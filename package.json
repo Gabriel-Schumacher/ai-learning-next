@@ -9,7 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "dompurify": "^3.2.6",
+    "highlight.js": "^11.11.1",
+    "marked": "^15.0.12",
+    "marked-highlight": "^2.2.1",
     "next": "15.3.2",
+    "openai": "^4.102.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
