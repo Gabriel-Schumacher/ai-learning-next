@@ -1,4 +1,4 @@
-import { ChatResponse, Conversation } from "../types/client-server-types";
+import { ChatResponse, Conversation } from "../../lib/types/types";
 import {Arrow} from "./IconsIMGSVG";
 import {useEffect, useState} from "react";
 import LoadingIcon from "./LoadingIcon";
@@ -65,7 +65,7 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
 
     // AI RESPONSE STUFF START
     const readableStream = useReadableStream();
-    let [aiResponseText, setAiResponseText] = useState('');
+    const [aiResponseText, setAiResponseText] = useState('');
 
     // Set the ai response text, and make sure to sanitize it.
     useEffect(() => {
@@ -98,7 +98,7 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
             
             /** CLIENT STUFF */
             // create user response object
-            let newUserChatResponse: ChatResponse = {
+            const newUserChatResponse: ChatResponse = {
                 body: textAreaValue,
                 isAiResponse: false,
                 type: 'text',
@@ -121,16 +121,15 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
                     role: 'user' | 'assistant';
                     content: string;
                 };
-                const chatHistoryAiSubmission: aiChatsType[] = chatHistory.messages.map((message) => {
+                const chatHistoryAiSubmission: aiChatsType[] = chatHistory.messages?.map((message) => {
                     return {
                         role: message.isAiResponse ? 'assistant' : 'user',
                         content: message.body,
                     };
-                });
-
+                }) || [];
 
                 const answer = readableStream.request(
-                    new Request('http://localhost:3001/api/chat', {
+                    new Request('../api/chat/route.ts', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

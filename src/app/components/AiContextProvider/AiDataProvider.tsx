@@ -1,6 +1,6 @@
 import React, { useReducer } from "react";
 import { AiDataReducer, DATA_ACTION_TYPES } from "./AiDataReducer";
-import { Folder, Conversation, Quiz } from "../../types/client-server-types";
+import { Folder, Conversation, Quiz } from "../../../lib/types/types";
 
 
 export const pageOptions = ['HOME', 'CHAT', 'QUIZ', 'DATA_CREATION'];

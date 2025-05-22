@@ -1,33 +1,48 @@
-// RESPONSES
-// Responses are used to store the responses from both the user and the AI. It also can contain the type (is it a  quiz? Was there an attached file, if so, what file? etc. )
-// and the time it was sent. The time is used to sort the responses in the conversation.
+// TYPES IN HERE SHOULD MATCH THE TYPES IN THE SERVER SIDE. FAILING TO TO DO SO WILL CAUSE MISMATCHES AND THUS ERRORS
+// MISMATCHES ON PURPOSE SHOULD INDICATE AS SUCH
+
+
+// CONVERSATIONS
 export interface ChatResponse {
     id: number;
-    type: "quiz" | "text" | "file"; // This is used to determine the type of response. It can be a quiz, a file, etc.
+    type: "text"; // This is used to determine the type of response. It can be a quiz, a file, etc.
     time: Date; // This is used to sort the responses in the conversation.
     body: string; // This is the body of the response. It contains the message, header, and data.
     isAiResponse?: boolean; // If true, the response will be styled as an AI response.
 }
-export type ChatResponses = ChatResponse[] | [];
-
-
-// CONVERSATIONS
-// Conversations are used to group messages together. They are not used for anything else at the moment, but may be in the future.
 export interface Conversation {
     id: number;
+    type: "conversation";
     title: string;
-    messages?: ChatResponses;
+    current?: boolean;
+    responses: ChatResponse[];
 }
-export type Conversations = Conversation[] | [];
 
+
+// QUIZZES
+export interface QuizQuestion {
+    id: number;
+    question: string;
+    answers: string[];
+    correct_answer: string;
+    selected_answer?: string; // This is used to store the answer selected by the user.
+    is_correct?: boolean; // This is used to determine if the answer is correct or not.
+}
+export interface Quiz {
+    id: number;
+    type: "quiz"; // This is used to determine the type of response. It can be a quiz, a file, etc.
+    responses: QuizQuestion[];
+    title: string;
+    current?: boolean;
+}
 // FOLDERS
 // Folders are used to group conversations together. They are not used for anything else at the moment, but may be in the future.
 export interface Folder {
     id: number;
     name: string;
-    attached_conversations: Conversations;
+    current?: boolean;
+    attached_items: (Conversation | Quiz)[]; // This is used to store the conversations and quizzes attached to the folder.
 }
-export type Folders = Folder[] | [];
 
 export interface ResponseBody {
     msg: string;
