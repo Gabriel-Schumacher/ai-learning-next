@@ -1,0 +1,22 @@
+.screen-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+    height: max-content;
+    min-height: 100vh;
+}
+@media only screen and (min-width: 1100px) {
+    .screen-container {
+        padding-left: 63px !important;
+    }
+}
+@media only screen and (max-width: 1099px) {
+    .screen-container {
+        padding-left: 0 !important;
+    }
+}
+/*I couldn't get tailwind to work so I had to make a custom css file just for this rule :O*/
+
+.screen-container > *:first-child {
+    padding-top: 60px; /* Adjust this value based on your "header (the top buttons)" height */
+}

@@ -1,0 +1,126 @@
+.hamburger {
+    display: black;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: rgba(255,255,255,0.5);
+    box-shadow: 0 0 5px rgba(255,255,255,0.5);
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+.hamburger span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: #000;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all 0.3s ease-in-out;
+    position: absolute;
+}
+.hamburger span:nth-child(1) {
+    top: 10px;
+}
+.hamburger span:nth-child(2) {
+    top: 20px;
+    transition: all 0;
+}
+.hamburger span:nth-child(3) {
+    top: 30px;
+}
+nav.open .hamburger span:nth-child(1) {
+    top: 20px;
+    transform: translateX(-50%) rotate(45deg);
+}
+nav.open .hamburger span:nth-child(2) {
+    opacity: 0;
+}
+nav.open .hamburger span:nth-child(3) {
+    top: 20px;
+    transform: translateX(-50%) rotate(-45deg);
+}
+
+nav {
+    --_nav-width: 200px;
+    --_max-nav-width: 20%;
+}
+@media only screen and (max-width: 1100px) {
+    /*Since the nav would cover too much of the page, remove these effects unless the screen is too large*/
+    nav.navigation:not(.open) {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+}
+nav.navigation {
+    border-right: 2px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: -136px;
+    width: var(--_nav-width);
+    height: 100vh;
+    overflow: hidden;
+    background: #fff;
+    z-index: 999;
+    display: flex;
+    padding-top: 80px;
+    padding-left: 19px;
+    padding-right: 19px;
+    flex-direction: column;
+    transition: all 0.3s ease-in-out;
+}
+nav.open {
+    left: 0px;
+}
+nav.open ul {
+    opacity: 1;
+}
+nav ul {
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    list-style: none;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+nav li.header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    position: relative;
+    cursor: default;
+}
+nav li.header::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.1);
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+}
+nav li:not(.header) {
+    transform: scale(1);
+    transition: all 0.3s ease-in-out;
+}
+nav.open li:not(.header):hover,
+nav.open li:not(.header):focus,
+nav.open li:not(.header):active {
+    transform: scale(0.98);
+}
+.loginTopBar {
+    display: flex;
+    width: 100%;
+    padding: 10px;
+    flex-direction: row-reverse;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

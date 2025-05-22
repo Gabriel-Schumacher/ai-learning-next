@@ -1,0 +1,52 @@
+/* .aiResponse .options {
+    left: 100%;
+    transform: translateX(-100%) translateY(-100%) !important;
+}
+.aiResponse:hover .options,
+.aiResponse:focus-within .options,
+.aiResponse:focus .options,
+.aiResponse .options:hover {
+    background-color: #f1f1f1;
+    transform: translateX(-10%) translateY(-100%) !important;
+} */
+
+/* NOT AI */
+/* .options {
+    left: 0;
+    transform: translateX(0%) translateY(-100%);
+} */
+/* .COMMENT:hover .options {
+    transform: translateX(-90%) translateY(-100%);
+} */
+
+/* Default */
+/* .options {
+    border: 0 solid transparent;
+    border-radius: 0.25rem;
+    z-index: -1;
+    position: absolute;
+    top: 100%;
+    content: "";
+    background-color: red;
+    height: 100%;
+    width: 50px;
+    max-width: 100%;
+    transition-duration: 200ms;
+} */
+
+.options {
+    opacity: 0;
+    border: 0 solid transparent;
+    border-radius: 0.25rem; 
+    z-index: 2;
+    background-color: red;
+    height: 100%;
+    width: 0px;
+    min-width: 50px;
+    transition: 2000ms;
+    transition-duration: 200ms;
+}
+.COMMENT:hover .options {
+    opacity: 1;
+    width: 50px;
+}
