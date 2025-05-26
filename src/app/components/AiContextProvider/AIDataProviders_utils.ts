@@ -1,4 +1,4 @@
-import { Folder, Conversation, Quiz, ChatResponse, QuizQuestion} from "../../types/client-server-types";
+import { Folder, Conversation, Quiz, ChatResponse, QuizQuestion} from "../../../lib/types/types";
 
 
 // ONE PURPOSE FUNCTIONS. ANY ABSTRACTIONS SHOULD BE DONE IN THEIR OWN FUNCTIONS

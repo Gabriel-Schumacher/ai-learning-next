@@ -1,5 +1,5 @@
 import './css/response.css';
-import { ChatResponse } from '../types/client-server-types';
+import { ChatResponse } from '../../lib/types/types';
 
 interface ResponseProps {
     chatResponse: ChatResponse;

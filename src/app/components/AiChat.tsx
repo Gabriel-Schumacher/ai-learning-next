@@ -1,6 +1,6 @@
 import { ChatResponse, Conversation } from "../../lib/types/types";
-import {Arrow} from "./IconsIMGSVG";
-import {useEffect, useState} from "react";
+import TextArea from "./TextArea";
+import {useEffect, useState, useContext} from "react";
 import LoadingIcon from "./LoadingIcon";
 import { Response } from "./Response";
 
@@ -15,8 +15,10 @@ import typescript from 'highlight.js/lib/languages/typescript';
 import css from 'highlight.js/lib/languages/css';
 import cpp from 'highlight.js/lib/languages/cpp';
 import csharp from 'highlight.js/lib/languages/csharp';
+import { AiDataProviderContext } from "./AiContextProvider/AiDataProvider";
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('html', javascript); // Use JavaScript highlighting for HTML
 hljs.registerLanguage('css', css);
 hljs.registerLanguage('cpp', cpp);
 hljs.registerLanguage('csharp', csharp);
@@ -31,37 +33,17 @@ const MARKED = new Marked(
     })
 )
 
-// ** Helper Functions **/
-function SanitizeText(text: string): string {
-    const sanitizedText = DOMPurify.sanitize(text, {
-        FORBID_TAGS: ['script', 'img', 'a'],
-    });
-    const thinkRegex = /<think>[\s\S]*?<\/think>/g;
-    return sanitizedText.replace(thinkRegex, '');
-}
 // AI STUFF END FROM TESTCHAT
-
-interface AiChatProps {
-    loading: boolean;
-    setLoading: (loading: boolean) => void;
-    chatHistory: Conversation;
-    addToHistory: (response: ChatResponse) => Conversation;
-    removeFromHistory: (index: number) => void;
-}
-/**
- * 
- * @param loading - Whether the component is loading or not
- * @param chatHistory - Array of chat history responses
- * @param addToHistory - Function to add a response to the chat history
- * @param removeFromHistory - Function to remove a response from the chat history
- * 
- * @returns AiChat Component
- */
-const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addToHistory, removeFromHistory }) => {
+const AiChat: React.FC = () => {
 
     const [textAreaValue, setTextAreaValue] = useState<string>("");
     const [prevConversationObjForDisplay, setPrevConversationObjForDisplay] = useState<Conversation | null>(null);
-    const [addingMessage, setAddingMessage] = useState<boolean>(false);
+
+    const context = useContext(AiDataProviderContext);
+    if (!context) {
+        throw new Error("AiDataProviderContext must be used within a AiDataProvider");
+    }
+    const { data, dispatch } = context;
 
     // AI RESPONSE STUFF START
     const readableStream = useReadableStream();
@@ -92,23 +74,22 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
         if (
             (e.nativeEvent instanceof KeyboardEvent && e.nativeEvent.key === "Enter" && !e.nativeEvent.shiftKey) || e.nativeEvent instanceof MouseEvent
         ) {
-            e.preventDefault(); // Prevent default behavior for Enter key
-            if (readableStream.loading) return; // If we're already getting a response, don't let the user send a message.
-            if (textAreaValue.trim() === "") return; // If the text area is empty, don't send a message.
+            // Prevent default behavior for Enter key
+            e.preventDefault(); 
+            // If we're already getting a response, don't let the user send a message.
+            if (readableStream.loading) return; 
+            // If the text area is empty, don't send a message.
+            if (textAreaValue.trim() === "") return; 
             
             /** CLIENT STUFF */
-            // create user response object
-            const newUserChatResponse: ChatResponse = {
+            const newResponse: ChatResponse = {
                 body: textAreaValue,
                 isAiResponse: false,
-                type: 'text',
+                type: 'text', // Need to figure out how to figure out the type of response.
                 id: -1,
                 time: new Date(), // Assigns a Date object directly
             };
-            // Add the user response to the conversation
-            const updatedConversationObjForDisplay: Conversation = addToHistory(newUserChatResponse);
-            setPrevConversationObjForDisplay(updatedConversationObjForDisplay);
-            // Clear the text area after submission
+            dispatch({ type: "ADD_RESPONSE", payload: newResponse });
             setTextAreaValue(""); 
 
             /** SERVER STUFF */
@@ -117,19 +98,26 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
             // The readable stream is handled in the useReadableStream hook component.
             try {
                 // Convert the chat history to what openAI wants to receive.
+                if (data.currentConversation === undefined) return;
                 type aiChatsType = {
                     role: 'user' | 'assistant';
                     content: string;
                 };
-                const chatHistoryAiSubmission: aiChatsType[] = chatHistory.messages?.map((message) => {
+                // Casting it as a conversation because this page should only show when it's a conversation and not a quiz.
+                const chatHistoryAiSubmission: aiChatsType[] = (data.currentConversation as Conversation).responses.map((message: ChatResponse) => {
                     return {
                         role: message.isAiResponse ? 'assistant' : 'user',
                         content: message.body,
                     };
-                }) || [];
+                });
+                // Since react handles dispatches after the funciton is done, we need to add the new response to the chat history. If we don't, the second to last response will be the one that is sent to the server.
+                chatHistoryAiSubmission.push({
+                    role: 'user',
+                    content: newResponse.body,
+                });
 
                 const answer = readableStream.request(
-                    new Request('../api/chat/route.ts', {
+                    new Request('http://localhost:3001/api/chat', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -160,8 +148,8 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
                 };
 
                 // Use functional update again to avoid stale state
-                const updatedConversationObjForDisplay: Conversation = addToHistory(newAiChatResponse);
-                setPrevConversationObjForDisplay(updatedConversationObjForDisplay);
+                dispatch({ type: "ADD_RESPONSE", payload: newAiChatResponse });
+                    //setPrevConversationObjForDisplay(updatedConversationObjForDisplay);
     
             } catch (e) {
                 console.error('Error in handleEnterPress, SERVER STUFF:', e);
@@ -169,22 +157,20 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
         }
     }
 
-    const removeFromHistoryHandler = (index: number) => {
+    const removeFromHistoryHandler = (id: number) => {
         // Passes it up so that the component that handles the parent of ConversationObjForDisplay can remove it from the history and cause a rerender.
-        removeFromHistory(index);
+       dispatch({ type: "REMOVE_RESPONSE", payload: id });
     }
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (prevConversationObjForDisplay !== chatHistory) {
-                setLoading(false);
-                setPrevConversationObjForDisplay(chatHistory);
+            if (data.currentConversation && prevConversationObjForDisplay !== data.currentConversation) {
+                setPrevConversationObjForDisplay(data.currentConversation as Conversation);
             }
         }, 0);
-        setAddingMessage(false);
 
         return () => clearTimeout(timer);
-    }, [chatHistory, prevConversationObjForDisplay, setLoading]);
+    }, [prevConversationObjForDisplay, data.currentConversation]);
 
     // FUNCTIONAL END
 
@@ -197,21 +183,21 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
                 {/* Response Classes are done here so that tailwind actually works */}
                 <div className="chat overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-surface-400 scrollbar-track-surface-200 dark:scrollbar-thumb-surface-700 dark:scrollbar-track-surface-800">
                     {/* Loading Icon */}
-                    {(loading || !chatHistory) && <div className="w-full h-full grid place-items-center"><LoadingIcon /></div>}
+                    {(data.loading || !data.currentConversation) && <div className="w-full h-full grid place-items-center"><LoadingIcon /></div>}
 
                     {/* If there is no chat history, show a message */}
-                    {!loading && !chatHistory && (
+                    {!data.loading && !data.currentConversation && (
                         <div className="w-full h-full grid place-items-center">
                             <p className="text-surface-900 dark:text-surface-50">No chat history available.</p>
                         </div>
                     )}
 
                     {/* Chat History */}
-                    {!loading && chatHistory && (
+                    {!data.loading && data.currentConversation && (
                         <>
-                        {chatHistory.messages?.map((response, index) => {
+                        {data.currentConversation.responses?.map((response, index) => {
                             return (
-                                <Response key={index} chatResponse={response} removeFromHistory={() => removeFromHistoryHandler(index)} />
+                                <Response key={index} chatResponse={response as ChatResponse} removeFromHistory={() => removeFromHistoryHandler(index)} />
                             );})
                         }
                         {readableStream.loading && (
@@ -226,25 +212,8 @@ const AiChat: React.FC<AiChatProps> = ({ loading, setLoading, chatHistory, addTo
 
                 </div>
                 {/* Text Area */}
-                <div className="w-full p-2 card border-black border-solid bg-surface-200 dark:bg-surface-800 min-h-24 grid grid-rows-[1fr_min-content] gap-2 relative">
-                    <textarea 
-                        className="all-unset h-full w-full text-surface-950 placeholder:text-surface-900 dark:text-surface-50 dark:placeholder:text-surface-200 cursor-text" 
-                        placeholder="Type your message here..."
-                        value={textAreaValue}
-                        onChange={(e) => setTextAreaValue(e.target.value)}
-                        onKeyDown={handleEnterPress} 
-                    />
+                <TextArea handleEnterPress={handleEnterPress} setTextAreaValue={setTextAreaValue} textAreaValue={textAreaValue} />
 
-                    <div className="flex w-full justify-between items-center gap-2">
-                        <button className="btn lg">+ Attach</button>
-                        <div className="flex flex-row items-center gap-2">
-                            <span className="text-sm text-surface-900">shift+enter for a new line</span>
-                            <button className="btn rounded-full" onClick={handleEnterPress}>
-                                <Arrow width="w-3" background={false} special={true} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );

@@ -7,6 +7,7 @@ import documentSrc from "../media/document-text.svg";
 import AaSrc from "../media/text.svg";
 import chatboxFilledSrc from "../media/chatbox-icon.svg";
 import arrowSrc from "../media/arrow.svg";
+import Image from "next/image";
 
 interface IconProps {
     background?: boolean;
@@ -32,12 +33,12 @@ const Icon = ({ src, background = true, width="w-6", special=false}: IconProps &
         <>
             {background &&
                 <div className={`${special ? "svg-icon-special" : ""} svg-icon grid place-items-center p-[4px] aspect-square rounded bg-white hover:bg-[#f0f0f0] cursor-pointer`}>
-                    <img src={src} alt="icon" className={CLASSES + " svg-icon-background aspect-square"} />
+                    <Image src={src} alt="icon" className={CLASSES + " svg-icon-background aspect-square"} width={24} height={24} />
                 </div>
             }
             {!background &&
                 <div className={`${special ? "svg-icon-special" : ""} svg-icon grid aspect-square place-items-center cursor-pointer`}>
-                    <img src={src} alt="icon" className={CLASSES + " aspect-square"} />
+                    <Image src={src} alt="icon" className={CLASSES + " aspect-square"} />
                 </div>
             }
         </>
@@ -71,6 +72,33 @@ const BulletIcon = ({ background = true, width="w-2", special=false}: IconProps)
             }
         </>
     );
+}
+
+export const SearchIcon = () => {
+    return <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="feather feather-search text-surface-950 dark:text-surface-50 cursor-pointer"
+        >
+            <circle
+                cx="11"
+                cy="11"
+                r="8"
+            ></circle>
+            <line
+                x1="21"
+                y1="21"
+                x2="16.65"
+                y2="16.65"
+            ></line>
+        </svg>
 }
 
 export const Bullet = (props: IconProps) => <BulletIcon {...props} />;

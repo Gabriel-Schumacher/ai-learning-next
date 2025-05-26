@@ -1,4 +1,4 @@
-import { Quiz } from "../../types/client-server-types";
+import { Quiz } from "../../../lib/types/types";
 import {useEffect, useContext} from "react";
 import { AiDataProviderContext } from "../AiContextProvider/AiDataProvider";
 import { QuizContext } from "./QuizContext";

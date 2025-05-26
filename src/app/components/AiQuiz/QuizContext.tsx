@@ -1,5 +1,5 @@
 import { useReducer, createContext} from "react";
-import { Quiz } from "../../types/client-server-types";
+import { Quiz } from "../../../lib/types/types";
 import { change_response } from "./quiz-utils";
 
 interface QuizContextProviderProps {

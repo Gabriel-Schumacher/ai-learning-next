@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { QuizQuestion } from "../../types/client-server-types"
+import { QuizQuestion } from "../../../lib/types/types";
 import { QuizContext } from "./QuizContext";
 
 export const QuizQuestionLI: React.FC<{ question: QuizQuestion }> = ({ question }) => {

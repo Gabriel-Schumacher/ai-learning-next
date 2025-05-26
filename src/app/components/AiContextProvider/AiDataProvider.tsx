@@ -1,3 +1,4 @@
+"use client";
 import React, { useReducer } from "react";
 import { AiDataReducer, DATA_ACTION_TYPES } from "./AiDataReducer";
 import { Folder, Conversation, Quiz } from "../../../lib/types/types";

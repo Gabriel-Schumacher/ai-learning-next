@@ -1,4 +1,4 @@
-import { Quiz } from "../../types/client-server-types";
+import { Quiz } from "../../../lib/types/types";
 
 
 export function change_response(quiz: Quiz | null, payload: { questionIndex: number; answer: string; }): Quiz {

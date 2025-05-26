@@ -1,4 +1,4 @@
-import {Quiz, QuizQuestion} from "../../types/client-server-types";
+import {Quiz, QuizQuestion} from "../../../lib/types/types";
 import { QuizQuestionLI } from "./QuizQuestionLI";
 import { useState } from "react";
 

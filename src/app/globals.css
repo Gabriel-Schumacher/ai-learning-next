@@ -4,4 +4,63 @@
 @import '@skeletonlabs/skeleton/optional/presets';
 @import '@skeletonlabs/skeleton/themes/cerberus';
 
+@import './customTheme.css';
+
 @source '../../node_modules/@skeletonlabs/skeleton-react/dist';
+
+/* GLOBAL CSS RULES */
+#root { 
+    /* This rule is for the body. */
+    @apply grid;
+    @apply grid-rows-[max-content_1fr_max-content];
+    @apply min-h-screen;
+    @apply gap-4;
+    @apply bg-surface-50;
+    @apply dark:bg-surface-950
+}
+* {
+    /* Tailwind is suppose to do this automatically, but I found that sometimes it doesn't. So this should make it the default for everything */
+    box-sizing: border-box;
+}
+.all-unset {
+    /* Easy tailwind-like way of making everything have no rules at all. */
+    all: unset !important;
+}
+@media (prefers-color-scheme: light) {
+    /* Fixes the svg icon colors */
+    .svg-icon:not(.svg-icon-special) {
+        filter: invert(0%) sepia(100%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) !important;
+    }
+    .svg-icon-background:not(.svg-icon-special) {
+        filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%) !important;
+    }
+}
+.svg-icon-background {
+    /* Correct the svg icon mode in dark mode. */
+    filter: invert(0%) sepia(100%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(100%) !important;
+}
+/* Have to do with the rotating stuff found in the AiMenu */
+.rotate > div {
+    position: relative;
+}
+.can-rotate img {
+    transition: all 0.5s ease;
+}
+.rotate > div > img {
+    position: relative;
+    transform: rotate(-90deg);
+}
+/* Chat Response Styles since there can be so many different types, this just makes it easier to have a baseplate for users and ai style responses. */
+.assistant-chat {
+    background-color: white;
+    margin: 0 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+}
+.user-chat {
+    margin: 0 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2); 
+}

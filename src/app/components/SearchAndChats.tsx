@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Bullet, PlusSign, Chevron, Folder, ChatBox, ThreeDotsEllipsis } from './IconsIMGSVG';
-import { Conversations, Folders } from "../types/client-server-types"
+import React, { useState, useEffect } from 'react';
+import { Bullet, PlusSign, Chevron, Folder as IconFolder, ChatBox, ThreeDotsEllipsis } from './IconsIMGSVG';
+import { Conversation, Folder } from "../../lib/types/types";
 
 interface SlotProps {
     header: string;
@@ -49,7 +49,7 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     return (
         <div className="grid grid-cols-[auto_1fr_auto] gap-2 bg-surface-50 dark:bg-surface-900 rounded-lg p-2 place-items-center relative">
             {type === 'folder' ? 
-                <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<Folder width='w-3' background={false} special={true} /></div>
+                <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<IconFolder width='w-3' background={false} special={true} /></div>
                 : 
                 <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<ChatBox width='w-3' background={false} special={true} /></div>
             }
@@ -66,47 +66,31 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 interface SearchAndChatsProps {
-    folders: Folders;
-    chats: Array<Omit<Conversations[number], 'messages'>>;
+    folders: Folder[];
+    chats: Array<Omit<Conversation[][number], 'messages'>>;
     folderActions: {
         addFolder: () => void;
-        removeFolder: (index: number) => void;
-        addConversation: () => Folders;
-        removeChat: (index: number) => void;
-        toggleFolders: (index: number) => void;
-        toggleChats: (index: number) => void;
-        handleDifferentChat: (index: number) => void;
+        removeFolder: (_index: number) => void;
+        addConversation: () => Folder[];
+        removeChat: (_index: number) => void;
+        toggleFolders: (_index: number) => void;
+        toggleChats: (_index: number) => void;
+        handleDifferentChat: (_index: number) => void;
     };
 }
 /**
  * This component is used to display the search bar, the folders provided to it, and the chats found in the folders.
  * It DOES NOT handle the actual logic functional items, it just displays the information and calls the functions provided to it.
  * 
- * @param folders The array of folders [Folders]
+ * @param folders The array of folders [Folder[]]
  * @param chats chats should be the attached_conversations of the active folder [Conversations]
  * @param folderActions The logical functions that this component should use for any intended actions
  * 
  */
 const SearchAndChats: React.FC<SearchAndChatsProps> = ({folders, chats, folderActions}) => {
-    const [loading, setLoading] = useState<boolean>(false);
     const [foldersHidden, setFoldersHidden] = useState<boolean>(false);
     const [chatsHidden, setChatsHidden] = useState<boolean>(false);
     const [activeFolder, setActiveFolder] = useState<boolean>(false);
-
-    // NOT SET UP - Tells the page to remove the conversation from the folder and all its conversations
-    const handleRemoveChat = (index: number) => {
-        if (loading) return;
-        setLoading(true);
-        folderActions.removeChat(index)
-        setLoading(false)
-    }
-    // NOT SET UP - Tells the page to remove the folder and all its conversations
-    const handleRemoveFolder = (index: number) => {
-        if (loading) return;
-        setLoading(true);
-        folderActions.removeFolder(index)
-        setLoading(false)
-    }
 
     // NOT SET UP * Placeholder functions for the buttons
     const handleToggleFolders = () => {
@@ -149,9 +133,9 @@ const SearchAndChats: React.FC<SearchAndChatsProps> = ({folders, chats, folderAc
                 </label>
                 {/* Search Results */}
                 <div className=''>
-                    {/* Folders */}
+                    {/* Folder[] */}
                     <div className="subheader grid-cols-[1fr_auto_auto] gap-2">
-                        <span className="block w-full font-semibold text-surface-950 dark:text-surface-50">Folders</span>
+                        <span className="block w-full font-semibold text-surface-950 dark:text-surface-50">Folder</span>
                         {/* Add File */}
                         <button className="bg-transparent border-none p-0 m-0" onClick={() => {folderActions.addFolder()}}><PlusSign width="w-3" background={false}/></button>
                         {/* Collapse or Expand */}

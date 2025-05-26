@@ -1,5 +1,6 @@
+"use client";
 import { INITIAL_DATA_STATE_TYPE as StateType, pageOptions } from "./AiDataProvider";
-import { Folder, Conversation, ChatResponse, Quiz } from "../../types/client-server-types";
+import { Folder, Conversation, ChatResponse, Quiz } from "../../../lib/types/types";
 import { addItemToFolder, addResponseToConversation, calculateIDsInUse, checkIfArrayHasCurrent, createConversation, createFolder, createQuiz, createResponse, makeCurrentFolder, makeCurrentItem, removeCurrentsInAttached, removeCurrentsInFolders, removeItemFromFolders, removeResponseFromAttachedItem } from "./AIDataProviders_utils";
 
 export type DATA_ACTION_TYPES =
