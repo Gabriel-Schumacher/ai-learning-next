@@ -7,7 +7,7 @@ import { useEffect, useContext } from "react"
 import { AiDataProviderContext } from "../../components/AiContextProvider/AiDataProvider"
 import AiQuiz from "../../components/AiQuiz/AiQuiz"
 import QuizContextProvider from "../../components/AiQuiz/QuizContext"
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3001';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 function ChatBot() {
     const context = useContext(AiDataProviderContext);
@@ -46,7 +46,7 @@ function ChatBot() {
             dispatch({ type: "SET_LOADING", payload: false })
         })
     }
-    , [dispatch])
+    , [dispatch, data.folders])
 
     return (
       <div className="flex flex-col h-full lg:flex-row gap-2 w-full">
