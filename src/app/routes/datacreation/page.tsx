@@ -16,6 +16,8 @@ import "highlight.js/styles/github.css"; // You can choose a different theme lik
 import PencilIcon from "@/app/components/customSvg/Pencil";
 import DriveIcon from "@/app/components/customSvg/Drive"; 
 import FolderIcon from "@/app/components/customSvg/Folder";
+import OneIcon from "@/app/components/customSvg/One";
+import TwoIcon from "@/app/components/customSvg/Two";
 
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("typescript", typescript);
@@ -284,8 +286,8 @@ function DataCreation() {
               <p>How would you like to study?</p>
             </div>   
             <div className="flex gap-4">
-              <div>1 Setup</div>
-              <div>2 Customize</div>
+              <div className="flex gap-1 text-primary-500"><div className="w-[24px] h-[24px]"><OneIcon/></div> Setup</div>
+              <div className="flex gap-1 text-surface-700"><div className="w-[24px] h-[24px]"><TwoIcon/></div>2 Customize</div>
             </div>       
             <div>
               <label className="text-primary-500">Test Type</label>
@@ -298,15 +300,15 @@ function DataCreation() {
             <div>
               <label className="text-primary-500">Upload</label>
               <div className="flex gap-2 mb-2">
-                 <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100"><div className="w-[24px] h-[24px]"><FolderIcon /></div>File Upload</button>
-                 <button className="bg-primary-500 text-white rounded-full p-2 shadow-lg flex gap-1 hover:bg-primary-300"><div className="w-[24px] h-[24px]"><PencilIcon /></div>Question Type</button>
-                 <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100"><div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload</button>
+                 <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><FolderIcon /></div>File Upload</button>
+                 <button className="bg-primary-500 text-white rounded-full p-2 shadow-lg flex gap-1 hover:bg-primary-300 hover:shadow-xl"><div className="w-[24px] h-[24px]"><PencilIcon /></div>Question Type</button>
+                 <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload</button>
  
               </div>
               <textarea className="textarea bg-white rounded-xl shadow-lg h-28" name="prompt" id="prompt"></textarea>
             </div>
             <div className="flex justify-end">
-              <button className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300">Next</button>
+              <button className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
             </div>
           </div>
           {/* Old stuff starts here */}
