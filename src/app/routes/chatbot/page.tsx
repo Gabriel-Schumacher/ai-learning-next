@@ -53,7 +53,7 @@ function ChatBot() {
     return (
       <div className="flex flex-col h-full lg:flex-row gap-2 w-full">
         <SearchAndChats />
-        <div className="w-full grid grid-rows-[auto_1fr]">
+        <div className="w-full mr-2 grid grid-rows-[auto_1fr]">
             <FigmaNavigation actions={() => {}}/>
             <div className="w-full h-full">
                 { !data.error &&
