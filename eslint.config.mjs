@@ -21,6 +21,7 @@ const eslintConfig = [
       'react/display-name': 'warn',
       'import/no-anonymous-default-export': 'warn',
       // Add more rules as you encounter them in your project
+      "@next/next/no-img-element": "off"
     }
   }
 ];

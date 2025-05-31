@@ -6,6 +6,8 @@ import FigmaNavigation from "../../components/FigmaNavigation"
 import { useEffect, useContext } from "react"
 import { AiDataProviderContext } from "../../components/AiContextProvider/AiDataProvider"
 import AiQuiz from "../../components/AiQuiz/AiQuiz"
+import DataCreation from "../datacreation/page"
+
 import QuizContextProvider from "../../components/AiQuiz/QuizContext"
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
@@ -51,7 +53,7 @@ function ChatBot() {
     return (
       <div className="flex flex-col h-full lg:flex-row gap-2 w-full">
         <SearchAndChats />
-        <div className="w-full grid grid-rows-[auto_1fr]">
+        <div className="w-full mr-2 grid grid-rows-[auto_1fr]">
             <FigmaNavigation actions={() => {}}/>
             <div className="w-full h-full">
                 { !data.error &&
@@ -72,11 +74,7 @@ function ChatBot() {
                         }
                         {/* Data Creation */}
                         {data.currentPage === "DATA_CREATION" &&
-                            <div className="w-full h-full grid place-items-center">
-                                <div>
-                                    <p className="bg-error-500 rounded py-1 px-2 text-surface-950-50 font-bold mb-2">Not set up yet 😞</p>
-                                </div>
-                            </div>
+                                <DataCreation />
                         }
                     </>
                 }
