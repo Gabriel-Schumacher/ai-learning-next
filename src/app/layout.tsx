@@ -32,7 +32,9 @@ export default function RootLayout({
       >
         <AiDataProvider>
           <Header />
-          {children}
+          <main>
+            {children}
+          </main>
         </AiDataProvider>
       </body>
     </html>

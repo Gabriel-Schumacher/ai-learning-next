@@ -1,3 +1,4 @@
+'use client';
 import {useState, useContext, useEffect} from 'react';
 import { Bullet, Folder, ChatBox, ThreeDotsEllipsis } from '../IconsIMGSVG';
 import { AiDataProviderContext } from '../AiContextProvider/AiDataProvider';
@@ -23,7 +24,10 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
         if (!context) {
             throw new Error("AiDataProviderContext must be used within a AiDataProvider");
         }
-    const { dispatch } = context;
+    const { data, dispatch } = context;
+
+    console.log("Slot Rendered: ", header, type, isActive, dataID);
+    console.log("When Slot was rendered, the current folder in data is: ", data._currentFolderID);
 
     /* Close other submenus while opening this one. */
     const handleButtonClick = () => {

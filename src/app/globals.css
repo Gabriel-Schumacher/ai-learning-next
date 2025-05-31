@@ -18,6 +18,9 @@
     @apply bg-surface-50;
     @apply dark:bg-surface-950
 }
+main {
+    @apply px-4;
+}
 * {
     /* Tailwind is suppose to do this automatically, but I found that sometimes it doesn't. So this should make it the default for everything */
     box-sizing: border-box;
@@ -63,4 +66,49 @@
     padding: 1rem;
     border-radius: 0.5rem;
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2); 
+}
+
+@layer utilities {
+    .chat:has(.LoadingIcon) {
+      height: 100%;
+    }
+    .chat {
+      width: 100%;
+      height: max-content;
+      align-self: end;
+      max-width: 100%;
+      min-width: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: repeat(auto-fit, max-content);
+      gap: 1rem;
+    }
+    .chat .AIRESPONSE, .chat .USERRESPONSE {
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      justify-content: start;
+      padding: 1rem;
+      box-sizing: border-box;
+      max-width: calc(100% - 2rem);
+      width: max-content;
+      word-wrap: break-word;
+      border-radius: 0.5rem;
+    }
+    .chat .AIRESPONSE {
+      background: var(--color-surface-200);
+      color: black;
+      border-bottom-left-radius: 0;
+    }
+    .chat .USERRESPONSE {
+      justify-self: end;
+      background: var(--color-primary-500);
+      color: white;
+      border-bottom-right-radius: 0;
+    }
+    .chat > div > * {
+      max-width: 100%;
+      text-wrap: break-word;
+    }
 }

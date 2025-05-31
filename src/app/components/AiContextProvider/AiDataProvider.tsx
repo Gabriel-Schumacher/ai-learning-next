@@ -20,7 +20,7 @@ export interface INITIAL_DATA_STATE_TYPE {
 
 const INITIAL_DATA_STATE: INITIAL_DATA_STATE_TYPE = {
     folders: undefined,
-    _currentFolderID: undefined,
+    _currentFolderID: 1,
     conversations: undefined,
     currentConversation: undefined,
     _currentConversationID: undefined,

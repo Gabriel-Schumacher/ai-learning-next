@@ -30,7 +30,7 @@ function QuizContextProvider({ children }: QuizContextProviderProps) {
             switch (action.type) {
                 case 'SET_QUIZ_DATA':
                     console.log("Setting Quiz Data: ", action.payload);
-                    return { 
+                    return {
                         ...newState,
                         quizData: action.payload,
                     };

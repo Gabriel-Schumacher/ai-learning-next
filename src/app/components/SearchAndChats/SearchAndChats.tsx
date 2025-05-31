@@ -1,3 +1,4 @@
+'use client';
 import { useState, useContext } from "react";
 import { PlusSign, Chevron, SearchIcon } from "../IconsIMGSVG";
 import { AiDataProviderContext } from "../AiContextProvider/AiDataProvider";

@@ -19,7 +19,6 @@ export type DATA_ACTION_TYPES =
 
 export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateType => {
     const newState = { ...state }; // Create a new state object to avoid mutating the original state. In cases where errors are thrown, we return the original state as to prevent rerendering.
-
     // Reducer logic
     switch (action.type) {
         case 'SET_FOLDERS':
@@ -28,7 +27,7 @@ export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): Stat
 
             const idsInUse = calculateIDsInUse(action.payload);
             const foldersWithoutCurrents = removeCurrentsInFolders(action.payload);
-
+            
             return {
                 ...newState,
                 folders: foldersWithoutCurrents,
@@ -58,12 +57,16 @@ export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): Stat
                 currentPage: action.payload,
             };
         case 'TOGGLE_CURRENT_FOLDER':
+            console.log("Toggling current folder: ", action.payload);
             if (!newState._idsInUse.includes(action.payload)) return state;
 
 
             // First, we should check if the folder being toggled is already the current folder. If so, we should remove the current state from all folders and set the current folder to undefined.
             const CURRENT_FOLDER = newState.folders?.find((folder: Folder) => folder.id === action.payload);
             const ALREADY_CURRENT_FOLDER = CURRENT_FOLDER?.current;
+            if (ALREADY_CURRENT_FOLDER) {
+                console.warn("Folder is already current, removing current state from all folders.");
+            }
             if (ALREADY_CURRENT_FOLDER) return {
                 ...newState,
                 folders: removeCurrentsInFolders(newState.folders as Folder[]),
@@ -79,6 +82,7 @@ export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): Stat
             const folderWithID = newState.folders?.find((folder: Folder) => folder.id === action.payload);
             const newConversations = folderWithID?.attached_items || [];
 
+            console.warn("Making Currrent Folder: ", folderWithID?.name, " with ID: ", action.payload);
             return {
                 ...newState,
                 conversations: newConversations,
