@@ -18,6 +18,7 @@ import DriveIcon from "@/app/components/customSvg/Drive";
 import FolderIcon from "@/app/components/customSvg/Folder";
 import OneIcon from "@/app/components/customSvg/One";
 import TwoIcon from "@/app/components/customSvg/Two";
+// import { numberOfQustions } from "@/app/api/dataCreation/route";
 
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("typescript", typescript);
@@ -44,6 +45,8 @@ function DataCreation() {
   const response = useReadableStream();
   const [responseText, setResponseText] = useState("");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1); // Add state for number of questions
+  const [subject, setSubject] = useState<string>("General");
   //const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Load chat history from localStorage on the client side
@@ -107,6 +110,11 @@ function DataCreation() {
 
     const formData: FormData = new FormData(event.currentTarget);
     const message = formData.get("message")?.toString().trim();
+    const topicInput = formData.get("topic")?.toString().trim();
+    
+    if (topicInput) {
+      setSubject(topicInput);
+    }
 
     if (!message) return;
 
@@ -123,6 +131,8 @@ function DataCreation() {
     ];
 
     try {
+      console.log("Sending request with numberOfQuestions:", numberOfQuestions);
+      
       const answer = response.request(
         new Request("/api/dataCreation", {
           method: "POST",
@@ -132,7 +142,9 @@ function DataCreation() {
           body: JSON.stringify({
             chats: updatedChatHistory,
             systemPrompt: "jsondata",
-            subject: "General",
+            subject: topicInput || subject,
+            numberOfQuestions, // Pass the correct number of questions
+            deepSeek: false, // Adding this required property from the type definition
           }),
         })
       );
@@ -141,8 +153,21 @@ function DataCreation() {
 
       const answerText = (await answer) as string;
       console.log("Server response:", answerText);
+      
+      // Check if the response is an object instead of an array and wrap it if needed
+      let formattedAnswer = answerText;
+      try {
+        const parsedAnswer = JSON.parse(answerText);
+        if (parsedAnswer && !Array.isArray(parsedAnswer) && parsedAnswer.question) {
+          // If we received a single question object instead of an array, wrap it in an array
+          formattedAnswer = JSON.stringify([parsedAnswer]);
+          console.log("Converted single object to array:", formattedAnswer);
+        }
+      } catch (e) {
+        console.error("Error parsing response JSON:", e);
+      }
 
-      const parsedAnswer = await marked.parse(answerText);
+      const parsedAnswer = await marked.parse(formattedAnswer);
       const purifiedText = DOMPurify.sanitize(parsedAnswer)
         .replace(/<script>/g, "&lt;script&gt;")
         .replace(/<\/script>/g, "&lt;/script&gt;");
@@ -202,12 +227,26 @@ function DataCreation() {
               <div className="flex gap-1 text-surface-700"><div className="w-[24px] h-[24px]"><TwoIcon/></div>2 Customize</div>
             </div>       
             <div>
-              <label className="text-primary-500">Test Type</label>
-              <input className="input bg-white rounded-xl shadow-lg" type="text" />
+              <label className="text-primary-500">Topic</label>
+              <input 
+                className="input bg-white rounded-xl shadow-lg" 
+                type="text" 
+                name="topic"
+              />
             </div>
             <div>
-              <label className="text-primary-500">Test Format</label>
-              <input className="input bg-white rounded-xl shadow-lg" type="text" />
+              <label className="text-primary-500">Number of Questions</label>
+              <input 
+                className="input bg-white rounded-xl shadow-lg" 
+                type="number" 
+                name="numQuestions"
+                value={numberOfQuestions}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  setNumberOfQuestions(isNaN(value) || value < 1 ? 1 : value); // Ensure valid number
+                }}
+                min="1"
+              />
             </div>
             <div>
               <label className="text-primary-500">Upload</label>
@@ -217,10 +256,17 @@ function DataCreation() {
                  <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload</button>
  
               </div>
-              <textarea className="textarea bg-white rounded-xl shadow-lg h-28" name="prompt" id="prompt"></textarea>
+              <textarea required onKeyDown={handleKeydown} name="message" className="textarea bg-white rounded-xl shadow-lg h-28" id="prompt" placeholder="Paste text or type about what you'd like to study"></textarea>
             </div>
             <div className="flex justify-end">
-              <button className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
+              <button type="submit" className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
+              <button
+                type="button"
+                className="btn bg-red-500 text-white p-2 rounded-lg"
+                onClick={deleteAllChats}
+              >
+                Clear Chats
+              </button>
             </div>
           </div>
           {/* Old stuff starts here */}
@@ -262,9 +308,8 @@ function DataCreation() {
                 </div>
               </div>
             )}
-            <br />
           </div>
-          <div className="flex space-x-4">
+          {/* <div className="flex space-x-4">
             <textarea
               className="textarea border p-2 rounded-lg w-full"
               required
@@ -288,7 +333,7 @@ function DataCreation() {
                 Clear Chats
               </button>
             </div>
-          </div>
+          </div> */}
         </form>
       </div>
     </div>
