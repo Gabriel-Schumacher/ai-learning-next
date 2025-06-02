@@ -17,8 +17,6 @@ function ChatBot() {
         throw new Error("AiDataProviderContext must be used within a AiDataProvider");
     }
     const { data, dispatch } = context;
-
-
     /*
         What to do when rendering the page.
     */
