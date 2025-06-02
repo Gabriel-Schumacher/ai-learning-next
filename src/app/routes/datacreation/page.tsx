@@ -111,7 +111,11 @@ function DataCreation() {
     const formData: FormData = new FormData(event.currentTarget);
     const message = formData.get("message")?.toString().trim();
     const topicInput = formData.get("topic")?.toString().trim();
-    
+    const numQuestionsInput = formData.get("numQuestions")?.toString().trim(); // Get number of questions from form data
+
+    const numQuestions = parseInt(numQuestionsInput || "1"); // Parse and ensure valid number
+    const validNumberOfQuestions = isNaN(numQuestions) || numQuestions < 1 ? 1 : numQuestions;
+
     if (topicInput) {
       setSubject(topicInput);
     }
@@ -124,15 +128,15 @@ function DataCreation() {
       { role: "user", content: message },
     ]);
 
-    // Send updated chat history to API (safe to construct here)
+    // Send updated chat history to API
     const updatedChatHistory = [
       ...chatHistory,
       { role: "user", content: message },
     ];
 
     try {
-      console.log("Sending request with numberOfQuestions:", numberOfQuestions);
-      
+      console.log("Sending request with numberOfQuestions:", validNumberOfQuestions);
+
       const answer = response.request(
         new Request("/api/dataCreation", {
           method: "POST",
@@ -143,8 +147,8 @@ function DataCreation() {
             chats: updatedChatHistory,
             systemPrompt: "jsondata",
             subject: topicInput || subject,
-            numberOfQuestions, // Pass the correct number of questions
-            deepSeek: false, // Adding this required property from the type definition
+            numberOfQuestions: validNumberOfQuestions, // Pass the correct number of questions
+            deepSeek: false,
           }),
         })
       );
@@ -153,13 +157,12 @@ function DataCreation() {
 
       const answerText = (await answer) as string;
       console.log("Server response:", answerText);
-      
+
       // Check if the response is an object instead of an array and wrap it if needed
       let formattedAnswer = answerText;
       try {
         const parsedAnswer = JSON.parse(answerText);
         if (parsedAnswer && !Array.isArray(parsedAnswer) && parsedAnswer.question) {
-          // If we received a single question object instead of an array, wrap it in an array
           formattedAnswer = JSON.stringify([parsedAnswer]);
           console.log("Converted single object to array:", formattedAnswer);
         }
@@ -172,7 +175,6 @@ function DataCreation() {
         .replace(/<script>/g, "&lt;script&gt;")
         .replace(/<\/script>/g, "&lt;/script&gt;");
 
-      // Use functional update again to avoid stale state
       setChatHistory((prev: ChatMessage[]): ChatMessage[] => [
         ...prev,
         { role: "assistant", content: purifiedText },
@@ -309,31 +311,7 @@ function DataCreation() {
               </div>
             )}
           </div>
-          {/* <div className="flex space-x-4">
-            <textarea
-              className="textarea border p-2 rounded-lg w-full"
-              required
-              placeholder="Type your message..."
-              name="message"
-              rows={3}
-              onKeyDown={handleKeydown}
-            ></textarea>
-            <div className="flex flex-col justify-between">
-              <button
-                type="submit"
-                className="btn bg-blue-500 text-white p-2 rounded-lg"
-              >
-                Send
-              </button>
-              <button
-                type="button"
-                className="btn bg-red-500 text-white p-2 rounded-lg"
-                onClick={deleteAllChats}
-              >
-                Clear Chats
-              </button>
-            </div>
-          </div> */}
+
         </form>
       </div>
     </div>
