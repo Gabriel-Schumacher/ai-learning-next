@@ -61,3 +61,19 @@ export interface MessageBody {
     subject: string;
     deepSeek: boolean;
 }
+
+export interface DataSubmitBody {
+    chats: Message[];
+    systemPrompt: string;
+    subject: string;
+    deepSeek: boolean;
+    numberOfQuestions: number; // Ensure this matches the backend
+}
+
+// Additional type to help with handling the API response
+export interface QuizQuestionResponse {
+    id: number;
+    question: string;
+    options: string[];
+    answer: string;
+}
