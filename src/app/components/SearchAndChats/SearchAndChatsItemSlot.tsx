@@ -56,7 +56,7 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     }, [menuIsOpen, dataID])
 
     return (
-        <div className="grid grid-cols-[auto_1fr_auto] gap-2 bg-surface-50 dark:bg-surface-900 rounded-lg p-2 place-items-center relative">
+        <div className="grid grid-cols-[auto_1fr_auto] gap-2 bg-surface-50 dark:bg-surface-900 rounded-lg p-2 place-items-center relative hover:cursor-pointer transition-all hover:bg-surface-100 dark:hover:bg-surface-950">
             {type === 'folder' ? 
                 <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<Folder width='w-3' background={false} special={true} /></div>
                 : 

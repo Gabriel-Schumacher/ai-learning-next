@@ -26,6 +26,7 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
 
     const changePage = (index: number) => {
         dispatch({ type: "SET_PAGE", payload: navigationItems[index].name.toUpperCase().replace(/ /g, "_") });
+        dispatch({ type: "REMOVE_CURRENT_ITEM" });
     }
 
     useEffect(() => {

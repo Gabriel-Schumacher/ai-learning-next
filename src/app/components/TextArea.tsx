@@ -28,7 +28,7 @@ const TextArea: React.FC<TextAreaProps> = ({ handleEnterPress, setTextAreaValue,
             <div className="flex w-full justify-between items-center gap-2">
                 <button className="btn lg">+ Attach</button>
                 <div className="flex flex-row items-center gap-2">
-                    <span className="text-sm text-surface-50-950">shift+enter for a new line</span>
+                    <span className="text-sm text-surface-900 dark:text-surface-100">shift+enter for a new line</span>
                     <button className="btn rounded-full" onClick={handleEnterPress}>
                         <Arrow width="w-3" background={false} special={true} />
                     </button>

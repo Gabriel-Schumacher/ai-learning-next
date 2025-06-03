@@ -15,6 +15,7 @@ export type DATA_ACTION_TYPES =
     | { type: 'ADD_RESPONSE'; payload: ChatResponse }
     | { type: 'ADD_QUIZ'; payload: Quiz }
     | { type: 'REMOVE_ITEM'; payload: number }
+    | { type: 'REMOVE_CURRENT_ITEM' }
     | { type: 'REMOVE_RESPONSE'; payload: number };
 
 export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateType => {
@@ -188,6 +189,19 @@ export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): Stat
                 conversations: updatedConversations,
                 currentConversation: updatedResponses,
                 _idsInUse: newState._idsInUse.filter((id) => id !== action.payload),
+            };
+        case 'REMOVE_CURRENT_ITEM':
+            // This action is used to remove the current item from the state without affecting the rest of the state.
+            const LOCAL_CURRENT_FOLDER = newState.folders?.find((folder: Folder) => folder.id === newState._currentFolderID);
+            if (!LOCAL_CURRENT_FOLDER) {
+                console.warn("No current folder found, cannot remove current items.");
+                return state;
+            }
+            removeCurrentsInAttached(LOCAL_CURRENT_FOLDER.attached_items as (Conversation | Quiz)[]);
+            return {
+                ...newState,
+                currentConversation: undefined,
+                _currentConversationID: undefined
             };
         default:
             return {
