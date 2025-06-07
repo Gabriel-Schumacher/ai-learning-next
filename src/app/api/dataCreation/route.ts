@@ -5,10 +5,11 @@ const openai = new OpenAI({
     apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY as string,
 });
 
-function generateJsonPrompt(numberOfQuestions: number): string {
+function generateJsonPrompt(numberOfQuestions: number, subject: string): string {
     return `You will return a JSON object with one property called "questions". Its value must be an array containing exactly ${numberOfQuestions} question objects, each structured like this:
 
 Important instructions:
+- The ${subject} is the topic of the qestions.
 - The outer structure must be a JSON object with a single key: "questions".
 - The value of "questions" must be a JSON array of exactly ${numberOfQuestions} objects.
 - Each object must contain all required fields.
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
         const body: DataSubmitBody = await req.json();
         const { chats, systemPrompt, subject, numberOfQuestions } = body;
 
-        console.log("Received request with numberOfQuestions:", numberOfQuestions);
+        console.log("Received request with numberOfQuestions:", numberOfQuestions, subject);
 
         if (!chats || !Array.isArray(chats)) {
             return new Response('Invalid chat history', { status: 400 });
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
         console.log("Using numberOfQuestions:", numQuestions);
 
         const selectedPrompt = typeof promptGenerator === 'function'
-            ? promptGenerator(numQuestions)
+            ? promptGenerator(numQuestions, subject)
             : promptGenerator;
 
         const completion = await openai.chat.completions.create({

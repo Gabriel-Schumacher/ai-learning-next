@@ -1,27 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function Quiz() {
-    const [questionLog] = useState(
-        typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('savedChats') || '[]') : []
-    );
+    const [questionLog, setQuestionLog] = useState<any[]>([]);
     const [selectedQuizIndex, setSelectedQuizIndex] = useState<number | null>(null);
     const [userAnswers, setUserAnswers] = useState<{ [questionId: number]: string }>({});
+    const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const savedQuizSets = localStorage.getItem('savedQuizSets');
+            setQuestionLog(savedQuizSets ? JSON.parse(savedQuizSets) : []);
+        }
+    }, []);
 
     const handleQuizSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const index = parseInt(event.target.value, 10);
         setSelectedQuizIndex(index);
         setUserAnswers({});
+        setShowCorrectAnswers(false);
     };
 
     const handleAnswerChange = (questionId: number, answer: string) => {
         setUserAnswers((prev) => ({ ...prev, [questionId]: answer }));
     };
 
+    const handleSubmit = () => {
+        setShowCorrectAnswers(true);
+        console.log("User Answers:", userAnswers);
+    };
+
     const selectedQuiz = selectedQuizIndex !== null ? questionLog[selectedQuizIndex] : null;
-    const parsedQuestions =
-        selectedQuiz?.messages[0]?.content ? JSON.parse(selectedQuiz.messages[0].content) : [];
+
+    // Simplified logic for parsedQuestions
+    const parsedQuestions = Array.isArray(selectedQuiz) ? selectedQuiz : selectedQuiz ? [selectedQuiz] : [];
+
+    console.log("Selected Quiz:", selectedQuiz);
+    console.log("Parsed Questions:", parsedQuestions);
 
     return (
         <div className="flex flex-col items-center justify-center">
@@ -44,7 +60,7 @@ function Quiz() {
             </select>
 
             {/* Display Questions */}
-            {selectedQuizIndex !== null && (
+            {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
                 <div className="w-full max-w-2xl">
                     {parsedQuestions.map((question: any) => (
                         <div key={question.id} className="mb-6 bg-gray-100 p-4 rounded-lg shadow-md">
@@ -67,16 +83,26 @@ function Quiz() {
                                     </li>
                                 ))}
                             </ul>
+                            {showCorrectAnswers && (
+                                <p className="mt-2 text-green-600">
+                                    Correct Answer: {question.answer}
+                                </p>
+                            )}
                         </div>
                     ))}
                 </div>
             )}
 
+            {/* Display fallback message if no questions are available */}
+            {selectedQuizIndex !== null && parsedQuestions.length === 0 && (
+                <p className="text-red-500">No questions available for the selected quiz.</p>
+            )}
+
             {/* Submit Button */}
-            {selectedQuizIndex !== null && (
+            {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
                 <button
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    onClick={() => console.log("User Answers:", userAnswers)}
+                    onClick={handleSubmit}
                 >
                     Submit Quiz
                 </button>

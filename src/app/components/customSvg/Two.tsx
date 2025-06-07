@@ -1,6 +1,6 @@
-function TwoIcon() {
+function TwoIcon({ color = "text-surface-500" }: { color?: string }) {
   return (
-    <div className="text-surface-700">
+    <div className={color}>
       <svg
         fill="currentColor"
         viewBox="0 0 256 256"

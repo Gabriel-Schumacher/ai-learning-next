@@ -1,69 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useReadableStream } from "../../components/useReadableStream";
+//import { numberOfQustions } from "@/app/api/dataCreation/route";
 
-// Add a highlight.js theme import
-import "highlight.js/styles/github.css"; // You can choose a different theme like 'atom-one-dark.css', 'monokai.css', etc.
 import PencilIcon from "@/app/components/customSvg/Pencil";
 import DriveIcon from "@/app/components/customSvg/Drive"; 
 import FolderIcon from "@/app/components/customSvg/Folder";
 import OneIcon from "@/app/components/customSvg/One";
 import TwoIcon from "@/app/components/customSvg/Two";
-// import { numberOfQustions } from "@/app/api/dataCreation/route";
 
 
-type ChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-};
+
+// type ChatMessage = {
+//   role: "user" | "assistant";
+//   content: string;
+// };
 
 function DataCreation() {
   const response = useReadableStream();
-  //const [responseText, setResponseText] = useState("");
-  const [dataHistory, setDataHistory] = useState<ChatMessage[]>([]);
+  //const [dataHistory, setDataHistory] = useState<ChatMessage[]>([]);
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1); // Add state for number of questions
-  const [subject, setSubject] = useState<string>("General");
-  //const chatContainerRef = useRef<HTMLDivElement>(null);
-
-  // Load chat history from localStorage on the client side
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedDataHistory = localStorage.getItem("dataHistory");
-      if (storedDataHistory) {
-        setDataHistory(
-          JSON.parse(storedDataHistory).map((chat: ChatMessage) => ({
-            ...chat,
-            content: stripThinkTags(chat.content), // Ensure think tags are stripped from stored history
-          }))
-        );
-      }
-    }
-  }, []);
-
-  function stripThinkTags(text: string): string {
-    if (typeof text !== "string") return ""; // Ensure text is a string
-    const thinkRegex = /<think>[\s\S]*?<\/think>/g;
-    return text.replace(thinkRegex, "");
-  }
-
-  useEffect(() => {
-    if (response.text !== "") {
-      (async () => {
-        // Strip <think> tags from the response text
-        // const cleanedText = stripThinkTags(response.text);
-        // Parse the cleaned text as Markdown
-
-
-      })();
-    }
-  }, [response.text]); // Added dependency array to avoid infinite re-renders
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("dataHistory", JSON.stringify(dataHistory));
-    }
-  }, [dataHistory]); // Added dependency array to avoid infinite re-renders
+  const [subject, setSubject] = useState<string>(""); // Initialize subject to an empty string
+  //const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [step, setStep] = useState<number>(1); // Add state for step tracking
 
   function handleKeydown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -100,7 +60,8 @@ function DataCreation() {
     setNumberOfQuestions(sanitizedNumQuestions);
   
     const updatedChatHistory = [
-      ...dataHistory,
+      // Uncomment and use dataHistory if needed
+      // ...dataHistory,
       { role: "user", content: message },
     ];
   
@@ -122,6 +83,7 @@ function DataCreation() {
       );
   
       event.currentTarget.reset();
+      setStep(2); // Move to step 2 after submission
   
       const answerText = (await answer) as string;
   
@@ -129,53 +91,33 @@ function DataCreation() {
         const parsedData = JSON.parse(answerText);
         if (parsedData && parsedData.questions) {
           localStorage.setItem("quizData", JSON.stringify(parsedData));
-          setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
-            ...prev,
-            { role: "assistant", content: "Quiz data saved." },
-          ]);
+          // setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
+          //   ...prev,
+          //   { role: "assistant", content: "Quiz data saved." },
+          // ]);
         } else {
           throw new Error("Missing 'questions' key in parsed data");
         }
       } catch (e) {
         console.error("Error parsing response JSON:", e);
-        setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
-          ...prev,
-          { role: "assistant", content: "Failed to parse quiz data." },
-        ]);
+        // setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
+        //   ...prev,
+        //   { role: "assistant", content: "Failed to parse quiz data." },
+        // ]);
       }
     } catch (e) {
       console.error("Error in handleSubmit:", e);
     }
   }
 
-  function deleteAllChats() {
-    setDataHistory([]);
-  }
-
-  (async () => {
-    if (response.text !== "") {
-      // Strip <think> tags from the response text
-
-
-
-
+  function clearQuizData() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("quizData");
+      console.log("Quiz data cleared.");
+      //setDataHistory([]); // Clear the user display by resetting the chat history
+      setStep(1); // Reset to step 1
     }
-  })();
-
-  // function saveData(index: number): void {
-  //   const chat = dataHistory[index];
-  //   if (chat) {
-  //     const blob = new Blob([chat.content], { type: "text/plain" });
-  //     const url = URL.createObjectURL(blob);
-  //     const a = document.createElement("a");
-  //     a.href = url;
-  //     a.download = `chat_data_${index}.txt`;
-  //     a.click();
-  //     URL.revokeObjectURL(url);
-  //   } else {
-  //     console.error("Invalid chat data or index.");
-  //   }
-  // }
+  }
 
   function getQuizQuestions(): { id: number; question: string; answer: string }[] {
     if (typeof window !== "undefined") {
@@ -191,6 +133,24 @@ function DataCreation() {
     }
     return [];
   }
+
+  function saveData() {
+    if (typeof window !== "undefined") {
+      const quizData = localStorage.getItem("quizData");
+      const savedSets = localStorage.getItem("savedQuizSets");
+      const parsedQuizData = quizData ? JSON.parse(quizData) : null;
+      const parsedSavedSets = savedSets ? JSON.parse(savedSets) : [];
+  
+      if (parsedQuizData && parsedQuizData.questions) {
+        const updatedSavedSets = [...parsedSavedSets, parsedQuizData.questions];
+        localStorage.setItem("savedQuizSets", JSON.stringify(updatedSavedSets));
+        console.log("Quiz data saved to savedQuizSets.");
+      } else {
+        console.error("No quiz data available to save.");
+      }
+    }
+  }
+
   //End of Logic-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   return (
     <div>
@@ -202,62 +162,81 @@ function DataCreation() {
               <p>How would you like to study?</p>
             </div>   
             <div className="flex gap-4">
-              <div className="flex gap-1 text-primary-500"><div className="w-[24px] h-[24px]"><OneIcon/></div> Setup</div>
-              <div className="flex gap-1 text-surface-700"><div className="w-[24px] h-[24px]"><TwoIcon/></div>2 Customize</div>
-            </div>       
+              <div className={`flex gap-1 ${step === 1 ? "text-primary-500" : "text-surface-700"}`}><div className="w-[24px] h-[24px]"><OneIcon color={step === 1 ? "text-primary-500" : "text-surface-700"} /></div>Setup</div>
+              <div className={`flex gap-1 ${step === 2 ? "text-primary-500" : "text-surface-700"}`}><div className="w-[24px] h-[24px]"><TwoIcon color={step === 2 ? "text-primary-500" : "text-surface-700"} /></div>Customize</div>
+            </div>      
+            { step === 1 && (
             <div>
-              <label className="text-primary-500">Topic</label>
-              <input 
-                className="input bg-white rounded-xl shadow-lg" 
-                type="text" 
-                name="topic"
-              />
-            </div>
-            <div>
-              <label className="text-primary-500">Number of Questions</label>
-              <input 
-                className="input bg-white rounded-xl shadow-lg" 
-                type="number" 
-                name="numQuestions"
-                value={numberOfQuestions}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  setNumberOfQuestions(isNaN(value) || value < 1 ? 1 : value); // Ensure valid number
-                }}
-                min="1"
-              />
-            </div>
-            <div>
-              <label className="text-primary-500">Upload</label>
-              <div className="flex gap-2 mb-2">
-                 <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><FolderIcon /></div>File Upload</button>
-                 <button className="bg-primary-500 text-white rounded-full p-2 shadow-lg flex gap-1 hover:bg-primary-300 hover:shadow-xl"><div className="w-[24px] h-[24px]"><PencilIcon /></div>Question Type</button>
-                 <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload</button>
- 
+              <div>
+                <label htmlFor="topic" className="text-primary-500">Topic</label>
+                <input 
+                  required
+                  className="input bg-white rounded-xl shadow-lg" 
+                  type="text" 
+                  name="topic"
+                  value={subject} // Controlled input
+                  onChange={(e) => setSubject(e.target.value)} // Update state on change
+                  placeholder="Enter a topic to study"
+                />
               </div>
-              <textarea required onKeyDown={handleKeydown} name="message" className="textarea bg-white rounded-xl shadow-lg h-28" id="prompt" placeholder="Paste text or type about what you'd like to study"></textarea>
-            </div>
-            <div className="flex justify-end">
-              <button type="submit" className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
-              <button
-                type="button"
-                className="btn bg-red-500 text-white p-2 rounded-lg"
-                onClick={deleteAllChats}
-              >
-                Clear Chats
-              </button>
-            </div>
-          </div>
-          {/* Step 2 Starts here */}
-          <div className="bg-surface-200 p-12 rounded-lg shadow-md mb-4">    
-            {getQuizQuestions().map((question) => (
-              <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
-                <p className="text-primary-500">Question: {question.id}</p>
-                <p className="text-primary-500">{question.question}</p>
-                <p className="text-primary-500">Answer: {question.answer || "No answer available."}</p>
+              <div>
+                <label className="text-primary-500">Number of Questions</label>
+                <input 
+                  className="input bg-white rounded-xl shadow-lg" 
+                  type="number" 
+                  name="numQuestions"
+                  value={numberOfQuestions}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    setNumberOfQuestions(isNaN(value) || value < 1 ? 1 : value); // Ensure valid number
+                  }}
+                  min="1"
+                />
               </div>
-            ))}
+              <div>
+                <label className="text-primary-500">Upload</label>
+                <div className="flex gap-2 mb-2">
+                  <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><FolderIcon /></div>File Upload</button>
+                  <button className="bg-primary-500 text-white rounded-full p-2 shadow-lg flex gap-1 hover:bg-primary-300 hover:shadow-xl"><div className="w-[24px] h-[24px]"><PencilIcon /></div>Question Type</button>
+                  <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload</button>
+  
+                </div>
+                <textarea onKeyDown={handleKeydown} name="message" className="textarea bg-white rounded-xl shadow-lg h-28" id="prompt" placeholder="Paste text or type about what you'd like to study"></textarea>
+              </div>        
+              <div className="flex justify-end mt-2">
+                <button type="submit" className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
+              </div>  
+            </div>               
+            )  } 
+            {/* Step 1 Ends here */}
+            { step === 2 && (
+            <div>    
+                {getQuizQuestions().map((question) => (
+                  <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
+                    <p className="text-primary-500">Question: {question.id}</p>
+                    <p className="text-primary-500">{question.question}</p>
+                    <p className="text-primary-500">Answer: {question.answer || "No answer available."}</p>
+                  </div>
+                ))}
+                <div className="flex justify-end mt-2">
+                  <button
+                    type="button"
+                    className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                    onClick={clearQuizData}>
+                    Back
+                  </button>              
+                  <button
+                    type="button"
+                    className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                    onClick={saveData}>
+                    Save
+                  </button>    
+                </div>
+
+            </div>              
+            )}
           </div>
+  
 
                     
 
