@@ -91,7 +91,6 @@ function DataCreation() {
     const topicInput = formData.get("topic")?.toString().trim();
     const numberInput = parseInt(formData.get("numQuestions")?.toString() || "1", 10);
     const sanitizedNumQuestions = isNaN(numberInput) || numberInput < 1 ? 1 : numberInput;
-    setStep(2); // Move to step 2 after submission
   
     if (topicInput) {
       setSubject(topicInput);
@@ -124,6 +123,7 @@ function DataCreation() {
       );
   
       event.currentTarget.reset();
+      setStep(2); // Move to step 2 after submission
   
       const answerText = (await answer) as string;
   
@@ -155,6 +155,7 @@ function DataCreation() {
       localStorage.removeItem("quizData");
       console.log("Quiz data cleared.");
       setDataHistory([]); // Clear the user display by resetting the chat history
+      setStep(1); // Reset to step 1
     }
   }
 
@@ -185,65 +186,77 @@ function DataCreation() {
             <div className="flex gap-4">
               <div className={`flex gap-1 ${step === 1 ? "text-primary-500" : "text-surface-700"}`}><div className="w-[24px] h-[24px]"><OneIcon color={step === 1 ? "text-primary-500" : "text-surface-700"} /></div>Setup</div>
               <div className={`flex gap-1 ${step === 2 ? "text-primary-500" : "text-surface-700"}`}><div className="w-[24px] h-[24px]"><TwoIcon color={step === 2 ? "text-primary-500" : "text-surface-700"} /></div>Customize</div>
-            </div>       
+            </div>      
+            { step === 1 && (
             <div>
-              <label className="text-primary-500">Topic</label>
-              <input 
-                required
-                className="input bg-white rounded-xl shadow-lg" 
-                type="text" 
-                name="topic"
-                value={subject} // Controlled input
-                onChange={(e) => setSubject(e.target.value)} // Update state on change
-                placeholder="Enter a topic to study"
-              />
-            </div>
-            <div>
-              <label className="text-primary-500">Number of Questions</label>
-              <input 
-                className="input bg-white rounded-xl shadow-lg" 
-                type="number" 
-                name="numQuestions"
-                value={numberOfQuestions}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  setNumberOfQuestions(isNaN(value) || value < 1 ? 1 : value); // Ensure valid number
-                }}
-                min="1"
-              />
-            </div>
-            <div>
-              <label className="text-primary-500">Upload</label>
-              <div className="flex gap-2 mb-2">
-                 <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><FolderIcon /></div>File Upload</button>
-                 <button className="bg-primary-500 text-white rounded-full p-2 shadow-lg flex gap-1 hover:bg-primary-300 hover:shadow-xl"><div className="w-[24px] h-[24px]"><PencilIcon /></div>Question Type</button>
-                 <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload</button>
- 
+              <div>
+                <label htmlFor="topic" className="text-primary-500">Topic</label>
+                <input 
+                  required
+                  className="input bg-white rounded-xl shadow-lg" 
+                  type="text" 
+                  name="topic"
+                  value={subject} // Controlled input
+                  onChange={(e) => setSubject(e.target.value)} // Update state on change
+                  placeholder="Enter a topic to study"
+                />
               </div>
-              <textarea onKeyDown={handleKeydown} name="message" className="textarea bg-white rounded-xl shadow-lg h-28" id="prompt" placeholder="Paste text or type about what you'd like to study"></textarea>
-            </div>
-            <div className="flex justify-end">
-              <button type="submit" className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
-              <button
-                type="button"
-                className="btn bg-red-500 text-white p-2 rounded-lg"
-                onClick={clearQuizData}
-              >
-                Clear Chats
-              </button>
-    
-            </div>
-          </div>
-          {/* Step 2 Starts here */}
-          <div className="bg-surface-200 p-12 rounded-lg shadow-md mb-4">    
-            {getQuizQuestions().map((question) => (
-              <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
-                <p className="text-primary-500">Question: {question.id}</p>
-                <p className="text-primary-500">{question.question}</p>
-                <p className="text-primary-500">Answer: {question.answer || "No answer available."}</p>
+              <div>
+                <label className="text-primary-500">Number of Questions</label>
+                <input 
+                  className="input bg-white rounded-xl shadow-lg" 
+                  type="number" 
+                  name="numQuestions"
+                  value={numberOfQuestions}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    setNumberOfQuestions(isNaN(value) || value < 1 ? 1 : value); // Ensure valid number
+                  }}
+                  min="1"
+                />
               </div>
-            ))}
+              <div>
+                <label className="text-primary-500">Upload</label>
+                <div className="flex gap-2 mb-2">
+                  <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><FolderIcon /></div>File Upload</button>
+                  <button className="bg-primary-500 text-white rounded-full p-2 shadow-lg flex gap-1 hover:bg-primary-300 hover:shadow-xl"><div className="w-[24px] h-[24px]"><PencilIcon /></div>Question Type</button>
+                  <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload</button>
+  
+                </div>
+                <textarea onKeyDown={handleKeydown} name="message" className="textarea bg-white rounded-xl shadow-lg h-28" id="prompt" placeholder="Paste text or type about what you'd like to study"></textarea>
+              </div>        
+              <div className="flex justify-end mt-2">
+                <button type="submit" className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
+              </div>  
+            </div>               
+            )  } 
+            {/* Step 1 Ends here */}
+            { step === 2 && (
+            <div>    
+                {getQuizQuestions().map((question) => (
+                  <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
+                    <p className="text-primary-500">Question: {question.id}</p>
+                    <p className="text-primary-500">{question.question}</p>
+                    <p className="text-primary-500">Answer: {question.answer || "No answer available."}</p>
+                  </div>
+                ))}
+                <div className="flex justify-end mt-2">
+                  <button
+                    type="button"
+                    className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                    onClick={clearQuizData}>
+                    Back
+                  </button>              
+                  <button
+                  
+                  >Save
+                  </button>    
+                </div>
+
+            </div>              
+            )}
           </div>
+  
 
                     
 
