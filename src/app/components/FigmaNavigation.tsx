@@ -19,8 +19,8 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
 
     const navigationItems = [
         { name: "Home", clickable: true },
-        { name: "Chat", clickable: false },
-        { name: "Quiz", clickable: false },
+        // { name: "Chat", clickable: false },
+        // { name: "Quiz", clickable: false },
         { name: "Data Creation", clickable: true },
     ];
 
@@ -32,14 +32,14 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
     useEffect(() => {
         const itemDependingOnPage: number = (() => {
             switch (data.currentPage) {
-                case 'HOME':
+                case 'HOME': // 1
                     return 1;
                 case 'CHAT':
-                    return 2;
+                    return 1; 
                 case 'QUIZ':
-                    return 3;
-                case 'DATA_CREATION':
-                    return 4;
+                    return 2;
+                case 'DATA_CREATION': // 2
+                    return 2;
                 default:
                     return 1; // Default case if currentPage doesn't match any known value
             }
@@ -50,15 +50,15 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
 
     return (
         <nav className="flex flex-col bg-surface-300 dark:bg-surface-800 rounded-xl relative overflow-hidden mb-2">
-            <ul className="flex flex-row justify-between w-full p-0 m-0 list-none overflow-hidden">
+            <ul className="flex flex-row justify-between w-full p-0 m-0 list-none overflow-hidden hover:[&>div]:rounded-lg">
                 <div
-                    className="absolute top-0 left-0 w-1/4 h-full bg-primary-500 transition-transform duration-300 z-0"
+                    className="absolute top-0 left-0 w-1/2 h-full bg-primary-500 transition-all duration-300 z-0"
                     style={{ transform: `translateX(${(currentItem - 1) * 100}%)` }}
                 ></div>
                 {navigationItems.map((item, index) => (
                     <li
                         key={index}
-                        className={`flex-1 text-center w-full h-full font-bold p-2 z-10 transition-all duration-300 rounded-lg bg-transparent ${
+                        className={`flex-1 text-center w-full h-full font-bold p-2 z-10 transition-all duration-300 rounded-lg bg-transparent hover:bg-[rgba(0,0,0,0.15)] ${
                             currentItem === index + 1 ? "text-white" : ""
                         } ${item.clickable && "cursor-pointer"}`}
                         {...item.clickable && { onClick: () => changePage(index) }}

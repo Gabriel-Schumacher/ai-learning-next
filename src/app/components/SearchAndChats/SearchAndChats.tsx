@@ -35,13 +35,13 @@ const SearchAndChats: React.FC = () => {
     };
 
     return (
-        <aside className="card lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg grid grid-rows-[1fr_auto] gap-4">
+        <aside className="card lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg grid grid-rows-[1fr_auto] gap-0">
             {/* Top Content */}
-            <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] [&>div>.subheader]:grid [&>div>.subheader]:place-items-center [&>div>.subheader]:w-full [&>div>.subheader]:py-2 flex flex-col gap-4 overflow-y-auto">
+            <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] [&>div>.subheader]:grid [&>div>.subheader]:place-items-center [&>div>.subheader]:w-full [&>div>.subheader]:py-2 flex flex-col gap-0 overflow-y-scroll">
                 {/* Search Bar */}
                 <label
                     htmlFor="search-input"
-                    className="grid grid-cols-[1fr_auto] gap-2 bg-surface-50 dark:bg-surface-700 rounded-lg p-2 cursor-text"
+                    className="grid grid-cols-[1fr_auto] gap-2 bg-surface-50 dark:bg-surface-700 rounded-lg p-2 cursor-text mb-4"
                 >
                     <input
                         type="text"
@@ -50,11 +50,16 @@ const SearchAndChats: React.FC = () => {
                     />
                     <SearchIcon />
                 </label>
+                {/* End of Search Bar */}
 
                 {/* Search Results */}
-                <div className="">
-                    {/* Folders */}
+                {/* End of Search Results */}
+
+                {/* Folders Section */}
+                <div>
+                    {/* Header (Section title, collapse button, and add file button) */}
                     <div className="subheader grid-cols-[1fr_auto_auto] gap-2">
+                        {/* Section Title */}
                         <span className="block w-full font-semibold text-surface-950 dark:text-surface-50">
                             Folders
                         </span>
@@ -68,7 +73,7 @@ const SearchAndChats: React.FC = () => {
                                 background={false}
                             />
                         </button>
-                        {/* Collapse or Expand */}
+                        {/* Collapse or Expand  Button*/}
                         <button
                             className="bg-transparent border-none p-0 m-0 can-rotate"
                             onClick={(e) => toggleRotation(e, "files")}
@@ -80,48 +85,32 @@ const SearchAndChats: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Folders List */}
+                    {/* Folder List */}
                     <ul
-                        className={`flex flex-col gap-2 mb-4 ${
-                            foldersHidden ? "hidden" : ""
-                        }`}
-                        onClick={(e) => {
-                            const target = e.target as HTMLElement;
-                            const li = target.closest("li");
-                            if (li) {
-                                const folderId =
-                                    li.getAttribute("data-folder-id");
-                                if (folderId) {
-                                    dispatch({
-                                        type: "TOGGLE_CURRENT_FOLDER",
-                                        payload: parseInt(folderId),
-                                    });
-                                }
-                            }
-                        }}
+                        className={`flex flex-col gap-2 mb-4 ${foldersHidden ? "hidden" : ""}`}
                     >
                         {data.folders &&
                             data.folders.map((folder, index) => (
-                                <li
+                                <Slot
                                     key={index}
-                                    data-folder-id={folder.id}
-                                >
-                                    <Slot
-                                        header={folder.name}
-                                        type={"folder"}
-                                        isActive={
-                                            folder.id === data._currentFolderID
-                                        }
-                                        dataID={folder.id}
-                                    />
-                                </li>
+                                    header={folder.name}
+                                    type={"folder"}
+                                    isActive={
+                                        folder.id === data._currentFolderID
+                                    }
+                                    dataID={folder.id}
+                                />
                             ))}
                     </ul>
+                </div>
+                {/* End of Folders Section */}
 
-                    {/* Chats */}
+                {/* Folder Items Section */}
+                <div className="max-h-full">
+                    {/* Header (Section title, Collapse Button */}
                     <div className="subheader grid-cols-[1fr_auto] gap-2">
                         <span className="block w-full font-semibold text-surface-950 dark:text-surface-50">
-                            Chats
+                            Folder Content
                         </span>
                         {/* Collapse or Expand */}
                         <button
@@ -135,40 +124,33 @@ const SearchAndChats: React.FC = () => {
                         </button>
                     </div>
 
+                    {/* Folder Content */}
                     <ul
-                        className={`max-h-full flex flex-col gap-2 mb-4 overflow-y-hidden ${chatsHidden ? "hidden" : "" }`}
+                        className={`max-h-full flex flex-col gap-2 mb-4 ${chatsHidden ? "hidden" : "" }`}
                     >
                         {data.conversations &&
                             data.conversations.map((chat, index) => (
-                                <li
+                                <Slot
                                     key={index}
-                                    data-chat-id={chat.id}
                                     data-chat-active={
                                         chat.current ? true : false
                                     }
-                                    onClick={() => {
-                                        dispatch({
-                                            type: "TOGGLE_CURRENT_ITEM",
-                                            payload: chat.id,
-                                        });
-                                    }}
-                                >
-                                    <Slot
-                                        header={chat.title}
-                                        type={"chat"}
-                                        isActive={
-                                            chat.id ===
-                                            data._currentConversationID
-                                        }
-                                        dataID={chat.id}
-                                    />
-                                </li>
+                                    header={chat.title}
+                                    type={"chat"}
+                                    isActive={
+                                        chat.id ===
+                                        data._currentConversationID
+                                    }
+                                    dataID={chat.id}
+                                />
                             ))}
                     </ul>
                 </div>
+                {/* End of Folder Items Section */}
             </div>
+            {/* End of Top Content */}
 
-            {/* Action Button */}
+            {/* New Conversation Button */}
             <button
                 disabled={data._currentFolderID ? false : true}
                 onClick={() => {
@@ -183,6 +165,7 @@ const SearchAndChats: React.FC = () => {
                     width="w-3"
                 />
             </button>
+            {/* End of New Conversation Button */}
         </aside>
     );
 };

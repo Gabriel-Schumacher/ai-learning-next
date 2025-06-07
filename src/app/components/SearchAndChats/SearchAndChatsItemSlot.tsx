@@ -56,19 +56,43 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     }, [menuIsOpen, dataID])
 
     return (
-        <div className="grid grid-cols-[auto_1fr_auto] gap-2 bg-surface-50 dark:bg-surface-900 rounded-lg p-2 place-items-center relative hover:cursor-pointer transition-all hover:bg-surface-100 dark:hover:bg-surface-950">
-            {type === 'folder' ? 
-                <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<Folder width='w-3' background={false} special={true} /></div>
-                : 
-                <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<ChatBox width='w-3' background={false} special={true} /></div>
-            }
-            <span className="text-black dark:text-white block w-full truncate h-min text-sm">{header}</span>
-            <button className="bg-transparent border-none p-0 m-0 cursor-pointer" onClick={()=>{handleButtonClick()}}><ThreeDotsEllipsis width='w-3' background={false} /></button>
-            <ul data-key={dataID} className={`subMenu ${menuIsOpen ? 'flex' : 'hidden'} absolute right-3 top-5 rounded-lg shadow-lg p-0 flex-col gap-0 cursor-pointer z-10`}>
-                <li className='border-transparent rounded-tl-lg hover:bg-error-800 bg-error-500 p-2 text-black hover:text-white transition-all' onClick={() => dispatch({type: "REMOVE_ITEM", payload: dataID ?? 0})}>Delete</li>
-                <li className='border-transparent rounded-b-lg hover:bg-surface-800 bg-surface-500 p-2 text-white transition-all'>Rename</li>
-            </ul>
-        </div>
+        <li className='grid grid-cols-[1fr_auto] relative bg-surface-50 dark:bg-surface-900 rounded-lg place-items-center hover:cursor-pointer transition-all '>
+            {/* Icon and File Name */}
+            {/* FOLDER */}
+                {(type === 'folder') && (
+                    <button type='button' className="grid grid-cols-[auto_1fr] gap-2 h-full place-items-center justify-items-start relative w-full hover:bg-surface-100 dark:hover:bg-surface-950 p-2 rounded-lg rounded-r-none"
+                    onClick={() => {
+                        dispatch({
+                            type: "TOGGLE_CURRENT_FOLDER",
+                            payload: dataID !== undefined ? dataID : -1,
+                        });
+                    }}>
+                        <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<Folder width='w-3' background={false} special={true} /></div>
+                        <span className="text-black dark:text-white block w-full truncate h-min text-sm">{header}</span>
+                    </button>
+                )}
+            {/* CHAT OR QUIZ OR NOTE TYPES */}
+                {(type !== 'folder') && (
+                    <button type='button' className="grid grid-cols-[auto_1fr] gap-2 h-full place-items-center justify-items-start relative w-full hover:bg-surface-100 dark:hover:bg-surface-950 p-2 rounded-lg rounded-r-none"
+                    onClick={() => {
+                        dispatch({
+                            type: "TOGGLE_CURRENT_ITEM",
+                            payload: dataID !== undefined ? dataID : -1,
+                        });
+                    }}>
+                        <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<ChatBox width='w-3' background={false} special={true} /></div>
+                        <span className="text-black dark:text-white block w-full truncate h-min text-sm">{header}</span>
+                    </button>
+                )}
+            {/* Options Button */}
+            <div className='p-2 rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center'>
+                <button className="bg-transparent border-none p-0 m-0 cursor-pointer" onClick={()=>{handleButtonClick()}}><ThreeDotsEllipsis width='w-3' background={false} /></button>
+                <ul data-key={dataID} className={`subMenu ${menuIsOpen ? 'flex' : 'hidden'} absolute right-3 top-5 rounded-lg shadow-lg flex-col gap-0 cursor-pointer z-10 p-2`}>
+                    <li className='border-transparent rounded-tl-lg hover:bg-error-800 bg-error-500 p-2 text-black hover:text-white transition-all' onClick={() => dispatch({type: "REMOVE_ITEM", payload: dataID ?? 0})}>Delete</li>
+                    <li className='border-transparent rounded-b-lg hover:bg-surface-800 bg-surface-500 p-2 text-white transition-all'>Rename</li>
+                </ul>
+            </div>
+        </li>
     );
 }
 
