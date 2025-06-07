@@ -20,11 +20,11 @@ type ChatMessage = {
 
 function DataCreation() {
   const response = useReadableStream();
-  //const [responseText, setResponseText] = useState("");
   const [dataHistory, setDataHistory] = useState<ChatMessage[]>([]);
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1); // Add state for number of questions
-  const [subject, setSubject] = useState<string>("General");
-  //const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [subject, setSubject] = useState<string>(""); // Initialize subject to an empty string
+  //const [isLoading, setIsLoading] = useState<boolean>(false);
+
 
   // Load chat history from localStorage on the client side
   useEffect(() => {
@@ -148,34 +148,13 @@ function DataCreation() {
     }
   }
 
-  function deleteAllChats() {
-    setDataHistory([]);
-  }
-
-  (async () => {
-    if (response.text !== "") {
-      // Strip <think> tags from the response text
-
-
-
-
+  function clearQuizData() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("quizData");
+      console.log("Quiz data cleared.");
+      setDataHistory([]); // Clear the user display by resetting the chat history
     }
-  })();
-
-  // function saveData(index: number): void {
-  //   const chat = dataHistory[index];
-  //   if (chat) {
-  //     const blob = new Blob([chat.content], { type: "text/plain" });
-  //     const url = URL.createObjectURL(blob);
-  //     const a = document.createElement("a");
-  //     a.href = url;
-  //     a.download = `chat_data_${index}.txt`;
-  //     a.click();
-  //     URL.revokeObjectURL(url);
-  //   } else {
-  //     console.error("Invalid chat data or index.");
-  //   }
-  // }
+  }
 
   function getQuizQuestions(): { id: number; question: string; answer: string }[] {
     if (typeof window !== "undefined") {
@@ -208,9 +187,13 @@ function DataCreation() {
             <div>
               <label className="text-primary-500">Topic</label>
               <input 
+                required
                 className="input bg-white rounded-xl shadow-lg" 
                 type="text" 
                 name="topic"
+                value={subject} // Controlled input
+                onChange={(e) => setSubject(e.target.value)} // Update state on change
+                placeholder="Enter a topic to study"
               />
             </div>
             <div>
@@ -235,17 +218,18 @@ function DataCreation() {
                  <button className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"><div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload</button>
  
               </div>
-              <textarea required onKeyDown={handleKeydown} name="message" className="textarea bg-white rounded-xl shadow-lg h-28" id="prompt" placeholder="Paste text or type about what you'd like to study"></textarea>
+              <textarea onKeyDown={handleKeydown} name="message" className="textarea bg-white rounded-xl shadow-lg h-28" id="prompt" placeholder="Paste text or type about what you'd like to study"></textarea>
             </div>
             <div className="flex justify-end">
               <button type="submit" className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
               <button
                 type="button"
                 className="btn bg-red-500 text-white p-2 rounded-lg"
-                onClick={deleteAllChats}
+                onClick={clearQuizData}
               >
                 Clear Chats
               </button>
+    
             </div>
           </div>
           {/* Step 2 Starts here */}
