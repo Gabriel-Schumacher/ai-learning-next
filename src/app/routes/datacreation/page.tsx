@@ -1,70 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useReadableStream } from "../../components/useReadableStream";
+//import { numberOfQustions } from "@/app/api/dataCreation/route";
 
-// Add a highlight.js theme import
-import "highlight.js/styles/github.css"; // You can choose a different theme like 'atom-one-dark.css', 'monokai.css', etc.
 import PencilIcon from "@/app/components/customSvg/Pencil";
 import DriveIcon from "@/app/components/customSvg/Drive"; 
 import FolderIcon from "@/app/components/customSvg/Folder";
 import OneIcon from "@/app/components/customSvg/One";
 import TwoIcon from "@/app/components/customSvg/Two";
-// import { numberOfQustions } from "@/app/api/dataCreation/route";
 
 
-type ChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-};
+
+// type ChatMessage = {
+//   role: "user" | "assistant";
+//   content: string;
+// };
 
 function DataCreation() {
   const response = useReadableStream();
-  const [dataHistory, setDataHistory] = useState<ChatMessage[]>([]);
+  //const [dataHistory, setDataHistory] = useState<ChatMessage[]>([]);
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1); // Add state for number of questions
   const [subject, setSubject] = useState<string>(""); // Initialize subject to an empty string
   //const [isLoading, setIsLoading] = useState<boolean>(false);
   const [step, setStep] = useState<number>(1); // Add state for step tracking
-
-
-  // Load chat history from localStorage on the client side
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedDataHistory = localStorage.getItem("dataHistory");
-      if (storedDataHistory) {
-        setDataHistory(
-          JSON.parse(storedDataHistory).map((chat: ChatMessage) => ({
-            ...chat,
-            content: stripThinkTags(chat.content), // Ensure think tags are stripped from stored history
-          }))
-        );
-      }
-    }
-  }, []);
-
-  function stripThinkTags(text: string): string {
-    if (typeof text !== "string") return ""; // Ensure text is a string
-    const thinkRegex = /<think>[\s\S]*?<\/think>/g;
-    return text.replace(thinkRegex, "");
-  }
-
-  useEffect(() => {
-    if (response.text !== "") {
-      (async () => {
-        // Strip <think> tags from the response text
-        // const cleanedText = stripThinkTags(response.text);
-        // Parse the cleaned text as Markdown
-
-
-      })();
-    }
-  }, [response.text]); // Added dependency array to avoid infinite re-renders
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("dataHistory", JSON.stringify(dataHistory));
-    }
-  }, [dataHistory]); // Added dependency array to avoid infinite re-renders
 
   function handleKeydown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -101,7 +60,8 @@ function DataCreation() {
     setNumberOfQuestions(sanitizedNumQuestions);
   
     const updatedChatHistory = [
-      ...dataHistory,
+      // Uncomment and use dataHistory if needed
+      // ...dataHistory,
       { role: "user", content: message },
     ];
   
@@ -131,19 +91,19 @@ function DataCreation() {
         const parsedData = JSON.parse(answerText);
         if (parsedData && parsedData.questions) {
           localStorage.setItem("quizData", JSON.stringify(parsedData));
-          setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
-            ...prev,
-            { role: "assistant", content: "Quiz data saved." },
-          ]);
+          // setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
+          //   ...prev,
+          //   { role: "assistant", content: "Quiz data saved." },
+          // ]);
         } else {
           throw new Error("Missing 'questions' key in parsed data");
         }
       } catch (e) {
         console.error("Error parsing response JSON:", e);
-        setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
-          ...prev,
-          { role: "assistant", content: "Failed to parse quiz data." },
-        ]);
+        // setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
+        //   ...prev,
+        //   { role: "assistant", content: "Failed to parse quiz data." },
+        // ]);
       }
     } catch (e) {
       console.error("Error in handleSubmit:", e);
@@ -154,7 +114,7 @@ function DataCreation() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("quizData");
       console.log("Quiz data cleared.");
-      setDataHistory([]); // Clear the user display by resetting the chat history
+      //setDataHistory([]); // Clear the user display by resetting the chat history
       setStep(1); // Reset to step 1
     }
   }
@@ -173,6 +133,24 @@ function DataCreation() {
     }
     return [];
   }
+
+  function saveData() {
+    if (typeof window !== "undefined") {
+      const quizData = localStorage.getItem("quizData");
+      const savedSets = localStorage.getItem("savedQuizSets");
+      const parsedQuizData = quizData ? JSON.parse(quizData) : null;
+      const parsedSavedSets = savedSets ? JSON.parse(savedSets) : [];
+  
+      if (parsedQuizData && parsedQuizData.questions) {
+        const updatedSavedSets = [...parsedSavedSets, parsedQuizData.questions];
+        localStorage.setItem("savedQuizSets", JSON.stringify(updatedSavedSets));
+        console.log("Quiz data saved to savedQuizSets.");
+      } else {
+        console.error("No quiz data available to save.");
+      }
+    }
+  }
+
   //End of Logic-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   return (
     <div>
@@ -248,8 +226,10 @@ function DataCreation() {
                     Back
                   </button>              
                   <button
-                  
-                  >Save
+                    type="button"
+                    className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                    onClick={saveData}>
+                    Save
                   </button>    
                 </div>
 
