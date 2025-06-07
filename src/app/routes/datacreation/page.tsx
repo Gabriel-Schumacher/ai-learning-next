@@ -24,6 +24,7 @@ function DataCreation() {
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1); // Add state for number of questions
   const [subject, setSubject] = useState<string>(""); // Initialize subject to an empty string
   //const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [step, setStep] = useState<number>(1); // Add state for step tracking
 
 
   // Load chat history from localStorage on the client side
@@ -90,6 +91,7 @@ function DataCreation() {
     const topicInput = formData.get("topic")?.toString().trim();
     const numberInput = parseInt(formData.get("numQuestions")?.toString() || "1", 10);
     const sanitizedNumQuestions = isNaN(numberInput) || numberInput < 1 ? 1 : numberInput;
+    setStep(2); // Move to step 2 after submission
   
     if (topicInput) {
       setSubject(topicInput);
@@ -181,8 +183,8 @@ function DataCreation() {
               <p>How would you like to study?</p>
             </div>   
             <div className="flex gap-4">
-              <div className="flex gap-1 text-primary-500"><div className="w-[24px] h-[24px]"><OneIcon/></div> Setup</div>
-              <div className="flex gap-1 text-surface-700"><div className="w-[24px] h-[24px]"><TwoIcon/></div>2 Customize</div>
+              <div className={`flex gap-1 ${step === 1 ? "text-primary-500" : "text-surface-700"}`}><div className="w-[24px] h-[24px]"><OneIcon color={step === 1 ? "text-primary-500" : "text-surface-700"} /></div>Setup</div>
+              <div className={`flex gap-1 ${step === 2 ? "text-primary-500" : "text-surface-700"}`}><div className="w-[24px] h-[24px]"><TwoIcon color={step === 2 ? "text-primary-500" : "text-surface-700"} /></div>Customize</div>
             </div>       
             <div>
               <label className="text-primary-500">Topic</label>

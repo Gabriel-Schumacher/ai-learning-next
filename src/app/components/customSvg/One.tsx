@@ -1,6 +1,6 @@
-function OneIcon() {
+function OneIcon({ color = "text-primary-500" }: { color?: string }) {
   return (
-    <div className="text-primary-500">
+    <div className={color}>
       <svg
         fill="currentColor"
         viewBox="0 0 256 256"
