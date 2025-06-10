@@ -117,7 +117,7 @@ const AiChat: React.FC = () => {
                 });
 
                 const answer = readableStream.request(
-                    new Request('http://localhost:3001/api/chat', {
+                    new Request('/api/chat', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

@@ -26,8 +26,8 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
         }
     const { data, dispatch } = context;
 
-    console.log("Slot Rendered: ", header, type, isActive, dataID);
-    console.log("When Slot was rendered, the current folder in data is: ", data._currentFolderID);
+    // console.log("Slot Rendered: ", header, type, isActive, dataID);
+    // console.log("When Slot was rendered, the current folder in data is: ", data._currentFolderID);
 
     /* Close other submenus while opening this one. */
     const handleButtonClick = () => {
@@ -85,12 +85,28 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                     </button>
                 )}
             {/* Options Button */}
-            <div className='p-2 rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center'>
-                <button className="bg-transparent border-none p-0 m-0 cursor-pointer" onClick={()=>{handleButtonClick()}}><ThreeDotsEllipsis width='w-3' background={false} /></button>
-                <ul data-key={dataID} className={`subMenu ${menuIsOpen ? 'flex' : 'hidden'} absolute right-3 top-5 rounded-lg shadow-lg flex-col gap-0 cursor-pointer z-10 p-2`}>
-                    <li className='border-transparent rounded-tl-lg hover:bg-error-800 bg-error-500 p-2 text-black hover:text-white transition-all' onClick={() => dispatch({type: "REMOVE_ITEM", payload: dataID ?? 0})}>Delete</li>
-                    <li className='border-transparent rounded-b-lg hover:bg-surface-800 bg-surface-500 p-2 text-white transition-all'>Rename</li>
+            <div className='p-2 rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center focus-within:[&>ul]:flex focus:[&>ul]:opacity-100 transition-all'>
+                <button className="bg-transparent border-none p-0 m-0 cursor-pointer focus:[&_+_ul]:flex focus:[&_+_ul]:opacity-100" onClick={()=>{handleButtonClick()}}><ThreeDotsEllipsis width='w-3' background={false} /></button>
+                
+                <ul data-key={dataID} className={`hidden focus:flex focus-within:flex focus:opacity-100 focus-within:opacity-100 opacity-0 transition-all absolute right-3 top-5 rounded-lg shadow-lg flex-col gap-0 cursor-pointer z-10`}>
+                    <li className='border-transparent rounded-tl-lg hover:bg-error-800 bg-error-500 transition-all'>
+                        <button
+                            type="button"
+                            className='w-full p-2 text-black hover:text-white text-left' 
+                            onClick={() => dispatch({type: "REMOVE_ITEM", payload: dataID ?? 0})}>
+                            Delete
+                        </button>
+                    </li>
+                    <li className='border-transparent rounded-b-lg hover:bg-surface-800 bg-surface-500 transition-all'>
+                        <button
+                            type="button"
+                            className='w-full p-2 text-white text-left' 
+                            onClick={() => console.log('Rename clicked')}>
+                            Rename
+                        </button>
+                    </li>
                 </ul>
+                
             </div>
         </li>
     );

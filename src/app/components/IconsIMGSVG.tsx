@@ -57,16 +57,16 @@ const BulletIcon = ({ background = true, width="w-2", special=false}: IconProps)
     return (
         <>
             {background &&
-            <div className={`${special ? "svg-icon-special" : ""} svg-icon grid place-items-center rounded bg-white hover:bg-[#f0f0f0] cursor-pointer`}>
-                <svg className={`${CLASSES} svg-icon-background aspect-square text-primary-500`} viewBox="0 0 24 24" fill="#0303ee" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" fill="#0303ee"/>
+            <div className={`BULLET ${special ? "svg-icon-special" : ""} svg-icon grid place-items-center rounded bg-white hover:bg-[#f0f0f0] cursor-pointer`}>
+                <svg className={`${CLASSES} aspect-square`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" className="fill-surface-950 dark:fill-surface-50" />
                 </svg>
             </div>
             }
             {!background &&
-            <div className={`${special ? "svg-icon-special" : ""} svg-icon grid place-items-center cursor-pointer`}>
-                <svg className={`${CLASSES} svg-icon-background aspect-square text-primary-500`} viewBox="0 0 24 24" fill="#0303ee" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="10" fill="#0303ee"/>
+            <div className={`BULLET ${special ? "svg-icon-special" : ""} svg-icon grid place-items-center cursor-pointer`}>
+                <svg className={`${CLASSES} aspect-square`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" className="fill-surface-950 dark:fill-surface-50" />
                 </svg>
             </div>
             }

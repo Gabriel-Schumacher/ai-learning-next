@@ -37,11 +37,11 @@ const SearchAndChats: React.FC = () => {
     return (
         <aside className="card lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg grid grid-rows-[1fr_auto] gap-0">
             {/* Top Content */}
-            <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] [&>div>.subheader]:grid [&>div>.subheader]:place-items-center [&>div>.subheader]:w-full [&>div>.subheader]:py-2 flex flex-col gap-0 overflow-y-scroll">
+            <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] [&>div>.subheader]:grid [&>div>.subheader]:place-items-center [&>div>.subheader]:w-full [&>div>.subheader]:py-2 flex flex-col gap-0 overflow-y-scroll [&>*]:pr-2">
                 {/* Search Bar */}
                 <label
                     htmlFor="search-input"
-                    className="grid grid-cols-[1fr_auto] gap-2 bg-surface-50 dark:bg-surface-700 rounded-lg p-2 cursor-text mb-4"
+                    className="grid grid-cols-[1fr_auto] gap-2 bg-surface-50 dark:bg-surface-700 rounded-lg p-2 mr-2 cursor-text mb-4"
                 >
                     <input
                         type="text"

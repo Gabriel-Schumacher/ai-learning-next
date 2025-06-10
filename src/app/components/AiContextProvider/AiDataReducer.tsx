@@ -155,13 +155,22 @@ export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): Stat
                 _idsInUse: [...newState._idsInUse, newQuiz.id]
             };
         case 'REMOVE_ITEM':
+            console.log("Payload for REMOVE_ITEM action: ", action.payload);
             if (!newState.folders || !newState._idsInUse.includes(action.payload)) return state;
+            console.log(1)
 
             const REMOVED_ITEMS_FOLDER_IS_CURRENT = checkIfArrayHasCurrent(newState.folders as Folder[], action.payload);
             const REMOVED_ITEM_IS_CURRENT = REMOVED_ITEMS_FOLDER_IS_CURRENT ? checkIfArrayHasCurrent(newState.conversations as (Conversation | Quiz)[], action.payload) : false;
             const updatedFolders = removeItemFromFolders(newState.folders, action.payload);
             const currentConversationInUpdatedFolders = updatedFolders.find((folder: Folder) => folder.id === newState._currentFolderID)?.attached_items || newState.conversations;
-
+            console.log("New state after removing item: ", updatedFolders);
+            if (!currentConversationInUpdatedFolders) {
+                console.warn("No current conversation found after removing item, resetting current conversation.");
+            }
+            if (REMOVED_ITEM_IS_CURRENT && !currentConversationInUpdatedFolders) {
+                console.warn("Removed item was current, but no current conversation found in updated folders.");
+            }
+            
             return {
                 ...newState,
                 folders: updatedFolders,

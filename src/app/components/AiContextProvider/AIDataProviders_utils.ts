@@ -206,6 +206,12 @@ export const removeItemFromFolders = (folders: Folder[], itemID: number): Folder
     if (!folders) return folders;
     if (folders.length === 0) return folders;
 
+    const folderIndex = folders.findIndex((folder: Folder) => folder.id === itemID);
+    if (folderIndex !== -1) {
+        folders.splice(folderIndex, 1);
+        return folders;
+    }
+
     folders.forEach((folder: Folder) => {
         folder.attached_items = folder.attached_items.filter((item: Conversation | Quiz) => item.id !== itemID);
     });
