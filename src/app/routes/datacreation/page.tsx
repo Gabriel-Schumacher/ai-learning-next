@@ -134,7 +134,7 @@ function DataCreation() {
     }
   }
 
-  function getQuizQuestions(): { id: number; question: string; answer: string }[] {
+  function getQuizQuestions(): { id: number; question: string; answer: string; options?: string[] }[] {
     if (typeof window !== "undefined") {
       const quizData = localStorage.getItem("quizData");
       if (quizData) {
@@ -235,8 +235,15 @@ function DataCreation() {
                   getQuizQuestions().map((question) => (
                     <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
                       <p className="text-primary-500">Question: {question.id}</p>
-                      <p className="text-primary-500">{question.question}</p>
-                      <p className="text-primary-500">Answer: {question.answer || "No answer available."}</p>
+                      <p className="text-primary-500 mb-1">{question.question}</p>
+                      {question.options && question.options.length > 0 && (
+                        <ul className="list-none">
+                          {question.options.map((option, index) => (
+                            <li key={index} className="text-primary-500 list-none">{option}</li>
+                          ))}
+                        </ul>  
+                      )}
+                      <p className="text-primary-500 mt-1">Answer: {question.answer || "No answer available."}</p>
                     </div>
                   ))
                 )}
