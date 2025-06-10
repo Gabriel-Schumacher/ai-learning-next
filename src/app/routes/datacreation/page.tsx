@@ -19,6 +19,8 @@ function DataCreation() {
   //const [isLoading, setIsLoading] = useState<boolean>(false);
   const [step, setStep] = useState<number>(1); // Add state for step tracking
   const [isLoadingQuizData, setIsLoadingQuizData] = useState<boolean>(false); // Add loading state
+  const [editedQuestions, setEditedQuestions] = useState<{ [id: number]: { question: string; answer: string; options?: string[] } }>({}); // Track edits
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null); // Track which question is being edited
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -155,6 +157,8 @@ function DataCreation() {
       const savedSets = localStorage.getItem("savedQuizSets");
       const parsedQuizData = quizData ? JSON.parse(quizData) : null;
       const parsedSavedSets = savedSets ? JSON.parse(savedSets) : [];
+      localStorage.removeItem("quizData");
+      setStep(1); // Reset to step 1
   
       if (parsedQuizData && parsedQuizData.questions) {
         const updatedSavedSets = [...parsedSavedSets, parsedQuizData.questions];
@@ -162,6 +166,47 @@ function DataCreation() {
         console.log("Quiz data saved to savedQuizSets.");
       } else {
         console.error("No quiz data available to save.");
+      }
+    }
+  }
+
+  function handleEditQuestion(id: number, field: string, value: string) {
+    setEditedQuestions((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [field]: value,
+      },
+    }));
+  }
+
+  function handleEditOption(id: number, optionIndex: number, value: string) {
+    setEditedQuestions((prev) => {
+      const updatedOptions = prev[id]?.options ? [...prev[id].options] : [];
+      updatedOptions[optionIndex] = value;
+      return {
+        ...prev,
+        [id]: {
+          ...prev[id],
+          options: updatedOptions,
+        },
+      };
+    });
+  }
+
+  function saveQuestion(id: number) {
+    const quizData = localStorage.getItem("quizData");
+    if (quizData) {
+      try {
+        const parsedData = JSON.parse(quizData);
+        const updatedQuestions = parsedData.questions.map((question: any) =>
+          question.id === id ? { ...question, ...editedQuestions[id] } : question
+        );
+        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
+        console.log(`Question ${id} saved.`);
+        setEditingQuestionId(null); // Exit edit mode
+      } catch (e) {
+        console.error("Error saving question:", e);
       }
     }
   }
@@ -225,29 +270,9 @@ function DataCreation() {
             )  } 
             {/* Step 1 Ends here */}
             { step === 2 && (
-              
             <div>    
-                {isLoadingQuizData ? (
-                  <div className="flex justify-center items-center">
-                    <LoadingIcon /> {/* Show loading icon while data is loading */}
-                  </div>
-                ) : (
-                  getQuizQuestions().map((question) => (
-                    <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
-                      <p className="text-primary-500">Question: {question.id}</p>
-                      <p className="text-primary-500 mb-1">{question.question}</p>
-                      {question.options && question.options.length > 0 && (
-                        <ul className="list-none">
-                          {question.options.map((option, index) => (
-                            <li key={index} className="text-primary-500 list-none">{option}</li>
-                          ))}
-                        </ul>  
-                      )}
-                      <p className="text-primary-500 mt-1">Answer: {question.answer || "No answer available."}</p>
-                    </div>
-                  ))
-                )}
-                <div className="flex justify-end mt-2">
+                {!isLoadingQuizData && (
+                <div className="flex justify-end mb-2 gap-2">
                   <button
                     type="button"
                     className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
@@ -258,10 +283,96 @@ function DataCreation() {
                     type="button"
                     className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
                     onClick={saveData}>
-                    Save
+                    Save Collection
                   </button>    
-                </div>
-
+                </div>                  
+                  )}
+                {isLoadingQuizData ? (
+                  <div className="flex justify-center items-center">
+                    <LoadingIcon /> {/* Show loading icon while data is loading */}
+                  </div>
+                ) : (
+                  getQuizQuestions().map((question) => (
+                    <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
+                      <p className="text-primary-500">Question: {question.id}</p>
+                      {editingQuestionId === question.id ? (
+                        <>
+                          <input
+                            className="input bg-white rounded-xl shadow-lg mb-2"
+                            type="text"
+                            value={editedQuestions[question.id]?.question || question.question}
+                            onChange={(e) => handleEditQuestion(question.id, "question", e.target.value)}
+                            placeholder="Edit question"
+                          />
+                          {question.options && question.options.length > 0 && (
+                            <ul className="list-none">
+                              {question.options.map((option, index) => (
+                                <li key={index} className="text-primary-500 list-none mb-2">
+                                  <input
+                                    className="input bg-white rounded-xl shadow-lg"
+                                    type="text"
+                                    value={editedQuestions[question.id]?.options?.[index] || option}
+                                    onChange={(e) => handleEditOption(question.id, index, e.target.value)}
+                                    placeholder={`Edit option ${index + 1}`}
+                                  />
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                          <input
+                            className="input bg-white rounded-xl shadow-lg mb-2"
+                            type="text"
+                            value={editedQuestions[question.id]?.answer || question.answer}
+                            onChange={(e) => handleEditQuestion(question.id, "answer", e.target.value)}
+                            placeholder="Edit answer"
+                          />
+                          <button
+                            type="button"
+                            className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                            onClick={() => saveQuestion(question.id)}
+                          >
+                            Save Question
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-primary-500 mb-1">{question.question}</p>
+                          {question.options && question.options.length > 0 && (
+                            <ul className="list-none">
+                              {question.options.map((option, index) => (
+                                <li key={index} className="text-primary-500 list-none">{option}</li>
+                              ))}
+                            </ul>
+                          )}
+                          <p className="text-primary-500 mt-1">Answer: {question.answer || "No answer available."}</p>
+                          <button
+                            type="button"
+                            className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                            onClick={() => setEditingQuestionId(question.id)}
+                          >
+                            Edit
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ))
+                )}
+                {!isLoadingQuizData && (
+                <div className="flex justify-end mt-2 gap-2">
+                  <button
+                    type="button"
+                    className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                    onClick={clearQuizData}>
+                    Back
+                  </button>              
+                  <button
+                    type="button"
+                    className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                    onClick={saveData}>
+                    Save Collection
+                  </button>    
+                </div>                  
+                  )}
             </div>              
             )}
           </div>
