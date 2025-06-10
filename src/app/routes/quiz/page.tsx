@@ -7,19 +7,32 @@ function Quiz() {
     const [selectedQuizIndex, setSelectedQuizIndex] = useState<number | null>(null);
     const [userAnswers, setUserAnswers] = useState<{ [questionId: number]: string }>({});
     const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
+    const [studyMode, setStudyMode] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const savedQuizSets = localStorage.getItem('savedQuizSets');
-            setQuestionLog(savedQuizSets ? JSON.parse(savedQuizSets) : []);
+            try {
+                const parsedQuizSets = savedQuizSets ? JSON.parse(savedQuizSets) : [];
+                if (Array.isArray(parsedQuizSets)) {
+                    setQuestionLog(parsedQuizSets);
+                } else {
+                    console.error("Invalid format for savedQuizSets:", parsedQuizSets);
+                    setQuestionLog([]);
+                }
+            } catch (error) {
+                console.error("Error parsing savedQuizSets:", error);
+                setQuestionLog([]);
+            }
         }
     }, []);
 
-    const handleQuizSelection = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        const index = parseInt(event.target.value, 10);
+
+    const handleQuizSelection = (index: number) => {
         setSelectedQuizIndex(index);
         setUserAnswers({});
         setShowCorrectAnswers(false);
+        setStudyMode(true);
     };
 
     const handleAnswerChange = (questionId: number, answer: string) => {
@@ -31,33 +44,47 @@ function Quiz() {
         console.log("User Answers:", userAnswers);
     };
 
-    const selectedQuiz = selectedQuizIndex !== null ? questionLog[selectedQuizIndex] : null;
+    const selectedQuiz = selectedQuizIndex !== null && questionLog[selectedQuizIndex] 
+        ? questionLog[selectedQuizIndex].questions 
+        : null;
 
     // Simplified logic for parsedQuestions
-    const parsedQuestions = Array.isArray(selectedQuiz) ? selectedQuiz : selectedQuiz ? [selectedQuiz] : [];
+    const parsedQuestions = Array.isArray(selectedQuiz) && selectedQuiz.every(q => q && q.question && q.options) 
+        ? selectedQuiz 
+        : [];
 
     console.log("Selected Quiz:", selectedQuiz);
     console.log("Parsed Questions:", parsedQuestions);
 
     return (
-        <div className="flex flex-col items-center justify-center">
+        <div>
             <h1 className="text-4xl font-bold mb-4">Quiz App</h1>
+            {/* Display Available Quizzes */}   
+            { studyMode === false && (
+            <div>
+                {questionLog.length > 0 && (
+                    <div className="mt-4">
+                        <h2 className="text-2xl font-semibold mb-2">What would you like to study?</h2>
+                        <ul className="flex flex-col gap-4">
+                            {questionLog.map((quizSet, index) => (
+                                <li className="bg-surface-200 p-4 rounded-lg shadow-md w-full" key={index}>
+                                    <p className="text-lg font-medium mb-2">
+                                        {quizSet.title ? `Collection ${index + 1}: ${quizSet.title}` : `Quiz ${index + 1}`}                                        
+                                    </p>
 
-            {/* Quiz Selection Dropdown */}
-            <select
-                className="mb-4 p-2 border rounded"
-                onChange={handleQuizSelection}
-                defaultValue=""
-            >
-                <option value="" disabled>
-                    Select a Quiz
-                </option>
-                {questionLog.map((log: any, index: number) => (
-                    <option key={index} value={index}>
-                        Quiz {index + 1} - {log.id}
-                    </option>
-                ))}
-            </select>
+                                    <div className="flex gap-2">
+                                        <button className="btn" onClick={() => handleQuizSelection(index)}>Study</button>        
+                                        <button className="btn">View</button>                                
+                                    </div>
+
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>                
+            )}
+
 
             {/* Display Questions */}
             {selectedQuizIndex !== null && parsedQuestions.length > 0 && (

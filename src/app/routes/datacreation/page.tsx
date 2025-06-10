@@ -142,13 +142,13 @@ function DataCreation() {
       if (quizData) {
         try {
           const parsedData = JSON.parse(quizData);
-          return parsedData.questions || [];
+          return Array.isArray(parsedData.questions) ? parsedData.questions : []; // Ensure questions is an array
         } catch (e) {
           console.error("Error parsing quizData:", e);
         }
       }
     }
-    return [];
+    return []; // Return an empty array if no quiz data is found
   }
 
   function saveData() {
@@ -161,9 +161,12 @@ function DataCreation() {
       setStep(1); // Reset to step 1
   
       if (parsedQuizData && parsedQuizData.questions) {
-        const updatedSavedSets = [...parsedSavedSets, parsedQuizData.questions];
+        const updatedSavedSets = [
+          ...parsedSavedSets,
+          { title: subject, questions: parsedQuizData.questions }, // Include topic as title
+        ];
         localStorage.setItem("savedQuizSets", JSON.stringify(updatedSavedSets));
-        console.log("Quiz data saved to savedQuizSets.");
+        console.log(`Quiz data saved to savedQuizSets with title: ${subject}`);
       } else {
         console.error("No quiz data available to save.");
       }
@@ -271,6 +274,7 @@ function DataCreation() {
             {/* Step 1 Ends here */}
             { step === 2 && (
             <div>    
+                <h2 className="text-primary-500 mb-4">Topic: {subject}</h2> {/* Display topic */}
                 {!isLoadingQuizData && (
                 <div className="flex justify-end mb-2 gap-2">
                   <button
