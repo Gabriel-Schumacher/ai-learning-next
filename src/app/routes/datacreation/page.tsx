@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useReadableStream } from "../../components/useReadableStream";
+import LoadingIcon from "../../components/LoadingIcon";
 //import { numberOfQustions } from "@/app/api/dataCreation/route";
 
 import PencilIcon from "@/app/components/customSvg/Pencil";
@@ -24,6 +25,8 @@ function DataCreation() {
   const [subject, setSubject] = useState<string>(""); // Initialize subject to an empty string
   //const [isLoading, setIsLoading] = useState<boolean>(false);
   const [step, setStep] = useState<number>(1); // Add state for step tracking
+  const [isLoadingQuizData, setIsLoadingQuizData] = useState<boolean>(false); // Add loading state
+  const quizData = getQuizQuestions(); // Fetch quiz questions from localStorage
 
   function handleKeydown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -44,6 +47,8 @@ function DataCreation() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (response.loading) return;
+
+    setIsLoadingQuizData(true); // Start loading
   
     const formData: FormData = new FormData(event.currentTarget);
     const message = formData.get("message")?.toString().trim();
@@ -105,8 +110,10 @@ function DataCreation() {
         //   { role: "assistant", content: "Failed to parse quiz data." },
         // ]);
       }
+      setIsLoadingQuizData(false); // Stop loading after data is fetched
     } catch (e) {
       console.error("Error in handleSubmit:", e);
+      setIsLoadingQuizData(false); // Stop loading on error
     }
   }
 
@@ -210,14 +217,21 @@ function DataCreation() {
             )  } 
             {/* Step 1 Ends here */}
             { step === 2 && (
+              
             <div>    
-                {getQuizQuestions().map((question) => (
-                  <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
-                    <p className="text-primary-500">Question: {question.id}</p>
-                    <p className="text-primary-500">{question.question}</p>
-                    <p className="text-primary-500">Answer: {question.answer || "No answer available."}</p>
+                {isLoadingQuizData ? (
+                  <div className="flex justify-center items-center">
+                    <LoadingIcon /> {/* Show loading icon while data is loading */}
                   </div>
-                ))}
+                ) : (
+                  getQuizQuestions().map((question) => (
+                    <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
+                      <p className="text-primary-500">Question: {question.id}</p>
+                      <p className="text-primary-500">{question.question}</p>
+                      <p className="text-primary-500">Answer: {question.answer || "No answer available."}</p>
+                    </div>
+                  ))
+                )}
                 <div className="flex justify-end mt-2">
                   <button
                     type="button"
