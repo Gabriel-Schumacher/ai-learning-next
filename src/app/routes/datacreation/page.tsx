@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Add useEffect import
 import { useReadableStream } from "../../components/useReadableStream";
 import LoadingIcon from "../../components/LoadingIcon";
 //import { numberOfQustions } from "@/app/api/dataCreation/route";
@@ -11,13 +11,6 @@ import FolderIcon from "@/app/components/customSvg/Folder";
 import OneIcon from "@/app/components/customSvg/One";
 import TwoIcon from "@/app/components/customSvg/Two";
 
-
-
-// type ChatMessage = {
-//   role: "user" | "assistant";
-//   content: string;
-// };
-
 function DataCreation() {
   const response = useReadableStream();
   //const [dataHistory, setDataHistory] = useState<ChatMessage[]>([]);
@@ -26,7 +19,22 @@ function DataCreation() {
   //const [isLoading, setIsLoading] = useState<boolean>(false);
   const [step, setStep] = useState<number>(1); // Add state for step tracking
   const [isLoadingQuizData, setIsLoadingQuizData] = useState<boolean>(false); // Add loading state
-  const quizData = getQuizQuestions(); // Fetch quiz questions from localStorage
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const quizData = localStorage.getItem("quizData");
+      if (quizData) {
+        try {
+          const parsedData = JSON.parse(quizData);
+          if (parsedData.questions && parsedData.questions.length > 0) {
+            setStep(2); // Automatically switch to step 2 if quizData exists
+          }
+        } catch (e) {
+          console.error("Error parsing quizData during initialization:", e);
+        }
+      }
+    }
+  }, []); // Run only once on component mount
 
   function handleKeydown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === "Enter" && !event.shiftKey) {
