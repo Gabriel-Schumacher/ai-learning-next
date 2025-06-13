@@ -12,6 +12,8 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
     //const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
     const [studyMode, setStudyMode] = useState(false);
     const [activity, setActivity] = useState(0);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [isFlipped, setIsFlipped] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -54,6 +56,20 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
     //     setShowCorrectAnswers(true);
     //     console.log("User Answers:", userAnswers);
     // };
+
+    const handleNextQuestion = () => {
+        setIsFlipped(false);
+        setCurrentQuestionIndex((prevIndex) => Math.min(prevIndex + 1, parsedQuestions.length - 1));
+    };
+
+    const handlePreviousQuestion = () => {
+        setIsFlipped(false);
+        setCurrentQuestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+    };
+
+    const toggleFlip = () => {
+        setIsFlipped((prev) => !prev);
+    };
 
     const selectedQuiz = selectedQuizIndex !== null && questionLog[selectedQuizIndex] 
         ? questionLog[selectedQuizIndex].questions 
@@ -138,29 +154,37 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
                 </div>
             )}
 
-            {/* Display Available Quizzes */}   
-            {studyMode === true && activity === 1 && (
-                <div>
-                    {questionLog.length > 0 && (
-                        <div>
-                            {/* Remove invalid rendering of questionLog */}
-                            <ul className="flex flex-col gap-4">
-                                {questionLog.map((quizSet, index) => (
-                                    <li className="bg-surface-200 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-100" key={index} onClick={() => handleQuizSelection(index)}>
-                                        <div className="flex justify-between">
-                                            <p className="text-lg font-medium">
-                                                {quizSet.title ? `Collection ${index + 1}: ${quizSet.title}` : `Quiz ${index + 1}`}                                        
-                                            </p>    
-                                            <p>{quizSet.questions.length} Terms</p>                                    
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>                
+            {/* Display FlashCards */}   
+            {studyMode === true && activity === 1 && parsedQuestions.length > 0 && (
+                <div className="flex flex-col items-center gap-6">
+                    <div
+                        className={`flashcard bg-surface-200 p-6 rounded-lg shadow-md w-full max-w-md text-center cursor-pointer ${
+                            isFlipped ? "flipped" : ""
+                        }`}
+                        onClick={toggleFlip}
+                    >
+                        <p className="text-xl font-medium">
+                            {isFlipped ? parsedQuestions[currentQuestionIndex].answer : parsedQuestions[currentQuestionIndex].question}
+                        </p>
+                    </div>
+                    <div className="flex justify-between w-full max-w-md">
+                        <button
+                            className="btn"
+                            onClick={handlePreviousQuestion}
+                            disabled={currentQuestionIndex === 0}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            className="btn"
+                            onClick={handleNextQuestion}
+                            disabled={currentQuestionIndex === parsedQuestions.length - 1}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
             )}
-
 
             {/* Display Questions */}
             {/* {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
