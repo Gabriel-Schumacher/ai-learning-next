@@ -74,7 +74,7 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
     return (
         <div>
             {/* Display Available Collections */}   
-            { studyMode === false && (
+            { studyMode === false && activity === 0 && (
             <div>
                 {questionLog.length > 0 && (
                     <div className="mt-4">
@@ -100,7 +100,7 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
                 )}
             </div>                
             )}
-            {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
+            {selectedQuizIndex !== null && parsedQuestions.length > 0 && activity === 0 && (
                 <div className="bg-surface-200 p-4 rounded-lg shadow-md w-full flex flex-col gap-4">
                     <div className="flex justify-between">
                         <p className="text-2xl font-semibold text-primary-500">{selectedQuizTitle}</p>
@@ -110,7 +110,7 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
                         <p className="text-xl">How would you like to study?</p>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                        <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6">
+                        <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6" onClick={() => setActivity(1)}>
                             <div className="text-center flex flex-col items-center gap-2">
                                 <div className="w-[48px] h-[48px] text-primary-500 mx-auto"><CardIcon /></div>
                                 <p className="text-xl">Flashcards</p>                                
@@ -139,11 +139,24 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
             )}
 
             {/* Display Available Quizzes */}   
-            { studyMode === true && activity === 1 && (
+            {studyMode === true && activity === 1 && (
                 <div>
                     {questionLog.length > 0 && (
-                        <p>{questionLog}</p>
-                        
+                        <div>
+                            {/* Remove invalid rendering of questionLog */}
+                            <ul className="flex flex-col gap-4">
+                                {questionLog.map((quizSet, index) => (
+                                    <li className="bg-surface-200 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-100" key={index} onClick={() => handleQuizSelection(index)}>
+                                        <div className="flex justify-between">
+                                            <p className="text-lg font-medium">
+                                                {quizSet.title ? `Collection ${index + 1}: ${quizSet.title}` : `Quiz ${index + 1}`}                                        
+                                            </p>    
+                                            <p>{quizSet.questions.length} Terms</p>                                    
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     )}
                 </div>                
             )}
