@@ -6,6 +6,18 @@ import CollectionsDisplay from "@/app/components/CollectionsDisplay";
 function DataCreationPage() {
     const [stage, setStage] = useState(0);
 
+    function handleCancel() {
+        console.log("Cancel action triggered");
+        setStage(1);
+        // Add any additional logic for canceling here
+    }
+
+    function handleSave() {
+        console.log("Save action triggered");
+        setStage(1);
+        // Add any additional logic for saving here
+    }
+
     useEffect(() => {
         const savedQuizSets = localStorage.getItem("savedQuizSets");
         if (savedQuizSets) {
@@ -20,7 +32,7 @@ function DataCreationPage() {
     return (
         <div>
             {stage === 0 && (
-                <DataCreation onSave={() => setStage(1)} />
+                <DataCreation onSave={handleSave} onCancel={handleCancel} />
             )}
             {stage === 1 && (
               <div>

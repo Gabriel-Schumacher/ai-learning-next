@@ -11,7 +11,7 @@ import FolderIcon from "@/app/components/customSvg/Folder";
 import OneIcon from "@/app/components/customSvg/One";
 import TwoIcon from "@/app/components/customSvg/Two";
 
-function DataCreation({ onSave }: { onSave: () => void }) {
+function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () => void; }) {
   const response = useReadableStream();
   //const [dataHistory, setDataHistory] = useState<ChatMessage[]>([]);
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1); // Add state for number of questions
@@ -174,6 +174,18 @@ function DataCreation({ onSave }: { onSave: () => void }) {
     }
   }
 
+  function handleCancel() {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("quizData");
+      setStep(1); // Reset to step 1
+      if (onCancel) {
+        onCancel(); // Ensure onCancel is called only if it exists
+      } else {
+        console.error("onCancel is not defined or is not a function.");
+      }
+    }
+  }
+
   function handleEditQuestion(id: number, field: string, value: string) {
     setEditedQuestions((prev) => ({
       ...prev,
@@ -267,8 +279,20 @@ function DataCreation({ onSave }: { onSave: () => void }) {
                 </div>
                 <textarea onKeyDown={handleKeydown} name="message" className="textarea bg-white rounded-xl shadow-lg h-28" id="prompt" placeholder="Paste text or type about what you'd like to study"></textarea>
               </div>        
-              <div className="flex justify-end mt-2">
-                <button type="submit" className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">Next</button>
+              <div className="flex justify-end mt-2 gap-2">
+                <button
+                  type="button" // Change type to "button" to avoid form submission
+                  onClick={handleCancel} // Ensure handleCancel is called directly
+                  className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit" // Keep "submit" type for the Next button
+                  className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                >
+                  Next
+                </button>
               </div>  
             </div>               
             )  } 
