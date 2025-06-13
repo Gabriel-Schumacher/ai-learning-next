@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import CardIcon from "@/app/components/customSvg/Card";
 import ListIcon from "@/app/components/customSvg/List";
 import BookIcon from "@/app/components/customSvg/Book";
-import DriveIcon from "./customSvg/Drive";
 
 function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }) {
     const [questionLog, setQuestionLog] = useState<any[]>([]);
@@ -12,6 +11,7 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
     const [userAnswers, setUserAnswers] = useState<{ [questionId: number]: string }>({});
     //const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
     const [studyMode, setStudyMode] = useState(false);
+    const [activity, setActivity] = useState(0);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -30,6 +30,13 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
             }
         }
     }, []);
+
+    function cancelSelectedCollection() {
+        setStudyMode(false);
+        setSelectedQuizIndex(null);
+        setUserAnswers({});
+        //setShowCorrectAnswers(false);
+    }
 
 
     const handleQuizSelection = (index: number) => {
@@ -66,30 +73,30 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
 
     return (
         <div>
-            <h1 className="text-4xl font-bold mb-4">Study Collections</h1>
-            {/* Display Available Quizzes */}   
+            {/* Display Available Collections */}   
             { studyMode === false && (
             <div>
                 {questionLog.length > 0 && (
                     <div className="mt-4">
-                        <h2 className="text-2xl font-semibold mb-2">What would you like to study?</h2>
-                        <button className="btn mb-2" onClick={onNewCollection}>New Collection</button>
+                        <h2 className="text-2xl font-semibold mb-2">Your study collections</h2>
                         <ul className="flex flex-col gap-4">
                             {questionLog.map((quizSet, index) => (
-                                <li className="bg-surface-200 p-4 rounded-lg shadow-md w-full" key={index}>
-                                    <p className="text-lg font-medium mb-2">
-                                        {quizSet.title ? `Collection ${index + 1}: ${quizSet.title}` : `Quiz ${index + 1}`}                                        
-                                    </p>
-
-                                    <div className="flex gap-2">
-                                        <button className="btn" onClick={() => handleQuizSelection(index)}>Study</button>        
-                                        <button className="btn">View</button>                                
+                                <li className="bg-surface-200 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-100" key={index} onClick={() => handleQuizSelection(index)}>
+                                    <div className="flex justify-between">
+                                        <p className="text-lg font-medium">
+                                            {quizSet.title ? `Collection ${index + 1}: ${quizSet.title}` : `Quiz ${index + 1}`}                                        
+                                        </p>    
+                                        <p>{quizSet.questions.length} Terms</p>                                    
                                     </div>
-
                                 </li>
                             ))}
                         </ul>
+                        <div className="text-center mt-4">
+                            <button className="btn mb-2" onClick={onNewCollection}>New Collection</button>                            
+                        </div>
+
                     </div>
+                    
                 )}
             </div>                
             )}
@@ -125,8 +132,20 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
                             <p className="mt-8">Break it down, keep it clear. A quick-glance tool to review the most important stuff fast.</p>
                         </div>
                     </div>
-
+                    <div className="flex justify-end">
+                        <button className="btn" onClick={cancelSelectedCollection}>Back</button>
+                    </div>
                 </div>
+            )}
+
+            {/* Display Available Quizzes */}   
+            { studyMode === true && activity === 1 && (
+                <div>
+                    {questionLog.length > 0 && (
+                        <p>{questionLog}</p>
+                        
+                    )}
+                </div>                
             )}
 
 
