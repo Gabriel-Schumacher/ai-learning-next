@@ -1,12 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import CardIcon from "@/app/components/customSvg/Card";
+import ListIcon from "@/app/components/customSvg/List";
+import BookIcon from "@/app/components/customSvg/Book";
+import DriveIcon from "./customSvg/Drive";
 
 function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }) {
     const [questionLog, setQuestionLog] = useState<any[]>([]);
     const [selectedQuizIndex, setSelectedQuizIndex] = useState<number | null>(null);
     const [userAnswers, setUserAnswers] = useState<{ [questionId: number]: string }>({});
-    const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
+    //const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
     const [studyMode, setStudyMode] = useState(false);
 
     useEffect(() => {
@@ -31,18 +35,18 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
     const handleQuizSelection = (index: number) => {
         setSelectedQuizIndex(index);
         setUserAnswers({});
-        setShowCorrectAnswers(false);
+        //setShowCorrectAnswers(false);
         setStudyMode(true);
     };
 
-    const handleAnswerChange = (questionId: number, answer: string) => {
-        setUserAnswers((prev) => ({ ...prev, [questionId]: answer }));
-    };
+    // const handleAnswerChange = (questionId: number, answer: string) => {
+    //     setUserAnswers((prev) => ({ ...prev, [questionId]: answer }));
+    // };
 
-    const handleSubmit = () => {
-        setShowCorrectAnswers(true);
-        console.log("User Answers:", userAnswers);
-    };
+    // const handleSubmit = () => {
+    //     setShowCorrectAnswers(true);
+    //     console.log("User Answers:", userAnswers);
+    // };
 
     const selectedQuiz = selectedQuizIndex !== null && questionLog[selectedQuizIndex] 
         ? questionLog[selectedQuizIndex].questions 
@@ -52,6 +56,10 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
     const parsedQuestions = Array.isArray(selectedQuiz) && selectedQuiz.every(q => q && q.question && q.options) 
         ? selectedQuiz 
         : [];
+
+    const selectedQuizTitle = selectedQuizIndex !== null && questionLog[selectedQuizIndex]
+        ? questionLog[selectedQuizIndex].title || `Quiz ${selectedQuizIndex + 1}`
+        : null;
 
     console.log("Selected Quiz:", selectedQuiz);
     console.log("Parsed Questions:", parsedQuestions);
@@ -85,10 +93,45 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
                 )}
             </div>                
             )}
+            {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
+                <div className="bg-surface-200 p-4 rounded-lg shadow-md w-full flex flex-col gap-4">
+                    <div className="flex justify-between">
+                        <p className="text-2xl font-semibold text-primary-500">{selectedQuizTitle}</p>
+                        <p>{selectedQuiz.length} Terms</p>                        
+                    </div>
+                    <div className="text-center my-5">
+                        <p className="text-xl">How would you like to study?</p>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                        <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6">
+                            <div className="text-center flex flex-col items-center gap-2">
+                                <div className="w-[48px] h-[48px] text-primary-500 mx-auto"><CardIcon /></div>
+                                <p className="text-xl">Flashcards</p>                                
+                            </div>
+                            <p className="mt-8">Make studying fun! Test yourseslf, build speed, and lock in your knowledge.</p>
+                        </div>
+                        <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6">
+                            <div className="text-center flex flex-col items-center gap-2">
+                                <div className="w-[48px] h-[48px] text-primary-500 mx-auto"><ListIcon /></div>
+                                <p className="text-xl">Practice Tests</p>                                
+                            </div>
+                            <p className="mt-8">Simulate the real thing. Build confidence, find weak spots in your knowledge, and track your progress.</p>
+                        </div>
+                        <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6">
+                            <div className="text-center flex flex-col items-center gap-2">
+                                <div className="w-[48px] h-[48px] text-primary-500 mx-auto"><BookIcon /></div>
+                                <p className="text-xl">Study Guide</p>                                
+                            </div>
+                            <p className="mt-8">Break it down, keep it clear. A quick-glance tool to review the most important stuff fast.</p>
+                        </div>
+                    </div>
+
+                </div>
+            )}
 
 
             {/* Display Questions */}
-            {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
+            {/* {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
                 <div className="w-full max-w-2xl">
                     {parsedQuestions.map((question: any) => (
                         <div key={question.id} className="mb-6 bg-gray-100 p-4 rounded-lg shadow-md">
@@ -119,22 +162,22 @@ function CollectionsDisplay({ onNewCollection }: { onNewCollection: () => void }
                         </div>
                     ))}
                 </div>
-            )}
+            )} */}
 
             {/* Display fallback message if no questions are available */}
-            {selectedQuizIndex !== null && parsedQuestions.length === 0 && (
+            {/* {selectedQuizIndex !== null && parsedQuestions.length === 0 && (
                 <p className="text-red-500">No questions available for the selected quiz.</p>
-            )}
+            )} */}
 
             {/* Submit Button */}
-            {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
+            {/* {selectedQuizIndex !== null && parsedQuestions.length > 0 && (
                 <button
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                     onClick={handleSubmit}
                 >
                     Submit Quiz
                 </button>
-            )}
+            )} */}
         </div>
     );
 }
