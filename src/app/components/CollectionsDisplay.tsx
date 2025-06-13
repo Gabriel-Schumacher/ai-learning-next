@@ -65,19 +65,32 @@ function CollectionsDisplay({
   // };
 
   const handleNextQuestion = () => {
-    setIsFlipped(false); // Reset flip state
-    setTimeout(() => {
-      setCurrentQuestionIndex((prevIndex) =>
-        Math.min(prevIndex + 1, parsedQuestions.length - 1)
-      );
-    }, 300); // Add a delay to ensure flip animation completes
+    if (isFlipped) {
+        setIsFlipped(false); // Reset flip state
+        setTimeout(() => {
+        setCurrentQuestionIndex((prevIndex) =>
+            Math.min(prevIndex + 1, parsedQuestions.length - 1)
+        );
+        }, 300); // Add a delay to ensure flip animation completes        
+    } else {
+        setIsFlipped(false); // Reset flip state
+        setCurrentQuestionIndex((prevIndex) =>
+            Math.min(prevIndex + 1, parsedQuestions.length - 1)
+        );
+    }
   };
 
   const handlePreviousQuestion = () => {
-    setIsFlipped(false); // Reset flip state
-    setTimeout(() => {
-      setCurrentQuestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
-    }, 300); // Add a delay to ensure flip animation completes
+    if (isFlipped) {
+        setIsFlipped(false); // Reset flip state
+        setTimeout(() => {
+        setCurrentQuestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+        }, 300); // Add a delay to ensure flip animation completes        
+    } else {
+        setIsFlipped(false); // Reset flip state
+        setCurrentQuestionIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+    }
+
   };
 
   const toggleFlip = () => {
@@ -144,7 +157,7 @@ function CollectionsDisplay({
       {selectedQuizIndex !== null &&
         parsedQuestions.length > 0 &&
         activity === 0 && (
-          <div className="bg-surface-200 p-4 rounded-lg shadow-md w-full flex flex-col gap-4">
+          <div className="bg-surface-200 p-4 rounded-xl shadow-md w-full flex flex-col gap-4">
             <div className="flex justify-between">
               <p className="text-2xl font-semibold text-primary-500">
                 {selectedQuizTitle}
@@ -156,7 +169,7 @@ function CollectionsDisplay({
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               <div
-                className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6"
+                className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
                 onClick={() => setActivity(1)}
               >
                 <div className="text-center flex flex-col items-center gap-2">
@@ -170,7 +183,7 @@ function CollectionsDisplay({
                   your knowledge.
                 </p>
               </div>
-              <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6">
+              <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl">
                 <div className="text-center flex flex-col items-center gap-2">
                   <div className="w-[48px] h-[48px] text-primary-500 mx-auto">
                     <ListIcon />
@@ -182,7 +195,7 @@ function CollectionsDisplay({
                   your knowledge, and track your progress.
                 </p>
               </div>
-              <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6">
+              <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl">
                 <div className="text-center flex flex-col items-center gap-2">
                   <div className="w-[48px] h-[48px] text-primary-500 mx-auto">
                     <BookIcon />
@@ -205,7 +218,7 @@ function CollectionsDisplay({
 
       {/* Display FlashCards */}
       {studyMode === true && activity === 1 && parsedQuestions.length > 0 && (
-        <div className="flex flex-col items-center gap-6">
+        <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6">
           <div
             className="flashcard card-3d relative bg-transparent rounded-lg w-full max-w-md cursor-pointer h-[300px]"
             onClick={toggleFlip}
@@ -216,7 +229,7 @@ function CollectionsDisplay({
               }`}
             >
               {/* Front */}
-              <div className="card-face card-front absolute w-full h-full backface-hidden bg-surface-200 rounded-lg shadow-md">
+              <div className="card-face card-front absolute w-full h-full backface-hidden bg-surface-100 rounded-lg shadow-md">
                 <div className="flex flex-col justify-center items-center w-full h-full p-4 text-center">
                   <p className="text-sm">Question:</p>
                   <p className="text-xl font-medium">
@@ -226,7 +239,7 @@ function CollectionsDisplay({
               </div>
 
               {/* Back */}
-              <div className="card-face card-back absolute w-full h-full backface-hidden bg-surface-200 rounded-lg shadow-md transform rotate-y-180">
+              <div className="card-face card-back absolute w-full h-full backface-hidden bg-surface-100 rounded-lg shadow-md transform rotate-y-180">
                 <div className="flex flex-col justify-center items-center w-full h-full p-4 text-center">
                   <p className="text-sm">Answer:</p>
                   <p className="text-xl font-medium">
