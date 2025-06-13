@@ -130,7 +130,7 @@ function CollectionsDisplay({
               <ul className="flex flex-col gap-4">
                 {questionLog.map((quizSet, index) => (
                   <li
-                    className="bg-surface-200 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-100"
+                    className="bg-surface-200 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-100  hover:cursor-pointer hover:shadow-xl"
                     key={index}
                     onClick={() => handleQuizSelection(index)}
                   >

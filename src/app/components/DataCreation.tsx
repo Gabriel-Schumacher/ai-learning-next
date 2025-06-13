@@ -386,7 +386,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                     </div>
                   ))
                 )}
-                {!isLoadingQuizData && (
+                {!isLoadingQuizData && getQuizQuestions().length > 8 && (
                 <div className="flex justify-end mt-2 gap-2">
                   <button
                     type="button"
