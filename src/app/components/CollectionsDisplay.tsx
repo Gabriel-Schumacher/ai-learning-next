@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import CardIcon from "@/app/components/customSvg/Card";
 import ListIcon from "@/app/components/customSvg/List";
 import BookIcon from "@/app/components/customSvg/Book";
+import PlusIcon from "./customSvg/Plus";
 
 function CollectionsDisplay({
   onNewCollection,
@@ -146,7 +147,11 @@ function CollectionsDisplay({
                 ))}
               </ul>
               <div className="text-center mt-4">
-                <button className="btn mb-2" onClick={onNewCollection}>
+                <button className="btn" onClick={onNewCollection}>
+                    <div className="w-[24px] h-[24px]">
+                        <PlusIcon color={"text-surface-50"}/>                        
+                    </div>
+
                   New Collection
                 </button>
               </div>
