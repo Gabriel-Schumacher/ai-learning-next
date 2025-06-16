@@ -324,7 +324,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
         const newIndex = parsedData.questions.findIndex((q: any) => q.id === over.id);
   
         const reorderedQuestions = arrayMove(parsedData.questions, oldIndex, newIndex);
-        const updatedQuestions = reorderQuestionIds(reorderedQuestions); // Reorder IDs sequentially
+        const updatedQuestions = reorderQuestionIds(reorderedQuestions as { id: number; question: string; answer: string; options?: string[] }[]); // Reorder IDs sequentially
   
         // Update localStorage
         localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
@@ -355,7 +355,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     };
   
     return (
-      <div ref={setNodeRef} style={style}>
+      <div ref={setNodeRef} style={style as React.CSSProperties}>
         <div
           {...attributes}
           {...listeners}
