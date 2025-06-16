@@ -227,6 +227,52 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     }
   }
 
+  function addQuestion() {
+    if (isLoadingQuizData) return; // Prevent adding a question while loading
+  
+    const newQuestion = {
+      id: Date.now(), // Use timestamp as a unique ID
+      question: "",
+      answer: "",
+      options: [],
+    };
+  
+    // Update localStorage directly to ensure questions persist
+    const quizData = localStorage.getItem("quizData");
+    const parsedData = quizData ? JSON.parse(quizData) : { questions: [] };
+    const updatedQuestions = [...parsedData.questions, newQuestion];
+    localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
+  
+    setEditedQuestions((prev) => ({
+      ...prev,
+      [newQuestion.id]: newQuestion,
+    }));
+    setEditingQuestionId(newQuestion.id); // Set the new question as the one being edited
+  }
+
+  function removeQuestion(id: number) {
+    if (isLoadingQuizData) return; // Prevent removing a question while loading
+    const quizData = localStorage.getItem("quizData");
+    if (quizData) {
+      try {
+        const parsedData = JSON.parse(quizData);
+        const updatedQuestions = parsedData.questions.filter((question: any) => question.id !== id);
+        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
+        console.log(`Question ${id} removed.`);
+        setEditedQuestions((prev) => {
+          const newEditedQuestions = { ...prev };
+          delete newEditedQuestions[id]; // Remove the edited question from state
+          return newEditedQuestions;
+        });
+        if (editingQuestionId === id) {
+          setEditingQuestionId(null); // Exit edit mode if the removed question was being edited
+        }
+      } catch (e) {
+        console.error("Error removing question:", e);
+      }
+    }
+  }
+
   //End of Logic-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   return (
     <div>
@@ -355,13 +401,23 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                             onChange={(e) => handleEditQuestion(question.id, "answer", e.target.value)}
                             placeholder="Edit answer"
                           />
-                          <button
-                            type="button"
-                            className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                            onClick={() => saveQuestion(question.id)}
-                          >
-                            Save Question
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                              onClick={() => saveQuestion(question.id)}
+                            >
+                              Save Question
+                            </button>
+                            <button
+                              type="button"
+                              className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                              onClick={() => removeQuestion(question.id)}
+                            >
+                              Remove
+                            </button>                                 
+                          </div>
+
                         </>
                       ) : (
                         <>
@@ -373,18 +429,23 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                               ))}
                             </ul>
                           )}
-                          <p className="text-primary-500 mt-1">Answer: {question.answer || "No answer available."}</p>
-                          <button
-                            type="button"
-                            className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                            onClick={() => setEditingQuestionId(question.id)}
-                          >
-                            Edit
-                          </button>
+                          <p className="text-primary-500 my-1">Answer: {question.answer || "No answer available."}</p>
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                              onClick={() => setEditingQuestionId(question.id)}
+                            >
+                              Edit
+                            </button>                            
+                          </div>
+                     
                         </>
                       )}
                     </div>
+                    
                   ))
+                  
                 )}
                 {!isLoadingQuizData && getQuizQuestions().length > 8 && (
                 <div className="flex justify-end mt-2 gap-2">
@@ -402,6 +463,12 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                   </button>    
                 </div>                  
                   )}
+                  {!isLoadingQuizData && (
+                  <div className="flex justify-center">
+                    <button onClick={addQuestion} className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">+ Question</button>
+                  </div>                    
+                  )}
+
             </div>              
             )}
           </div>
