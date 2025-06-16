@@ -120,8 +120,8 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
         console.error("Error parsing response JSON:", e);
         // setDataHistory((prev: ChatMessage[]): ChatMessage[] => [
         //   ...prev,
-        //   { role: "assistant", content: "Failed to parse quiz data." },
-        // ]);
+          //   { role: "assistant", content: "Failed to parse quiz data." },
+          // ]);
       }
       setIsLoadingQuizData(false); // Stop loading after data is fetched
     } catch (e) {
@@ -225,18 +225,35 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     if (quizData) {
       try {
         const parsedData = JSON.parse(quizData);
-        const updatedQuestions = parsedData.questions.map((question: any) =>
-          question.id === id ? { ...question, ...editedQuestions[id] } : question
-        );
-        const reorderedQuestions = reorderQuestionIds(updatedQuestions); // Reorder IDs sequentially
+        const updatedQuestions = parsedData.questions.map((question: any) => {
+          if (question.id === id) {
+            const edited = editedQuestions[id] || {};
+            // Merge options: use original options, but replace with edited if present
+            let mergedOptions = question.options;
+            if (Array.isArray(question.options)) {
+              mergedOptions = question.options.map((opt: string, idx: number) =>
+                edited.options && edited.options[idx] !== undefined
+                  ? edited.options[idx]
+                  : opt
+              );
+            }
+            return {
+              ...question,
+              ...edited,
+              options: mergedOptions,
+              id: question.id,
+            };
+          }
+          return question;
+        });
+        const reorderedQuestions = reorderQuestionIds(updatedQuestions);
         localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: reorderedQuestions }));
-        console.log(`Question ${id} saved and IDs reordered.`);
         setEditedQuestions((prev) => {
           const updatedEditedQuestions = { ...prev };
-          delete updatedEditedQuestions[id]; // Clear the edited state for the saved question
+          delete updatedEditedQuestions[id];
           return updatedEditedQuestions;
         });
-        setEditingQuestionId(null); // Exit edit mode
+        setEditingQuestionId(null);
       } catch (e) {
         console.error("Error saving question:", e);
       }
@@ -456,7 +473,11 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                                 <input
                                   className="input bg-white rounded-xl shadow-lg mb-2"
                                   type="text"
-                                  value={editedQuestions[question.id]?.question || question.question}
+                                  value={
+                                    editedQuestions[question.id]?.question !== undefined && editedQuestions[question.id]?.question !== null
+                                      ? editedQuestions[question.id]?.question
+                                      : question.question ?? ""
+                                  }
                                   onChange={(e) => handleEditQuestion(question.id, "question", e.target.value)}
                                   placeholder="Edit question"
                                   data-drag-disabled // Disable drag for this input
@@ -468,7 +489,11 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                                         <input
                                           className="input bg-white rounded-xl shadow-lg"
                                           type="text"
-                                          value={editedQuestions[question.id]?.options?.[index] || option}
+                                          value={
+                                            editedQuestions[question.id]?.options?.[index] !== undefined && editedQuestions[question.id]?.options?.[index] !== null
+                                              ? editedQuestions[question.id]?.options?.[index]
+                                              : option ?? ""
+                                          }
                                           onChange={(e) => handleEditOption(question.id, index, e.target.value)}
                                           placeholder={`Edit option ${index + 1}`}
                                           data-drag-disabled // Disable drag for this input
@@ -480,7 +505,11 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                                 <input
                                   className="input bg-white rounded-xl shadow-lg mb-2"
                                   type="text"
-                                  value={editedQuestions[question.id]?.answer || question.answer}
+                                  value={
+                                    editedQuestions[question.id]?.answer !== undefined && editedQuestions[question.id]?.answer !== null
+                                      ? editedQuestions[question.id]?.answer
+                                      : question.answer ?? ""
+                                  }
                                   onChange={(e) => handleEditQuestion(question.id, "answer", e.target.value)}
                                   placeholder="Edit answer"
                                   data-drag-disabled // Disable drag for this input
