@@ -228,9 +228,14 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
         const updatedQuestions = parsedData.questions.map((question: any) =>
           question.id === id ? { ...question, ...editedQuestions[id] } : question
         );
-        const reorderedQuestions = reorderQuestionIds(updatedQuestions); // Reorder IDs
+        const reorderedQuestions = reorderQuestionIds(updatedQuestions); // Reorder IDs sequentially
         localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: reorderedQuestions }));
         console.log(`Question ${id} saved and IDs reordered.`);
+        setEditedQuestions((prev) => {
+          const updatedEditedQuestions = { ...prev };
+          delete updatedEditedQuestions[id]; // Clear the edited state for the saved question
+          return updatedEditedQuestions;
+        });
         setEditingQuestionId(null); // Exit edit mode
       } catch (e) {
         console.error("Error saving question:", e);
@@ -329,10 +334,18 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
+      position: "relative", // Ensure the drag handle is positioned within the card
     };
   
     return (
-      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <div ref={setNodeRef} style={style}>
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute top-2 right-2 p-[.75rem] cursor-move"
+        >
+          <span className="drag-handle-icon">☰</span> {/* Drag handle icon */}
+        </div>
         {children}
       </div>
     );
@@ -446,6 +459,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                                   value={editedQuestions[question.id]?.question || question.question}
                                   onChange={(e) => handleEditQuestion(question.id, "question", e.target.value)}
                                   placeholder="Edit question"
+                                  data-drag-disabled // Disable drag for this input
                                 />
                                 {question.options && question.options.length > 0 && (
                                   <ul className="list-none">
@@ -457,6 +471,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                                           value={editedQuestions[question.id]?.options?.[index] || option}
                                           onChange={(e) => handleEditOption(question.id, index, e.target.value)}
                                           placeholder={`Edit option ${index + 1}`}
+                                          data-drag-disabled // Disable drag for this input
                                         />
                                       </li>
                                     ))}
@@ -468,6 +483,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                                   value={editedQuestions[question.id]?.answer || question.answer}
                                   onChange={(e) => handleEditQuestion(question.id, "answer", e.target.value)}
                                   placeholder="Edit answer"
+                                  data-drag-disabled // Disable drag for this input
                                 />
                                 <div className="flex justify-between gap-2">
                                   <button
