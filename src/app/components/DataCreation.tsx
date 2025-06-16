@@ -228,7 +228,6 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
   }
 
   function addQuestion() {
-    if (isLoadingQuizData) return; // Prevent adding a question while loading
   
     const newQuestion = {
       id: Date.now(), // Use timestamp as a unique ID
@@ -248,6 +247,9 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
       [newQuestion.id]: newQuestion,
     }));
     setEditingQuestionId(newQuestion.id); // Set the new question as the one being edited
+    getQuizQuestions(); // Refresh the questions list
+    setStep((prevStep) => prevStep); // Force re-render by setting the same step
+    console.log(`New question added with ID: ${newQuestion.id}`);
   }
 
   function removeQuestion(id: number) {
@@ -401,14 +403,14 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                             onChange={(e) => handleEditQuestion(question.id, "answer", e.target.value)}
                             placeholder="Edit answer"
                           />
-                          <div className="flex gap-2">
+                          <div className="flex justify-between gap-2">
                             <button
                               type="button"
                               className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
                               onClick={() => saveQuestion(question.id)}
                             >
                               Save Question
-                            </button>
+                            </button>                            
                             <button
                               type="button"
                               className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
@@ -447,7 +449,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                   ))
                   
                 )}
-                {!isLoadingQuizData && getQuizQuestions().length > 8 && (
+                {/* {!isLoadingQuizData && getQuizQuestions().length > 8 && (
                 <div className="flex justify-end mt-2 gap-2">
                   <button
                     type="button"
@@ -462,10 +464,10 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                     Save Collection
                   </button>    
                 </div>                  
-                  )}
+                  )} */}
                   {!isLoadingQuizData && (
                   <div className="flex justify-center">
-                    <button onClick={addQuestion} className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">+ Question</button>
+                    <button type="button" onClick={addQuestion} className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl">+ Question</button>
                   </div>                    
                   )}
 
