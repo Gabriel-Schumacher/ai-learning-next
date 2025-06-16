@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react"; // Add useEffect import
 import { useReadableStream } from "@/app/components/useReadableStream"; // Import the custom hook for handling streams
 import LoadingIcon from "@/app/components/LoadingIcon"; // Import the loading icon component
+import { DndContext, closestCenter } from "@dnd-kit/core"; // Import DndContext and utilities
+import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable"; // Import sortable utilities
+import { CSS } from "@dnd-kit/utilities"; // Import CSS utilities for styling
 //import { numberOfQustions } from "@/app/api/dataCreation/route";
 
 import PencilIcon from "@/app/components/customSvg/Pencil";
@@ -210,6 +213,13 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     });
   }
 
+  function reorderQuestionIds(questions: { id: number; question: string; answer: string; options?: string[] }[]) {
+    return questions.map((question, index) => ({
+      ...question,
+      id: index + 1, // Reassign IDs sequentially starting from 1
+    }));
+  }
+
   function saveQuestion(id: number) {
     const quizData = localStorage.getItem("quizData");
     if (quizData) {
@@ -218,8 +228,9 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
         const updatedQuestions = parsedData.questions.map((question: any) =>
           question.id === id ? { ...question, ...editedQuestions[id] } : question
         );
-        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
-        console.log(`Question ${id} saved.`);
+        const reorderedQuestions = reorderQuestionIds(updatedQuestions); // Reorder IDs
+        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: reorderedQuestions }));
+        console.log(`Question ${id} saved and IDs reordered.`);
         setEditingQuestionId(null); // Exit edit mode
       } catch (e) {
         console.error("Error saving question:", e);
@@ -227,18 +238,45 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     }
   }
 
+  function removeQuestion(id: number) {
+    if (isLoadingQuizData) return; // Prevent removing a question while loading
+    const quizData = localStorage.getItem("quizData");
+    if (quizData) {
+      try {
+        const parsedData = JSON.parse(quizData);
+        const updatedQuestions = parsedData.questions.filter((question: any) => question.id !== id);
+        const reorderedQuestions = reorderQuestionIds(updatedQuestions); // Reorder IDs
+        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: reorderedQuestions }));
+        console.log(`Question ${id} removed and IDs reordered.`);
+        setEditedQuestions((prev) => {
+          const newEditedQuestions = { ...prev };
+          delete newEditedQuestions[id]; // Remove the edited question from state
+          return newEditedQuestions;
+        });
+        if (editingQuestionId === id) {
+          setEditingQuestionId(null); // Exit edit mode if the removed question was being edited
+        }
+      } catch (e) {
+        console.error("Error removing question:", e);
+      }
+    }
+  }
+
   function addQuestion() {
+    const quizData = localStorage.getItem("quizData");
+    const parsedData = quizData ? JSON.parse(quizData) : { questions: [] };
+  
+    const lastQuestionId = parsedData.questions.length > 0 
+      ? parsedData.questions[parsedData.questions.length - 1].id 
+      : 0; // Get the last question ID or default to 0
   
     const newQuestion = {
-      id: Date.now(), // Use timestamp as a unique ID
+      id: lastQuestionId + 1, // Increment the last question ID
       question: "",
       answer: "",
       options: [],
     };
   
-    // Update localStorage directly to ensure questions persist
-    const quizData = localStorage.getItem("quizData");
-    const parsedData = quizData ? JSON.parse(quizData) : { questions: [] };
     const updatedQuestions = [...parsedData.questions, newQuestion];
     localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
   
@@ -252,27 +290,52 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     console.log(`New question added with ID: ${newQuestion.id}`);
   }
 
-  function removeQuestion(id: number) {
-    if (isLoadingQuizData) return; // Prevent removing a question while loading
+  function handleDragEnd(event: any) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+  
     const quizData = localStorage.getItem("quizData");
     if (quizData) {
       try {
         const parsedData = JSON.parse(quizData);
-        const updatedQuestions = parsedData.questions.filter((question: any) => question.id !== id);
+        const oldIndex = parsedData.questions.findIndex((q: any) => q.id === active.id);
+        const newIndex = parsedData.questions.findIndex((q: any) => q.id === over.id);
+  
+        const reorderedQuestions = arrayMove(parsedData.questions, oldIndex, newIndex);
+        const updatedQuestions = reorderQuestionIds(reorderedQuestions); // Reorder IDs sequentially
+  
+        // Update localStorage
         localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
-        console.log(`Question ${id} removed.`);
+  
+        // Force re-render by updating state
         setEditedQuestions((prev) => {
-          const newEditedQuestions = { ...prev };
-          delete newEditedQuestions[id]; // Remove the edited question from state
-          return newEditedQuestions;
+          const updatedEditedQuestions = { ...prev };
+          updatedQuestions.forEach((question: any) => {
+            updatedEditedQuestions[question.id] = question;
+          });
+          return updatedEditedQuestions;
         });
-        if (editingQuestionId === id) {
-          setEditingQuestionId(null); // Exit edit mode if the removed question was being edited
-        }
+  
+        console.log("Questions reordered.");
       } catch (e) {
-        console.error("Error removing question:", e);
+        console.error("Error reordering questions:", e);
       }
     }
+  }
+
+  function SortableItem({ id, children }: { id: number; children: React.ReactNode }) {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+    };
+  
+    return (
+      <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        {children}
+      </div>
+    );
   }
 
   //End of Logic-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -369,85 +432,87 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                     <LoadingIcon /> {/* Show loading icon while data is loading */}
                   </div>
                 ) : (
-                  getQuizQuestions().map((question) => (
-                    <div key={question.id} className="bg-white rounded-xl shadow-lg p-4 mb-4">
-                      <p className="text-primary-500">Question: {question.id}</p>
-                      {editingQuestionId === question.id ? (
-                        <>
-                          <input
-                            className="input bg-white rounded-xl shadow-lg mb-2"
-                            type="text"
-                            value={editedQuestions[question.id]?.question || question.question}
-                            onChange={(e) => handleEditQuestion(question.id, "question", e.target.value)}
-                            placeholder="Edit question"
-                          />
-                          {question.options && question.options.length > 0 && (
-                            <ul className="list-none">
-                              {question.options.map((option, index) => (
-                                <li key={index} className="text-primary-500 list-none mb-2">
-                                  <input
-                                    className="input bg-white rounded-xl shadow-lg"
-                                    type="text"
-                                    value={editedQuestions[question.id]?.options?.[index] || option}
-                                    onChange={(e) => handleEditOption(question.id, index, e.target.value)}
-                                    placeholder={`Edit option ${index + 1}`}
-                                  />
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                          <input
-                            className="input bg-white rounded-xl shadow-lg mb-2"
-                            type="text"
-                            value={editedQuestions[question.id]?.answer || question.answer}
-                            onChange={(e) => handleEditQuestion(question.id, "answer", e.target.value)}
-                            placeholder="Edit answer"
-                          />
-                          <div className="flex justify-between gap-2">
-                            <button
-                              type="button"
-                              className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                              onClick={() => saveQuestion(question.id)}
-                            >
-                              Save Question
-                            </button>                            
-                            <button
-                              type="button"
-                              className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                              onClick={() => removeQuestion(question.id)}
-                            >
-                              Remove
-                            </button>                                 
+                  <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={getQuizQuestions().map((q) => q.id)}>
+                      {getQuizQuestions().map((question) => (
+                        <SortableItem key={question.id} id={question.id}>
+                          <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
+                            <p className="text-primary-500">Question: {question.id}</p>
+                            {editingQuestionId === question.id ? (
+                              <>
+                                <input
+                                  className="input bg-white rounded-xl shadow-lg mb-2"
+                                  type="text"
+                                  value={editedQuestions[question.id]?.question || question.question}
+                                  onChange={(e) => handleEditQuestion(question.id, "question", e.target.value)}
+                                  placeholder="Edit question"
+                                />
+                                {question.options && question.options.length > 0 && (
+                                  <ul className="list-none">
+                                    {question.options.map((option, index) => (
+                                      <li key={index} className="text-primary-500 list-none mb-2">
+                                        <input
+                                          className="input bg-white rounded-xl shadow-lg"
+                                          type="text"
+                                          value={editedQuestions[question.id]?.options?.[index] || option}
+                                          onChange={(e) => handleEditOption(question.id, index, e.target.value)}
+                                          placeholder={`Edit option ${index + 1}`}
+                                        />
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                                <input
+                                  className="input bg-white rounded-xl shadow-lg mb-2"
+                                  type="text"
+                                  value={editedQuestions[question.id]?.answer || question.answer}
+                                  onChange={(e) => handleEditQuestion(question.id, "answer", e.target.value)}
+                                  placeholder="Edit answer"
+                                />
+                                <div className="flex justify-between gap-2">
+                                  <button
+                                    type="button"
+                                    className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                                    onClick={() => saveQuestion(question.id)}
+                                  >
+                                    Save Question
+                                  </button>                            
+                                  <button
+                                    type="button"
+                                    className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                                    onClick={() => removeQuestion(question.id)}
+                                  >
+                                    Remove
+                                  </button>                                 
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <p className="text-primary-500 mb-1">{question.question}</p>
+                                {question.options && question.options.length > 0 && (
+                                  <ul className="list-none">
+                                    {question.options.map((option, index) => (
+                                      <li key={index} className="text-primary-500 list-none">{option}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                                <p className="text-primary-500 my-1">Answer: {question.answer || "No answer available."}</p>
+                                <div className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                                    onClick={() => setEditingQuestionId(question.id)}
+                                  >
+                                    Edit
+                                  </button>                            
+                                </div>
+                              </>
+                            )}
                           </div>
-
-                        </>
-                      ) : (
-                        <>
-                          <p className="text-primary-500 mb-1">{question.question}</p>
-                          {question.options && question.options.length > 0 && (
-                            <ul className="list-none">
-                              {question.options.map((option, index) => (
-                                <li key={index} className="text-primary-500 list-none">{option}</li>
-                              ))}
-                            </ul>
-                          )}
-                          <p className="text-primary-500 my-1">Answer: {question.answer || "No answer available."}</p>
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                              onClick={() => setEditingQuestionId(question.id)}
-                            >
-                              Edit
-                            </button>                            
-                          </div>
-                     
-                        </>
-                      )}
-                    </div>
-                    
-                  ))
-                  
+                        </SortableItem>
+                      ))}
+                    </SortableContext>
+                  </DndContext>
                 )}
                 {/* {!isLoadingQuizData && getQuizQuestions().length > 8 && (
                 <div className="flex justify-end mt-2 gap-2">
