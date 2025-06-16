@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react"; // Add useEffect import
+import { useState, useEffect, useRef } from "react"; // Add useRef if not present
 import { useReadableStream } from "@/app/components/useReadableStream"; // Import the custom hook for handling streams
 import LoadingIcon from "@/app/components/LoadingIcon"; // Import the loading icon component
 import { DndContext, closestCenter } from "@dnd-kit/core"; // Import DndContext and utilities
@@ -189,30 +189,6 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     }
   }
 
-  function handleEditQuestion(id: number, field: string, value: string) {
-    setEditedQuestions((prev) => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [field]: value,
-      },
-    }));
-  }
-
-  function handleEditOption(id: number, optionIndex: number, value: string) {
-    setEditedQuestions((prev) => {
-      const updatedOptions = prev[id]?.options ? [...prev[id].options] : [];
-      updatedOptions[optionIndex] = value;
-      return {
-        ...prev,
-        [id]: {
-          ...prev[id],
-          options: updatedOptions,
-        },
-      };
-    });
-  }
-
   function reorderQuestionIds(questions: { id: number; question: string; answer: string; options?: string[] }[]) {
     return questions.map((question, index) => ({
       ...question,
@@ -220,26 +196,21 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     }));
   }
 
-  function saveQuestion(id: number) {
+  function saveQuestion(id: number, localEdit: { question: string; answer: string; options?: string[] }) {
     const quizData = localStorage.getItem("quizData");
     if (quizData) {
       try {
         const parsedData = JSON.parse(quizData);
         const updatedQuestions = parsedData.questions.map((question: any) => {
           if (question.id === id) {
-            const edited = editedQuestions[id] || {};
             // Merge options: use original options, but replace with edited if present
             let mergedOptions = question.options;
             if (Array.isArray(question.options)) {
-              mergedOptions = question.options.map((opt: string, idx: number) =>
-                edited.options && edited.options[idx] !== undefined
-                  ? edited.options[idx]
-                  : opt
-              );
+              mergedOptions = localEdit.options ?? question.options;
             }
             return {
               ...question,
-              ...edited,
+              ...localEdit,
               options: mergedOptions,
               id: question.id,
             };
@@ -368,6 +339,72 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     );
   }
 
+  // Inline QuestionEdit component for local state
+  function QuestionEdit({ question, onSave, onRemove }: { question: any, onSave: (edit: any) => void, onRemove: () => void }) {
+    const [localEdit, setLocalEdit] = useState({
+      question: question.question ?? "",
+      answer: question.answer ?? "",
+      options: Array.isArray(question.options) ? [...question.options] : [],
+    });
+
+    return (
+      <>
+        <input
+          className="input bg-white rounded-xl shadow-lg mb-2"
+          type="text"
+          value={localEdit.question}
+          onChange={(e) => setLocalEdit((prev) => ({ ...prev, question: e.target.value }))}
+          placeholder="Edit question"
+          data-drag-disabled
+        />
+        {localEdit.options && localEdit.options.length > 0 && (
+          <ul className="list-none">
+            {localEdit.options.map((option, index) => (
+              <li key={index} className="text-primary-500 list-none mb-2">
+                <input
+                  className="input bg-white rounded-xl shadow-lg"
+                  type="text"
+                  value={localEdit.options[index]}
+                  onChange={(e) => {
+                    const newOptions = [...localEdit.options];
+                    newOptions[index] = e.target.value;
+                    setLocalEdit((prev) => ({ ...prev, options: newOptions }));
+                  }}
+                  placeholder={`Edit option ${index + 1}`}
+                  data-drag-disabled
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+        <input
+          className="input bg-white rounded-xl shadow-lg mb-2"
+          type="text"
+          value={localEdit.answer}
+          onChange={(e) => setLocalEdit((prev) => ({ ...prev, answer: e.target.value }))}
+          placeholder="Edit answer"
+          data-drag-disabled
+        />
+        <div className="flex justify-between gap-2">
+          <button
+            type="button"
+            className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+            onClick={() => onSave(localEdit)}
+          >
+            Save Question
+          </button>
+          <button
+            type="button"
+            className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+            onClick={onRemove}
+          >
+            Remove
+          </button>
+        </div>
+      </>
+    );
+  }
+
   //End of Logic-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   return (
     <div>
@@ -469,68 +506,11 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
                           <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
                             <p className="text-primary-500">Question: {question.id}</p>
                             {editingQuestionId === question.id ? (
-                              <>
-                                <input
-                                  className="input bg-white rounded-xl shadow-lg mb-2"
-                                  type="text"
-                                  value={
-                                    editedQuestions[question.id]?.question !== undefined && editedQuestions[question.id]?.question !== null
-                                      ? editedQuestions[question.id]?.question
-                                      : question.question ?? ""
-                                  }
-                                  onChange={(e) => handleEditQuestion(question.id, "question", e.target.value)}
-                                  placeholder="Edit question"
-                                  data-drag-disabled // Disable drag for this input
-                                />
-                                {question.options && question.options.length > 0 && (
-                                  <ul className="list-none">
-                                    {question.options.map((option, index) => (
-                                      <li key={index} className="text-primary-500 list-none mb-2">
-                                        <input
-                                          className="input bg-white rounded-xl shadow-lg"
-                                          type="text"
-                                          value={
-                                            editedQuestions[question.id]?.options?.[index] !== undefined && editedQuestions[question.id]?.options?.[index] !== null
-                                              ? editedQuestions[question.id]?.options?.[index]
-                                              : option ?? ""
-                                          }
-                                          onChange={(e) => handleEditOption(question.id, index, e.target.value)}
-                                          placeholder={`Edit option ${index + 1}`}
-                                          data-drag-disabled // Disable drag for this input
-                                        />
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                                <input
-                                  className="input bg-white rounded-xl shadow-lg mb-2"
-                                  type="text"
-                                  value={
-                                    editedQuestions[question.id]?.answer !== undefined && editedQuestions[question.id]?.answer !== null
-                                      ? editedQuestions[question.id]?.answer
-                                      : question.answer ?? ""
-                                  }
-                                  onChange={(e) => handleEditQuestion(question.id, "answer", e.target.value)}
-                                  placeholder="Edit answer"
-                                  data-drag-disabled // Disable drag for this input
-                                />
-                                <div className="flex justify-between gap-2">
-                                  <button
-                                    type="button"
-                                    className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                                    onClick={() => saveQuestion(question.id)}
-                                  >
-                                    Save Question
-                                  </button>                            
-                                  <button
-                                    type="button"
-                                    className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                                    onClick={() => removeQuestion(question.id)}
-                                  >
-                                    Remove
-                                  </button>                                 
-                                </div>
-                              </>
+                              <QuestionEdit
+                                question={question}
+                                onSave={(localEdit) => saveQuestion(question.id, localEdit)}
+                                onRemove={() => removeQuestion(question.id)}
+                              />
                             ) : (
                               <>
                                 <p className="text-primary-500 mb-1">{question.question}</p>
