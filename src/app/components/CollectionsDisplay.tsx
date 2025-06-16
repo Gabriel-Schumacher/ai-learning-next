@@ -49,6 +49,11 @@ function CollectionsDisplay({
     //setShowCorrectAnswers(false);
   }
 
+  function finishFlashCards() {
+    cancelSelectedCollection()
+    setActivity(0);
+  }
+
   const handleQuizSelection = (index: number) => {
     setSelectedQuizIndex(index);
     setUserAnswers({});
@@ -224,6 +229,11 @@ function CollectionsDisplay({
       {/* Display FlashCards */}
       {studyMode === true && activity === 1 && parsedQuestions.length > 0 && (
         <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6">
+          <div className="flex justify-between w-full max-w-md items-center">
+            <p>{currentQuestionIndex + 1}/{parsedQuestions.length}</p>    
+            <button className="btn" onClick={finishFlashCards}>Finish</button>        
+          </div>
+
           <div
             className="flashcard card-3d relative bg-transparent rounded-lg w-full max-w-md cursor-pointer h-[300px]"
             onClick={toggleFlip}
