@@ -24,6 +24,14 @@ function CollectionsDisplay({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
 
+  // Quiz mode state
+  const [quizCurrentIndex, setQuizCurrentIndex] = useState(0);
+  const [quizSelectedOption, setQuizSelectedOption] = useState<string | null>(null);
+  const [quizShowFeedback, setQuizShowFeedback] = useState(false);
+  const [quizCorrect, setQuizCorrect] = useState<boolean | null>(null);
+  const [quizFinished, setQuizFinished] = useState(false);
+  const [quizScore, setQuizScore] = useState(0);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedQuizSets = localStorage.getItem("savedQuizSets");
@@ -123,6 +131,61 @@ function CollectionsDisplay({
   console.log("Selected Quiz:", selectedQuiz);
   console.log("Parsed Questions:", parsedQuestions);
 
+  // Reset quiz state when entering quiz mode or changing collection
+  useEffect(() => {
+    if (activity === 2 && studyMode) {
+      setQuizCurrentIndex(0);
+      setQuizSelectedOption(null);
+      setQuizShowFeedback(false);
+      setQuizCorrect(null);
+      setQuizFinished(false);
+      setQuizScore(0);
+    }
+  }, [activity, studyMode, selectedQuizIndex]);
+
+  const handleQuizOptionSelect = (option: string) => {
+    if (!quizShowFeedback) {
+      setQuizSelectedOption(option);
+    }
+  };
+
+  const handleQuizSubmit = () => {
+    if (quizSelectedOption !== null && !quizShowFeedback) {
+      const correctAnswer = parsedQuestions[quizCurrentIndex].answer;
+      const isCorrect = quizSelectedOption === correctAnswer;
+      setQuizCorrect(isCorrect);
+      setQuizShowFeedback(true);
+      if (isCorrect) setQuizScore((prev) => prev + 1);
+    }
+  };
+
+  const handleQuizNext = () => {
+    if (quizCurrentIndex < parsedQuestions.length - 1) {
+      setQuizCurrentIndex((prev) => prev + 1);
+      setQuizSelectedOption(null);
+      setQuizShowFeedback(false);
+      setQuizCorrect(null);
+    } else {
+      setQuizFinished(true);
+    }
+  };
+
+  const handleQuizFinish = () => {
+    setQuizFinished(true);
+  };
+
+  const handleQuizBackToMenu = () => {
+    setActivity(0);
+    setStudyMode(false);
+    setSelectedQuizIndex(null);
+    setQuizFinished(false);
+    setQuizScore(0);
+    setQuizCurrentIndex(0);
+    setQuizSelectedOption(null);
+    setQuizShowFeedback(false);
+    setQuizCorrect(null);
+  };
+
   return (
     <div>
       {/* Display Available Collections */}
@@ -193,7 +256,8 @@ function CollectionsDisplay({
                   your knowledge.
                 </p>
               </div>
-              <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl">
+              <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
+                onClick={() => setActivity(2)}>
                 <div className="text-center flex flex-col items-center gap-2">
                   <div className="w-[48px] h-[48px] text-primary-500 mx-auto">
                     <ListIcon />
@@ -283,6 +347,99 @@ function CollectionsDisplay({
           </div>
         </div>
       )}
+
+      {/* Display Quiz */}
+      {studyMode === true && activity === 2 && parsedQuestions.length > 0 && (
+        <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6 w-full max-w-md mx-auto">
+          {!quizFinished ? (
+            <>
+              <div className="flex justify-between w-full items-center">
+                <p>
+                  Question {quizCurrentIndex + 1}/{parsedQuestions.length}
+                </p>
+                <button className="btn" onClick={handleQuizFinish}>
+                  Finish
+                </button>
+              </div>
+              <div className="w-full bg-surface-100 rounded-lg shadow-md p-4">
+                <p className="text-lg font-medium mb-4">
+                  {parsedQuestions[quizCurrentIndex].question}
+                </p>
+                <div className="flex flex-col gap-2">
+                  {parsedQuestions[quizCurrentIndex].options.map(
+                    (option: string, idx: number) => (
+                      <button
+                        key={idx}
+                        className={`btn w-full text-left ${
+                          quizSelectedOption === option
+                            ? "bg-primary-200"
+                            : "bg-surface-50"
+                        }`}
+                        disabled={quizShowFeedback}
+                        onClick={() => handleQuizOptionSelect(option)}
+                      >
+                        {option}
+                      </button>
+                    )
+                  )}
+                </div>
+                {quizShowFeedback && (
+                  <div className="mt-4">
+                    {quizCorrect ? (
+                      <p className="text-green-600 font-semibold">Correct!</p>
+                    ) : (
+                      <p className="text-red-600 font-semibold">
+                        Incorrect. Correct answer:{" "}
+                        <span className="font-bold">
+                          {parsedQuestions[quizCurrentIndex].answer}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-between w-full mt-4">
+                <button
+                  className="btn"
+                  onClick={handleQuizBackToMenu}
+                >
+                  Back
+                </button>
+                {!quizShowFeedback ? (
+                  <button
+                    className="btn"
+                    onClick={handleQuizSubmit}
+                    disabled={quizSelectedOption === null}
+                  >
+                    Submit
+                  </button>
+                ) : (
+                  <button
+                    className="btn"
+                    onClick={handleQuizNext}
+                    disabled={quizCurrentIndex === parsedQuestions.length - 1}
+                  >
+                    {quizCurrentIndex === parsedQuestions.length - 1
+                      ? "Finish"
+                      : "Next"}
+                  </button>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="w-full text-center">
+              <h2 className="text-2xl font-semibold mb-4">Quiz Finished!</h2>
+              <p className="mb-2">
+                Your score: {quizScore} / {parsedQuestions.length}
+              </p>
+              <button className="btn mt-4" onClick={handleQuizBackToMenu}>
+                Back to Collections
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      
     </div>
   );
 }
