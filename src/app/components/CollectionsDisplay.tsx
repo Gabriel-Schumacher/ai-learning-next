@@ -350,10 +350,10 @@ function CollectionsDisplay({
 
       {/* Display Quiz */}
       {studyMode === true && activity === 2 && parsedQuestions.length > 0 && (
-        <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6 w-full max-w-md mx-auto">
+        <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6 w-full mx-auto">
           {!quizFinished ? (
             <>
-              <div className="flex justify-between w-full items-center">
+              <div className="flex justify-between w-full items-center max-w-md">
                 <p>
                   Question {quizCurrentIndex + 1}/{parsedQuestions.length}
                 </p>
@@ -361,7 +361,7 @@ function CollectionsDisplay({
                   Finish
                 </button>
               </div>
-              <div className="w-full bg-surface-100 rounded-lg shadow-md p-4">
+              <div className="w-full bg-surface-100 rounded-lg shadow-md p-4 max-w-md">
                 <p className="text-lg font-medium mb-4">
                   {parsedQuestions[quizCurrentIndex].question}
                 </p>
@@ -398,7 +398,7 @@ function CollectionsDisplay({
                   </div>
                 )}
               </div>
-              <div className="flex justify-between w-full mt-4">
+              <div className="flex justify-between w-full mt-4 max-w-md">
                 <button
                   className="btn"
                   onClick={handleQuizBackToMenu}
