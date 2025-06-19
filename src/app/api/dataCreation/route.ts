@@ -5,14 +5,16 @@ const openai = new OpenAI({
     apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY as string,
 });
 
-function generateJsonPrompt(numberOfQuestions: number, subject: string): string {
-    return `You will return a JSON object with one property called "questions". Its value must be an array containing exactly ${numberOfQuestions} question objects, each structured like this:
+function generateJsonPrompt(numberOfQuestions: number, subject: string, prompt: string): string {
+    return `You will return a JSON object with one property called "questions". Its value must be an array containing exactly ${numberOfQuestions} question objects:
 
 Important instructions:
 - The ${subject} is the topic of the qestions.
+- The ${prompt} is details about the topic.
 - The outer structure must be a JSON object with a single key: "questions".
 - The value of "questions" must be a JSON array of exactly ${numberOfQuestions} objects.
 - Each object must contain all required fields.
+- Questions options can be strings, numbers, including but not limited to true and false.
 - Do not include any extra text or comments. Only return the raw JSON object.`;
 }
 
@@ -25,11 +27,11 @@ type SystemPromptKey = keyof typeof SYSTEM_PROMPTS;
 export async function POST(req: Request) {
     try {
         const body: DataSubmitBody = await req.json();
-        const { chats, systemPrompt, subject, numberOfQuestions } = body;
+        const { prompt, systemPrompt, subject, numberOfQuestions } = body;
 
         console.log("Received request with numberOfQuestions:", numberOfQuestions, subject);
 
-        if (!chats || !Array.isArray(chats)) {
+        if (!prompt || !Array.isArray(prompt)) {
             return new Response('Invalid chat history', { status: 400 });
         }
 
@@ -45,7 +47,7 @@ export async function POST(req: Request) {
         console.log("Using numberOfQuestions:", numQuestions);
 
         const selectedPrompt = typeof promptGenerator === 'function'
-            ? promptGenerator(numQuestions, subject)
+            ? promptGenerator(numQuestions, subject, systemPrompt)
             : promptGenerator;
 
         const completion = await openai.chat.completions.create({
@@ -55,7 +57,7 @@ export async function POST(req: Request) {
                     role: 'system',
                     content: `${selectedPrompt}\n\nSubject: ${subject}\n\nPlease respond with a valid JSON object where the "questions" key maps to an array of exactly ${numQuestions} quiz questions.`
                 },
-                ...body.chats,
+                ...body.prompt,
             ],
             response_format: {
                 type: "json_schema",
@@ -78,7 +80,7 @@ export async function POST(req: Request) {
                                             minItems: 2,
                                             maxItems: 4
                                         },
-                                        answer: { type: "string" }
+                                        answer: { type: ["string", "number"] }
                                     },
                                     required: ["id", "question", "options", "answer"],
                                     additionalProperties: false

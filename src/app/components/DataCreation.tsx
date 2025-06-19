@@ -77,7 +77,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
   
     setNumberOfQuestions(sanitizedNumQuestions);
   
-    const updatedChatHistory = [
+    const userPrompt = [
       // Uncomment and use dataHistory if needed
       // ...dataHistory,
       { role: "user", content: message },
@@ -91,7 +91,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            chats: updatedChatHistory,
+            prompt: userPrompt,
             systemPrompt: "jsondata",
             subject: topicInput || subject,
             numberOfQuestions: sanitizedNumQuestions,
