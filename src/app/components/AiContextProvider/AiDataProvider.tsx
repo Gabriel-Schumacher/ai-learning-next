@@ -2,6 +2,7 @@
 import React, { useEffect, useReducer} from "react";
 import { AiDataReducer, DATA_ACTION_TYPES } from "./AiDataReducer";
 import { Folder, Conversation, Quiz } from "../../../lib/types/types";
+import { LocalStorageContextProvider } from "@/app/context_providers/local_storage/LocalStorageProvider";
 
 
 export const pageOptions = ['HOME', 'CHAT', 'QUIZ', 'DATA_CREATION'];
@@ -38,6 +39,12 @@ export const AiDataProviderContext = React.createContext<{
 function AiDataProvider({ children }: { children: React.ReactNode }) {
     const [data, dispatch] = useReducer(AiDataReducer, INITIAL_DATA_STATE);
 
+    const localContext = React.useContext(LocalStorageContextProvider);
+    if (!localContext) {
+        throw new Error("AiDataProviderContext must be used within a AiDataProvider");
+    }
+    const { local_data } = localContext;
+
     useEffect(() => {
         // Load initial data from localStorage or any other source
         const storedData = localStorage.getItem('user_info_ai_data');
@@ -61,7 +68,7 @@ function AiDataProvider({ children }: { children: React.ReactNode }) {
                 console.log("Data already initialized, skipping initialization.");
             }
         }
-    }, [data.folders]);
+    }, [data.folders, local_data.rawData]);
 
     return (
         <AiDataProviderContext.Provider value={{ data, dispatch }}>
