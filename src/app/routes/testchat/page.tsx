@@ -247,7 +247,7 @@ function TestChat() {
 
     //End of Logic-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     return (
-        <div className="m-4 p-2 flex flex-col md:w-[80%] md:max-w-[75rem] mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg">
+        <main className="m-4 p-2 flex flex-col md:w-[80%] md:max-w-[75rem] mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg">
             <div className="border-b pb-3 mb-4 dark:bg-gray-900">
                 <h1 className="text-2xl font-semibold text-center text-gray-800 dark:text-white">Coding Chat Assistant</h1>
             </div>
@@ -319,7 +319,7 @@ function TestChat() {
                     </div>
                 </div>
             </form>
-        </div>
+        </main>
     );
 
 

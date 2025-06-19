@@ -57,7 +57,7 @@ function Quiz() {
     console.log("Parsed Questions:", parsedQuestions);
 
     return (
-        <div>
+        <main>
             <h1 className="text-4xl font-bold mb-4">Quiz App</h1>
             {/* Display Available Quizzes */}   
             { studyMode === false && (
@@ -134,7 +134,7 @@ function Quiz() {
                     Submit Quiz
                 </button>
             )}
-        </div>
+        </main>
     );
 }
 export default Quiz;

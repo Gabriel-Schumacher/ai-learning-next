@@ -16,6 +16,7 @@ import css from 'highlight.js/lib/languages/css';
 import cpp from 'highlight.js/lib/languages/cpp';
 import csharp from 'highlight.js/lib/languages/csharp';
 import { AiDataProviderContext } from "./AiContextProvider/AiDataProvider";
+import { LocalStorageContextProvider } from "../context_providers/local_storage/LocalStorageProvider";
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('typescript', typescript);
 hljs.registerLanguage('html', javascript); // Use JavaScript highlighting for HTML
@@ -44,6 +45,14 @@ const AiChat: React.FC = () => {
         throw new Error("AiDataProviderContext must be used within a AiDataProvider");
     }
     const { data, dispatch } = context;
+
+    const localContext = useContext(LocalStorageContextProvider)
+        if (!localContext) {
+            throw new Error(
+                "LocalStorageContextProvider must be used within a LocalStorageProvider"
+            );
+        }
+        const { local_dispatch } = localContext;
 
     // AI RESPONSE STUFF START
     const readableStream = useReadableStream();
@@ -85,11 +94,12 @@ const AiChat: React.FC = () => {
             const newResponse: ChatResponse = {
                 body: textAreaValue,
                 isAiResponse: false,
-                type: 'text', // Need to figure out how to figure out the type of response.
+                type: 'response', // Need to figure out how to figure out the type of response.
                 id: -1,
                 time: new Date(), // Assigns a Date object directly
             };
             dispatch({ type: "ADD_RESPONSE", payload: newResponse });
+            local_dispatch({ type: "SAVE", payload: newResponse });
             setTextAreaValue(""); 
 
             /** SERVER STUFF */
@@ -132,7 +142,6 @@ const AiChat: React.FC = () => {
                 );
 
                 const answerText = (await answer) as string;
-                console.log('Server response:', answerText);
     
                 const parsedAnswer = await MARKED.parse(answerText);
                 const purifiedText = DOMPurify.sanitize(parsedAnswer)
@@ -142,13 +151,14 @@ const AiChat: React.FC = () => {
                 const newAiChatResponse: ChatResponse = {
                     body: purifiedText,
                     isAiResponse: true,
-                    type: 'text', // Need to figure out how to figure out the type of response.
+                    type: 'response', // Need to figure out how to figure out the type of response.
                     id: -1,
                     time: new Date(), // Assigns a Date object directly
                 };
 
                 // Use functional update again to avoid stale state
                 dispatch({ type: "ADD_RESPONSE", payload: newAiChatResponse });
+                local_dispatch({ type: "SAVE", payload: newAiChatResponse });
                     //setPrevConversationObjForDisplay(updatedConversationObjForDisplay);
     
             } catch (e) {

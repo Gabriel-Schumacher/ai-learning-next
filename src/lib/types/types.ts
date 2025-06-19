@@ -5,7 +5,7 @@
 // CONVERSATIONS
 export interface ChatResponse {
     id: number;
-    type: "text"; // This is used to determine the type of response. It can be a quiz, a file, etc.
+    type: "response"; // This is used to determine the type of response. It can be a quiz, a file, etc.
     time: Date; // This is used to sort the responses in the conversation.
     body: string; // This is the body of the response. It contains the message, header, and data.
     isAiResponse?: boolean; // If true, the response will be styled as an AI response.
@@ -22,6 +22,7 @@ export interface Conversation {
 // QUIZZES
 export interface QuizQuestion {
     id: number;
+    type: "question";
     question: string;
     answers: string[];
     correct_answer: string;
@@ -40,6 +41,7 @@ export interface Quiz {
 export interface Folder {
     id: number;
     name: string;
+    type?: "folder";
     current?: boolean;
     attached_items: (Conversation | Quiz)[]; // This is used to store the conversations and quizzes attached to the folder.
 }

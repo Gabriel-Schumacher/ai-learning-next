@@ -3,6 +3,7 @@ import { useState, useContext } from "react";
 import { PlusSign, Chevron, SearchIcon } from "../IconsIMGSVG";
 import { AiDataProviderContext } from "../AiContextProvider/AiDataProvider";
 import Slot from "./SearchAndChatsItemSlot";
+import { LocalStorageContextProvider } from "@/app/context_providers/local_storage/LocalStorageProvider";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -20,6 +21,14 @@ const SearchAndChats: React.FC = () => {
         );
     }
     const { data, dispatch } = context;
+
+    const localContext = useContext(LocalStorageContextProvider)
+    if (!localContext) {
+        throw new Error(
+            "LocalStorageContextProvider must be used within a LocalStorageProvider"
+        );
+    }
+    const { local_data, local_dispatch } = localContext;
 
     // Causes the rotation of the chevron icon when clicked. This also results in the folders or chats being hidden or shown.
     const toggleRotation = (e: React.MouseEvent, type: "files" | "chats") => {
@@ -66,7 +75,19 @@ const SearchAndChats: React.FC = () => {
                         {/* Add File */}
                         <button
                             className="bg-transparent border-none p-0 m-0"
-                            onClick={() => {dispatch({ type: "ADD_FOLDER" });}}
+                            onClick={() => {
+                                dispatch({ type: "ADD_FOLDER" });
+                                local_dispatch({
+                                    type: "SAVE",
+                                    payload: {
+                                        id: -1,
+                                        name: "Saved Folder",
+                                        type: "folder",
+                                        current: false,
+                                        attached_items: []
+                                    },
+                                });
+                            }}
                         >
                             <PlusSign
                                 width="w-3"

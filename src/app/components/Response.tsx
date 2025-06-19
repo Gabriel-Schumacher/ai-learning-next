@@ -23,10 +23,10 @@ export const Response: React.FC<ResponseProps> = ({chatResponse, removeFromHisto
 
     return (
         <>
-            {chatResponse.type === "text" && 
+            {chatResponse.type === "response" && 
                 <div className={BASIC_STYLE} dangerouslySetInnerHTML={{ __html: chatResponse.body }}></div>
             }
-            {chatResponse.type !== "text" &&
+            {chatResponse.type !== "response" &&
                 <div className={BASIC_STYLE}>This response type has not been set up in Response.tsx</div>
             }
         </>

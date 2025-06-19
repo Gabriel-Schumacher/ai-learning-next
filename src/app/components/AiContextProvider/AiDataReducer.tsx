@@ -2,6 +2,9 @@
 import { INITIAL_DATA_STATE_TYPE as StateType, pageOptions } from "./AiDataProvider";
 import { Folder, Conversation, ChatResponse, Quiz } from "../../../lib/types/types";
 import { addItemToFolder, addResponseToConversation, calculateIDsInUse, checkIfArrayHasCurrent, createConversation, createFolder, createQuiz, createResponse, makeCurrentFolder, makeCurrentItem, removeCurrentsInAttached, removeCurrentsInFolders, removeItemFromFolders, removeResponseFromAttachedItem } from "./AIDataProviders_utils";
+import { LocalStorageDataParsedType } from "@/app/context_providers/local_storage/local_utils";
+import { useContext } from "react";
+import { LocalStorageContextProvider } from "@/app/context_providers/local_storage/LocalStorageProvider";
 
 export type DATA_ACTION_TYPES =
     | { type: 'SET_FOLDERS'; payload: Folder[] }
@@ -16,29 +19,43 @@ export type DATA_ACTION_TYPES =
     | { type: 'ADD_QUIZ'; payload: Quiz }
     | { type: 'REMOVE_ITEM'; payload: number }
     | { type: 'REMOVE_CURRENT_ITEM' }
-    | { type: 'REMOVE_RESPONSE'; payload: number };
+    | { type: 'REMOVE_RESPONSE'; payload: number }
+    | { type: 'INITIALIZE_DATA'; payload?: LocalStorageDataParsedType };
 
 export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateType => {
     const newState = { ...state }; // Create a new state object to avoid mutating the original state. In cases where errors are thrown, we return the original state as to prevent rerendering.
+
     // Reducer logic
     switch (action.type) {
-        case 'SET_FOLDERS':
-            if (!action.payload) return state;
-            if (action.payload.length === 0) return state;
-
-            const idsInUse = calculateIDsInUse(action.payload);
-            const foldersWithoutCurrents = removeCurrentsInFolders(action.payload);
+        case 'INITIALIZE_DATA':
+            // Since we are initializing the data from the local storage, we need to get the active Ids that are already in use,
+            // We also need to find any current folders and conversations that are already set.
             
+            const INITIALIZED_FOLDERS: Folder[] = action.payload as unknown as Folder[];
+            if (!INITIALIZED_FOLDERS || INITIALIZED_FOLDERS.length === 0) {
+                console.warn("No payload provided for INITIALIZE_DATA");
+                return state;
+            }
+
+            const AllIdsInUse = calculateIDsInUse(INITIALIZED_FOLDERS);
+            
+            const currentFolder = INITIALIZED_FOLDERS.find((folder: Folder) => folder.current);
+            const currentConversation = currentFolder?.attached_items?.find((item: Conversation | Quiz) => item.current);
+
             return {
                 ...newState,
-                folders: foldersWithoutCurrents,
-                conversations: undefined,
-                currentConversation: undefined,
-                _currentConversationID: undefined,
-                _currentFolderID: undefined,
-                _idsInUse: idsInUse,
-                currentPage: 'HOME',
+                folders: INITIALIZED_FOLDERS || [],
+                conversations: [],
+                currentConversation: currentConversation || undefined,
+                _currentConversationID: currentConversation?.id || undefined,
+                _currentFolderID: currentFolder?.id || undefined,
+                _idsInUse: AllIdsInUse || [],
+                loading: false,
+                error: null,
             };
+        case 'SET_FOLDERS':
+            console.log("SET_FOLDERS is being phased out, if I got called then the code that called me needs to be looked at.");
+            return state; 
         case 'SET_ERROR':
             return {
                 ...newState,
@@ -108,7 +125,6 @@ export const AiDataReducer = (state: StateType, action: DATA_ACTION_TYPES): Stat
 
             newState.conversations = makeCurrentItem(newState.conversations as (Conversation | Quiz)[], action.payload);
             const conversationWithID = newState.conversations?.find((conversation: Conversation | Quiz) => conversation.id === action.payload);
-
             return {
                 ...newState,
                 conversations: newState.conversations,

@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <>
+    <main>
         <div className="w-full grid place-items-center grid-cols-1 lg:grid-cols-2 place-self-center gap-2">
             
             <div className="w-full flex flex-col justify-center items-start gap-2">
@@ -61,6 +61,6 @@ export default function Home() {
             </div>
 
         </div>
-    </>
+    </main>
   );
 }

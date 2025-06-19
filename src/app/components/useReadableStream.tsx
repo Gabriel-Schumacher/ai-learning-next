@@ -13,10 +13,10 @@ export function useReadableStream() {
         setError(null);
 
         try {
-            console.debug("Requesting:", request.body);
+            //console.debug("Requesting:", request.body);
             const response = await fetch(request);
 
-            console.debug("Response:", response);
+            //console.debug("Response:", response);
 
             if (!response.ok) throw new Error(response.statusText);
             if (!response.body) throw new Error("Response body is null");

@@ -98,7 +98,7 @@ export const createResponse = (IDS_IN_USE: number[], PAYLOAD: ChatResponse): Cha
     const NEW_ID = getRandomID(IDS_IN_USE);
     const newResponse: ChatResponse = {
         id: NEW_ID,
-        type: "text",
+        type: "response",
         time: PAYLOAD.time || new Date(),
         body: PAYLOAD.body,
         isAiResponse: PAYLOAD.isAiResponse || false,

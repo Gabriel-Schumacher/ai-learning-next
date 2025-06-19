@@ -16,40 +16,40 @@ function ChatBot() {
     if (!context) {
         throw new Error("AiDataProviderContext must be used within a AiDataProvider");
     }
-    const { data, dispatch } = context;
-    /*
-        What to do when rendering the page.
-    */
-    useEffect(() => {
-        const fetchChatHistory = async () => {
-            dispatch({ type: "SET_LOADING", payload: true })
-            try {
-                if (data.folders && data.folders.length > 0) {
-                    return // Don't override it if there already is data.
-                }
-                let USER_ID = localStorage.getItem("userId")
-                if (!USER_ID) {
-                    USER_ID = "guest"
-                }
-                const chatHistory = await fetch(`${BASE_URL}/api/chatHistory/${USER_ID}`)
-                if (!chatHistory.ok) {
-                    dispatch({ type: "SET_ERROR", payload: "Failed to fetch chat history" })
-                }
-                const DATA = await chatHistory.json()
-                dispatch({ type: "SET_FOLDERS", payload: DATA.folders })
-            } catch (error) {
-                console.error("Error fetching conversations:", error)
-                dispatch({ type: "SET_ERROR", payload: (error as Error).message })
-            }
-        }
-        fetchChatHistory().then(() => {
-            dispatch({ type: "SET_LOADING", payload: false })
-        })
-    }
-    , [dispatch, data.folders])
+    const { data } = context;
+    // /*
+    //     What to do when rendering the page.
+    // */
+    // useEffect(() => {
+    //     const fetchChatHistory = async () => {
+    //         dispatch({ type: "SET_LOADING", payload: true })
+    //         try {
+    //             if (data.folders && data.folders.length > 0) {
+    //                 return // Don't override it if there already is data.
+    //             }
+    //             let USER_ID = localStorage.getItem("userId")
+    //             if (!USER_ID) {
+    //                 USER_ID = "guest"
+    //             }
+    //             const chatHistory = await fetch(`${BASE_URL}/api/chatHistory/${USER_ID}`)
+    //             if (!chatHistory.ok) {
+    //                 dispatch({ type: "SET_ERROR", payload: "Failed to fetch chat history" })
+    //             }
+    //             const DATA = await chatHistory.json()
+    //             dispatch({ type: "SET_FOLDERS", payload: DATA.folders })
+    //         } catch (error) {
+    //             console.error("Error fetching conversations:", error)
+    //             dispatch({ type: "SET_ERROR", payload: (error as Error).message })
+    //         }
+    //     }
+    //     fetchChatHistory().then(() => {
+    //         dispatch({ type: "SET_LOADING", payload: false })
+    //     })
+    // }
+    // , [dispatch, data.folders])
 
     return (
-      <div className="flex flex-col h-full lg:flex-row gap-2 w-full">
+      <main className="flex flex-col h-full lg:flex-row gap-2 w-full">
         <SearchAndChats />
         <div className="w-full mr-2 grid grid-rows-[auto_1fr]">
             <FigmaNavigation actions={() => {}}/>
@@ -88,7 +88,7 @@ function ChatBot() {
                 }
             </div>
         </div>
-      </div>
+      </main>
     )
   }
   

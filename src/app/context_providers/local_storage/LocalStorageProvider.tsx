@@ -4,7 +4,7 @@ import { LocalStorageReducer, LOCAL_DATA_ACTION_TYPES } from "./LocalStorageRedu
 
 export interface INITIAL_STATE_LOCAL_STORAGE_TYPE {
     rawData: string | null;
-    sortedData: string | undefined;
+    sortedData: object | undefined;
     localStorageError: string | undefined;
 }
 
@@ -22,22 +22,12 @@ export const LocalStorageContextProvider = React.createContext<{
 function LocalStorageProvider({ children }: { children: React.ReactNode }) {
     const [local_data, local_dispatch] = useReducer(LocalStorageReducer, INITIAL_LOCAL_STORAGE_STATE);
 
-    // On render, get the localStorage data and dispatch it to the reducer to save that data.
+    // While we don't need to load the data on every render, we do need to load it when the component mounts or when the data changes.
     useEffect(() => {
-        // Load state from localStorage on initial render
-        const storedState = localStorage.getItem('user_info_ai_data');
-        if (storedState) {
-          local_dispatch({
-            type: 'SAVE',
-            payload: JSON.parse(storedState),
-          });
+        if (local_data.rawData === null) {
+            local_dispatch({ type: 'LOAD' });
         }
-      }, []);
-
-    // useEffect(() => {
-    //     // TESTING PURPOSES, DELETE LATER OR IF ACTUALLY TRYING TO USE THE LOCAL STORAGE
-    //     local_dispatch({ type: 'TEST_CASE_RESET' });
-    // })
+    }, [local_data.rawData]);
 
     return (
         <LocalStorageContextProvider.Provider value={{ local_data, local_dispatch }}>

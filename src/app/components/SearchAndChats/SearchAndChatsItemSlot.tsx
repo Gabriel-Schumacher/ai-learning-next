@@ -2,6 +2,7 @@
 import {useState, useContext, useEffect} from 'react';
 import { Bullet, Folder, ChatBox, ThreeDotsEllipsis } from '../IconsIMGSVG';
 import { AiDataProviderContext } from '../AiContextProvider/AiDataProvider';
+import { LocalStorageContextProvider } from '@/app/context_providers/local_storage/LocalStorageProvider';
 
 interface SlotProps {
     header: string;
@@ -24,7 +25,13 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
         if (!context) {
             throw new Error("AiDataProviderContext must be used within a AiDataProvider");
         }
-    const { data, dispatch } = context;
+    const { dispatch } = context;
+
+    const localContext = useContext(LocalStorageContextProvider);
+    if (!localContext) {
+        throw new Error("LocalStorageContextProvider must be used within a LocalStorageProvider");
+    }
+    const { local_dispatch } = localContext;
 
     // console.log("Slot Rendered: ", header, type, isActive, dataID);
     // console.log("When Slot was rendered, the current folder in data is: ", data._currentFolderID);
@@ -66,9 +73,10 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                             type: "TOGGLE_CURRENT_FOLDER",
                             payload: dataID !== undefined ? dataID : -1,
                         });
+                        local_dispatch({type: "TOGGLE_ACTIVE", payload: dataID || -1})
                     }}>
                         <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<Folder width='w-3' background={false} special={true} /></div>
-                        <span className="text-black dark:text-white block w-full truncate h-min text-sm">{header}</span>
+                        <span className="text-black dark:text-white block w-full text-start truncate h-min text-sm">{header}</span>
                     </button>
                 )}
             {/* CHAT OR QUIZ OR NOTE TYPES */}
@@ -79,14 +87,15 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                             type: "TOGGLE_CURRENT_ITEM",
                             payload: dataID !== undefined ? dataID : -1,
                         });
+                        local_dispatch({type: "TOGGLE_ACTIVE", payload: dataID || -1})
                     }}>
                         <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<ChatBox width='w-3' background={false} special={true} /></div>
-                        <span className="text-black dark:text-white block w-full truncate h-min text-sm">{header}</span>
+                        <span className="text-black dark:text-white block w-full text-start truncate h-min text-sm">{header}</span>
                     </button>
                 )}
             {/* Options Button */}
-            <div className='p-2 rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center focus-within:[&>ul]:flex focus:[&>ul]:opacity-100 transition-all'>
-                <button className="bg-transparent border-none p-0 m-0 cursor-pointer focus:[&_+_ul]:flex focus:[&_+_ul]:opacity-100" onClick={()=>{handleButtonClick()}}><ThreeDotsEllipsis width='w-3' background={false} /></button>
+            <div className='rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center focus-within:[&>ul]:flex focus:[&>ul]:opacity-100 transition-all'>
+                <button className="p-2 bg-transparent border-none m-0 cursor-pointer focus:[&_+_ul]:flex focus:[&_+_ul]:opacity-100" onClick={()=>{handleButtonClick()}}><ThreeDotsEllipsis width='w-3' background={false} /></button>
                 
                 <ul data-key={dataID} className={`hidden focus:flex focus-within:flex focus:opacity-100 focus-within:opacity-100 opacity-0 transition-all absolute right-3 top-5 rounded-lg shadow-lg flex-col gap-0 cursor-pointer z-10`}>
                     <li className='border-transparent rounded-tl-lg hover:bg-error-800 bg-error-500 transition-all'>

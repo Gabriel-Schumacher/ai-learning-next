@@ -52,18 +52,20 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
         <nav className="flex flex-col bg-surface-300 dark:bg-surface-800 rounded-xl relative overflow-hidden mb-2">
             <ul className="flex flex-row justify-between w-full p-0 m-0 list-none overflow-hidden hover:[&>div]:rounded-lg">
                 <div
-                    className="absolute top-0 left-0 w-1/2 h-full bg-primary-500 transition-all duration-300 z-0"
+                    className="absolute top-0 left-0 w-1/2 h-full bg-primary-500 rounded-lg transition-all duration-300 z-0"
                     style={{ transform: `translateX(${(currentItem - 1) * 100}%)` }}
                 ></div>
                 {navigationItems.map((item, index) => (
-                    <li
-                        key={index}
-                        className={`flex-1 text-center w-full h-full font-bold p-2 z-10 transition-all duration-300 rounded-lg bg-transparent hover:bg-[rgba(0,0,0,0.15)] ${
-                            currentItem === index + 1 ? "text-white" : ""
-                        } ${item.clickable && "cursor-pointer"}`}
-                        {...item.clickable && { onClick: () => changePage(index) }}
-                    >
-                        {item.name}
+                    <li key={index} className="flex-1 text-center w-full h-full font-bold z-10 transition-all duration-300 rounded-lg bg-transparent">
+                        <button
+                            className={`w-full h-full rounded-lg transition-all duration-300 p-2 ${
+                                currentItem === index + 1 ? "text-white bg-[rgba(0,0,0,0.15)]" : "hover:bg-[rgba(0,0,0,0.15)]"
+                            } ${item.clickable && "cursor-pointer"}`}
+                            disabled={!item.clickable}
+                            onClick={() => item.clickable && changePage(index)}
+                        >
+                            {item.name}
+                        </button>
                     </li>
                 ))}
             </ul>

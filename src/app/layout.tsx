@@ -34,9 +34,7 @@ export default function RootLayout({
         <LocalStorageProvider>
           <AiDataProvider>
             <Header />
-            <main>
               {children}
-            </main>
           </AiDataProvider>
         </LocalStorageProvider>
       </body>

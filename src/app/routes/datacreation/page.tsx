@@ -216,7 +216,7 @@ function DataCreation() {
 
   //End of Logic-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   return (
-    <div>
+    <main>
       <div className="flex flex-col">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="bg-surface-200 p-12 rounded-lg shadow-md mb-4 flex flex-col gap-4">
@@ -387,7 +387,7 @@ function DataCreation() {
        
         </form>
       </div>
-    </div>
+    </main>
   );
 }
 export default DataCreation;
