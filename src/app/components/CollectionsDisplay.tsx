@@ -645,20 +645,35 @@ function CollectionsDisplay({
                 </p>
                 <div className="flex flex-col gap-2">
                   {parsedQuestions[quizCurrentIndex].options.map(
-                    (option: string, idx: number) => (
-                      <button
-                        key={idx}
-                        className={`btn w-full text-left ${
-                          quizSelectedOption === option
-                            ? "bg-primary-200"
-                            : "bg-surface-50"
-                        }`}
-                        disabled={quizShowFeedback}
-                        onClick={() => handleQuizOptionSelect(option)}
-                      >
-                        {option}
-                      </button>
-                    )
+                    (option: string, idx: number) => {
+                      // Determine button style
+                      let btnClass = "btn bg-primary-500 w-full text-left border-3 border-primary-500";
+                      if (quizShowFeedback) {
+                        if (option === parsedQuestions[quizCurrentIndex].answer) {
+                          btnClass += "bg-green-200 border-green-600 border-3 ";
+                        } else if (option === quizSelectedOption) {
+                          btnClass += "bg-red-200 border-red-600 border-3 ";
+                        } else {
+                          btnClass += "bg-surface-50 ";
+                        }
+                      } else {
+                        if (quizSelectedOption === option) {
+                          btnClass += "bg-primary-500 border-tertiary-500 border-3 ";
+                        } else {
+                          btnClass += "bg-surface-50 ";
+                        }
+                      }
+                      return (
+                        <button
+                          key={idx}
+                          className={btnClass}
+                          disabled={quizShowFeedback}
+                          onClick={() => handleQuizOptionSelect(option)}
+                        >
+                          {option}
+                        </button>
+                      );
+                    }
                   )}
                 </div>
                 {quizShowFeedback && (
