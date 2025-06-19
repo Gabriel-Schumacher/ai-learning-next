@@ -112,3 +112,22 @@ main {
       text-wrap: break-word;
     }
 }
+
+/* Flashcard CSS Here */
+
+.card-3d {
+  perspective: 1000px;
+}
+
+.card-inner {
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.card-face {
+  backface-visibility: hidden;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}

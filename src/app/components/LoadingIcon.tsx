@@ -8,7 +8,7 @@
 
 function LoadingIcon() {
   return (
-    <div className="LoadingIcon border border-t-4 border-red-200 rounded-full w-12 h-12 animate-spin">
+    <div className="LoadingIcon border border-t-4 border-primary-200 rounded-full w-12 h-12 animate-spin">
     </div>
   );
 }

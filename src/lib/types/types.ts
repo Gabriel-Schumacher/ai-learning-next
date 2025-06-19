@@ -64,12 +64,23 @@ export interface MessageBody {
     deepSeek: boolean;
 }
 
+export interface CollectionBody {
+    prompt: Message[];
+    systemPrompt: string;
+    subject: string;
+    deepSeek: boolean;
+}
+
 export interface DataSubmitBody {
-    chats: Message[];
+    prompt: Message[];
     systemPrompt: string;
     subject: string;
     deepSeek: boolean;
     numberOfQuestions: number; // Ensure this matches the backend
+}
+
+export interface studyGuideSubmitBody {
+    studyContent: Quiz[]
 }
 
 // Additional type to help with handling the API response
