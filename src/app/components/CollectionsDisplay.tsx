@@ -5,6 +5,7 @@ import CardIcon from "@/app/components/customSvg/Card";
 import ListIcon from "@/app/components/customSvg/List";
 import BookIcon from "@/app/components/customSvg/Book";
 import PlusIcon from "./customSvg/Plus";
+import EditIcon from "./customSvg/Edit";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -76,15 +77,6 @@ function CollectionsDisplay({
     //setShowCorrectAnswers(false);
     setStudyMode(true);
   };
-
-  // const handleAnswerChange = (questionId: number, answer: string) => {
-  //     setUserAnswers((prev) => ({ ...prev, [questionId]: answer }));
-  // };
-
-  // const handleSubmit = () => {
-  //     setShowCorrectAnswers(true);
-  //     console.log("User Answers:", userAnswers);
-  // };
 
   const handleNextQuestion = () => {
     if (isFlipped) {
@@ -353,27 +345,52 @@ function CollectionsDisplay({
     setEditQuestionsMode(false);
   }
 
+  function handleDeleteCollection() {
+    if (selectedQuizIndex !== null && selectedQuizIndex >= 0 && selectedQuizIndex < questionLog.length) {
+      const updatedLog = questionLog.filter((_, index) => index !== selectedQuizIndex);
+      setQuestionLog(updatedLog);
+      localStorage.setItem("savedQuizSets", JSON.stringify(updatedLog));
+      setSelectedQuizIndex(null);
+      setEditQuestionsMode(false);
+      setStudyMode(false);
+      setActivity(0);
+      setUserAnswers({});
+      setQuizCurrentIndex(0);
+      setQuizSelectedOption(null);
+    }
+  }
+
   return (
     <div>
       {/* Edit Questions Mode */}
       {editQuestionsMode && (
         <div className="bg-surface-200 p-12 rounded-lg shadow-md mb-4 flex flex-col gap-4">
           <h2 className="text-primary-500 mb-4">Edit Collection: {editTitle}</h2>
-          <div className="flex justify-end mb-2 gap-2">
-            <button
-              type="button"
-              className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-              onClick={handleEditCancel}
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-              onClick={handleEditSaveCollection}
-            >
-              Save Collection
-            </button>
+          <div className="flex justify-between mb-2 gap-2">
+            <div>
+              <button
+                type="button"
+                className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                onClick={handleDeleteCollection}
+              >Delete</button>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                onClick={handleEditCancel}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                onClick={handleEditSaveCollection}
+              >
+                Save Collection
+              </button>
+            </div>
+
           </div>
           <DndContext collisionDetection={closestCenter} onDragEnd={handleEditDragEnd}>
             <SortableContext items={editQuestions.map((q) => q.id)}>
@@ -465,6 +482,20 @@ function CollectionsDisplay({
           )}
         </div>
       )}
+      {/* If the user doesn't have collections, but it's not in creation mode */}
+      {questionLog.length === 0 && !editQuestionsMode && (
+              <div className="text-center mt-4">
+                <p className="mb-4">You don&#39;t have any study collections yet!</p>
+              <button className="btn" onClick={onNewCollection}>
+                  <div className="w-[24px] h-[24px]">
+                      <PlusIcon color={"text-surface-50"}/>                        
+                  </div>
+
+                New Collection
+              </button>
+            </div>
+      )}
+      {/* Has selected a collection of data */}
       {selectedQuizIndex !== null &&
         parsedQuestions.length > 0 &&
         activity === 0 &&
@@ -477,11 +508,10 @@ function CollectionsDisplay({
               <div className="flex items-center gap-2">
                 <p>{selectedQuiz.length} Terms</p>
                 <button
-                  className="border-1 border-gray-300 px-1 py-[.25rem]"
                   onClick={() => enterEditQuestionsMode(selectedQuizIndex)}
                   title="Edit Questions"
                 >
-                  =
+                  <div className="w-[32px] h-[32px] text-primary-500 mx-auto"><EditIcon/></div>
                 </button>
               </div>
             </div>
