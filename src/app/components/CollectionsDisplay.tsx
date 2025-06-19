@@ -6,9 +6,14 @@ import ListIcon from "@/app/components/customSvg/List";
 import BookIcon from "@/app/components/customSvg/Book";
 import PlusIcon from "./customSvg/Plus";
 import EditIcon from "./customSvg/Edit";
+import LoadingIcon from "./LoadingIcon";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Marked } from "marked";
+import DOMPurify from "dompurify";
+
+const marked = new Marked();
 
 function CollectionsDisplay({
   onNewCollection,
@@ -41,6 +46,11 @@ function CollectionsDisplay({
   const [editTitle, setEditTitle] = useState<string>("");
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
 
+  const [studyGuideResponse, setStudyGuideResponse] = useState<string | null>(null);
+  const [studyGuideLoading, setStudyGuideLoading] = useState(false);
+  const [studyGuideError, setStudyGuideError] = useState<string | null>(null);
+  const [studyGuideHtml, setStudyGuideHtml] = useState<string | null>(null);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedQuizSets = localStorage.getItem("savedQuizSets");
@@ -63,6 +73,9 @@ function CollectionsDisplay({
     setStudyMode(false);
     setSelectedQuizIndex(null);
     setUserAnswers({});
+    setCurrentQuestionIndex(0);
+    setQuizCurrentIndex(0);
+    setActivity(0);
     //setShowCorrectAnswers(false);
   }
 
@@ -360,6 +373,38 @@ function CollectionsDisplay({
     }
   }
 
+  // Study Guide handler
+  async function handleStudyGuide() {
+    setStudyGuideLoading(true);
+    setStudyGuideError(null);
+    setStudyGuideResponse(null);
+    setStudyGuideHtml(null);
+    try {
+      const res = await fetch("/api/studyGuide", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questions: parsedQuestions,
+          title: selectedQuizTitle,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to fetch study guide.");
+      const text = await res.text();
+      setStudyGuideResponse(text);
+
+      // Parse and sanitize like in testChat
+      const parsed = await marked.parse(text);
+      const sanitized = DOMPurify.sanitize(parsed)
+        .replace(/<script>/g, "&lt;script&gt;")
+        .replace(/<\/script>/g, "&lt;/script&gt;");
+      setStudyGuideHtml(sanitized);
+    } catch (err: any) {
+      setStudyGuideError(err.message || "Unknown error");
+    } finally {
+      setStudyGuideLoading(false);
+    }
+  }
+
   return (
     <div>
       {/* Edit Questions Mode */}
@@ -547,7 +592,13 @@ function CollectionsDisplay({
                   your knowledge, and track your progress.
                 </p>
               </div>
-              <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl">
+              <div
+                className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
+                onClick={() => {
+                  setActivity(3);
+                  handleStudyGuide();
+                }}
+              >
                 <div className="text-center flex flex-col items-center gap-2">
                   <div className="w-[48px] h-[48px] text-primary-500 mx-auto">
                     <BookIcon />
@@ -730,6 +781,33 @@ function CollectionsDisplay({
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Study Guide Display */}
+      {studyMode === true && activity === 3 && (
+        <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6 w-full mx-auto">
+          <div className="flex justify-between w-full max-w-md items-center">
+            <p className="text-xl font-semibold">{selectedQuizTitle} - Study Guide</p>
+            <button className="btn" onClick={cancelSelectedCollection}>Back</button>
+          </div>
+          <div className="w-full bg-surface-100 rounded-lg shadow-md p-4 max-w-2xl min-h-[200px]">
+            {studyGuideLoading && (
+              <div className="flex flex-col items-center gap-4">
+                <div className="text-center text-primary-500">Generating study guide...</div>
+                <div><LoadingIcon/></div>                
+              </div>
+            )}
+            {studyGuideError && (
+              <div className="text-center text-red-600">{studyGuideError}</div>
+            )}
+            {studyGuideHtml && (
+              <div
+                className="prose max-w-none whitespace-pre-wrap"
+                dangerouslySetInnerHTML={{ __html: studyGuideHtml }}
+              />
+            )}
+          </div>
         </div>
       )}
       
