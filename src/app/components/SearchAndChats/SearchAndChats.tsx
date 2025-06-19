@@ -177,7 +177,7 @@ const SearchAndChats: React.FC = () => {
                 onClick={() => {
                     dispatch({ type: "ADD_CONVERSATION" });
                 }}
-                className="btn w-full flex justify-between"
+                className="btn w-full flex justify-between mt-1"
             >
                 <span className="flip-text-color">New Chat</span>
                 <PlusSign
