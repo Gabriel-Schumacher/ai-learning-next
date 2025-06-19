@@ -417,7 +417,7 @@ function CollectionsDisplay({
                 type="button"
                 className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
                 onClick={handleDeleteCollection}
-              >Delete</button>
+              >Delete this Collection</button>
             </div>
             <div className="flex gap-2">
               <button
