@@ -15,7 +15,8 @@ Important instructions:
 - The value of "questions" must be a JSON array of exactly ${numberOfQuestions} objects.
 - Each object must contain all required fields.
 - Questions options can be strings, numbers, including but not limited to true and false.
-- Do not include any extra text or comments. Only return the raw JSON object.`;
+- Do not include any extra text or comments. Only return the raw JSON object.
+- Avoid saying which of the following, rather just ask a question directly.`;
 }
 
 const SYSTEM_PROMPTS = {
