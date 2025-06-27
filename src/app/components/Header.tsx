@@ -11,6 +11,7 @@ function HeaderAndNav() {
         {name: "Chatbot", path: "/routes/chatbot", active:false, },
         {name: "Data Creation", path: "/routes/datacreation", active:false, },
         {name: "Quiz", path: "/routes/quiz", active:false, },
+        {name: "Library", path: "/routes/library", active:false, },
     ]);
     const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
 
