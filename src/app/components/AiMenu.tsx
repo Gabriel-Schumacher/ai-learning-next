@@ -29,7 +29,7 @@ const AiMenu: React.FC = () => {
             const newMessage: ChatResponse = {
                 body: textAreaValue,
                 isAiResponse: false,
-                type: 'text',
+                type: 'response',
                 id: -1,
                 time: new Date(), // Assigns a Date object directly
             };
