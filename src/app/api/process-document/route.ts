@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
     }
     
     const db = await getDb();
+    console.log(`Processing document in database: ${db.databaseName}`);
     
     // Create document entry
     const docResult = await db.collection('documents').insertOne({
@@ -26,9 +27,11 @@ export async function POST(req: NextRequest) {
     });
     
     const documentId = docResult.insertedId;
+    console.log(`Created document with ID: ${documentId}`);
     
     // Chunk the text
     const chunks = chunkTextByParagraphs(text);
+    console.log(`Created ${chunks.length} chunks for processing`);
     
     // Process each chunk
     for (let i = 0; i < chunks.length; i++) {
@@ -54,9 +57,10 @@ export async function POST(req: NextRequest) {
       const embeddingData = await embeddingResponse.json();
       const embedding = embeddingData.data[0].embedding;
       
-      // Store chunk with embedding
+      // Store chunk with embedding - IMPORTANT: Store documentId as string to ensure consistent lookup
       await db.collection('chunks').insertOne({
-        documentId,
+        documentId: documentId.toString(), // Store as string for consistency
+        originalDocumentId: documentId, // Also store the ObjectId version
         text: chunk,
         embedding,
         metadata: {
@@ -75,7 +79,7 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      documentId,
+      documentId: documentId.toString(), // Return string version of ID
       chunksProcessed: chunks.length,
     });
   } catch (error: any) {

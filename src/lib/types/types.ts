@@ -77,6 +77,7 @@ export interface DataSubmitBody {
     subject: string;
     deepSeek: boolean;
     numberOfQuestions: number; // Ensure this matches the backend
+    documentId?: string;  // Add this field
 }
 
 export interface studyGuideSubmitBody {

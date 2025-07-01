@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
     // Build the filter for finding chunks
     let filter: any = {};
     if (documentId) {
+      // Ensure documentId is converted to ObjectId
       filter.documentId = new ObjectId(documentId);
     }
     

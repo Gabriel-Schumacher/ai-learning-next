@@ -1,9 +1,23 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
-// Ensure your connection string includes the database name at the end
-// e.g., mongodb://localhost:27017/ai-learning or mongodb+srv://<username>:<password>@cluster.mongodb.net/ai-learning
+// Your MongoDB connection string
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/ai-learning';
-const dbName = 'Cluster3780'; // Specify your database name here
+
+// Important: Extract database name or use an explicit default
+function getDatabaseName(mongoUri: string): string {
+  // Check if URI has a database name at the end
+  const uriParts = mongoUri.split('/');
+  const lastPart = uriParts.pop() || '';
+  
+  // If there's a database name in the URI (after the last slash and no query params)
+  if (lastPart && !lastPart.includes('?') && !lastPart.includes('@')) {
+    return lastPart;
+  }
+  
+  // Default database name if not specified in URI
+  // This is critical - make sure it matches where your data is stored!
+  return '3780-spring-2024'; // Try this explicit name based on your MongoDB Atlas cluster
+}
 
 const options = {
   serverApi: {
@@ -38,7 +52,16 @@ if (process.env.NODE_ENV === 'development') {
 export default clientPromise;
 
 // Helper function to get the database with the specified name
-export async function getDb() {
+export async function getDb(explicitDbName?: string) {
   const client = await clientPromise;
+  const dbName = explicitDbName || getDatabaseName(uri);
+  console.log(`Using database: ${dbName}`);
   return client.db(dbName);
+}
+
+// Helper function to list all available databases
+export async function listDatabases() {
+  const client = await clientPromise;
+  const admin = client.db().admin();
+  return await admin.listDatabases();
 }

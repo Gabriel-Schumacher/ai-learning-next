@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import { getDb } from '@/lib/mongodb'; // Use consistent DB access
 import { ObjectId } from 'mongodb';
 
 export async function GET(req: NextRequest) {
@@ -14,17 +14,26 @@ export async function GET(req: NextRequest) {
       );
     }
     
-    const client = await clientPromise;
-    const db = client.db();
+    const db = await getDb();
+    console.log(`Looking up chunks for document ID: ${documentId}`);
     
+    // Try both string and ObjectId versions to be safe
     const chunks = await db.collection('chunks')
-      .find({ documentId: new ObjectId(documentId) })
+      .find({ 
+        $or: [
+          { documentId: documentId },
+          { documentId: new ObjectId(documentId) },
+          { originalDocumentId: new ObjectId(documentId) }
+        ]
+      })
       .sort({ 'metadata.chunkIndex': 1 })
       .project({
         text: 1,
         metadata: 1,
       })
       .toArray();
+    
+    console.log(`Found ${chunks.length} chunks for document ${documentId}`);
     
     return NextResponse.json({ chunks });
   } catch (error: any) {

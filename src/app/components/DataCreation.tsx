@@ -17,6 +17,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
   const [isLoadingQuizData, setIsLoadingQuizData] = useState<boolean>(false);
   const [editedQuestions, setEditedQuestions] = useState<{ [id: number]: { question: string; answer: string; options?: string[] } }>({});
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -50,24 +51,51 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     }
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  // Update function signature to accept the extracted form data
+  async function handleSubmit(
+    event: React.FormEvent<HTMLFormElement>,
+    extractedData?: { message?: string; topic?: string; numQuestions?: string; documentId?: string, documentTitle?: string }
+  ) {
     event.preventDefault();
     if (response.loading) return;
     setIsLoadingQuizData(true);
 
+    // Use extracted data if provided, otherwise get from form
     const formData: FormData = new FormData(event.currentTarget);
-    const message = formData.get("message")?.toString().trim();
-    const topicInput = formData.get("topic")?.toString().trim();
-    const numberInput = parseInt(formData.get("numQuestions")?.toString() || "1", 10);
+    const message = extractedData?.message || formData.get("message")?.toString().trim();
+    const topicInput = extractedData?.topic || formData.get("topic")?.toString().trim();
+    const numberInputStr = extractedData?.numQuestions || formData.get("numQuestions")?.toString() || "1";
+    const numberInput = parseInt(numberInputStr, 10);
     const sanitizedNumQuestions = isNaN(numberInput) || numberInput < 1 ? 1 : numberInput;
+    
+    // Get document ID from extracted data or form
+    const documentId = extractedData?.documentId || formData.get("documentId")?.toString();
+    
+    // Store the document title for display purposes
+    if (extractedData?.documentTitle) {
+      setSelectedDocumentTitle(extractedData.documentTitle);
+    }
 
-    if (topicInput) setSubject(topicInput);
-    if (!message) return;
+    // Set a default collection name if none provided
+    const collectionName = topicInput || (selectedDocumentTitle ? 
+      `Questions from ${selectedDocumentTitle}` : 
+      'Untitled Collection');
+    
+    setSubject(collectionName);
+    
+    if (!message && !documentId) return; // Return if no message and no document
     setNumberOfQuestions(sanitizedNumQuestions);
 
-    const userPrompt = [{ role: "user", content: message }];
+    const userPrompt = message ? [{ role: "user", content: message }] : [];
 
     try {
+      console.log("Sending request with documentId:", documentId);
+      
+      // Add debug logging to trace the issue
+      if (documentId) {
+        console.log("Using document ID:", documentId);
+      }
+      
       const answer = response.request(
         new Request("/api/dataCreation", {
           method: "POST",
@@ -75,19 +103,32 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
           body: JSON.stringify({
             prompt: userPrompt,
             systemPrompt: "jsondata",
-            subject: topicInput || subject,
+            subject: collectionName,
             numberOfQuestions: sanitizedNumQuestions,
             deepSeek: false,
+            documentId: documentId, // Include document ID in the API request
           }),
         })
       );
-      event.currentTarget.reset();
+      
+      // Only reset the form if we're using the actual form element
+      if (!extractedData) {
+        event.currentTarget.reset();
+      }
+      
       setStep(2);
 
       const answerText = (await answer) as string;
       try {
         const parsedData = JSON.parse(answerText);
         if (parsedData && parsedData.questions) {
+          // Store metadata about source if using document
+          if (documentId && selectedDocumentTitle) {
+            parsedData.metadata = {
+              documentId,
+              documentTitle: selectedDocumentTitle
+            };
+          }
           localStorage.setItem("quizData", JSON.stringify(parsedData));
         } else {
           throw new Error("Missing 'questions' key in parsed data");
@@ -133,10 +174,13 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
       localStorage.removeItem("quizData");
       setStep(1);
 
+      // Use the provided subject or generate a default name
+      const collectionName = subject || 'Untitled Collection';
+
       if (parsedQuizData && parsedQuizData.questions) {
         const updatedSavedSets = [
           ...parsedSavedSets,
-          { title: subject, questions: parsedQuizData.questions },
+          { title: collectionName, questions: parsedQuizData.questions },
         ];
         localStorage.setItem("savedQuizSets", JSON.stringify(updatedSavedSets));
         onSave();
@@ -280,6 +324,13 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
         {step === 2 && (
           <div>
             <h2 className="text-primary-500 mb-4">Topic: {subject}</h2>
+            {selectedDocumentTitle && (
+              <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
+                <p className="text-sm text-blue-700">
+                  <span className="font-medium">Document source:</span> {selectedDocumentTitle}
+                </p>
+              </div>
+            )}
             <div className="flex justify-end mb-2 gap-2">
               <button
                 type="button"
