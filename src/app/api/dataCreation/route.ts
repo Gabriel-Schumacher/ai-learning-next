@@ -52,7 +52,7 @@ async function getDocumentChunks(documentId: string, subject: string) {
             try {
                 // Try to find the document using string ID first
                 document = await db.collection('documents').findOne({ 
-                    _id: documentId 
+                    _id: new ObjectId(documentId) 
                 });
                 
                 // If not found, try with ObjectId
@@ -153,7 +153,7 @@ async function getDocumentChunks(documentId: string, subject: string) {
                     // Filter for chunks with embeddings
                     const chunksWithEmbeddings = chunks.filter(chunk => chunk.embedding);
                     
-                    if (chunksWithEmbeddings.length > 0) {
+                    if (chunksWithEmbeddings.length > 0 && db) {
                         // Connect to MongoDB again to use $vectorSearch if available
                         await client.connect();
                         
@@ -177,7 +177,7 @@ async function getDocumentChunks(documentId: string, subject: string) {
                                 return relevantChunks.map(chunk => chunk.text);
                             }
                         } catch (e) {
-                            console.warn("Vector search not available, falling back to random sampling");
+                            console.warn("Vector search not available, falling back to random sampling", e);
                         } finally {
                             await client.close();
                         }
@@ -276,25 +276,37 @@ Additional instructions:
 4. The correct answer must be explicitly found in or directly inferable from the document content.`
             : basePrompt;
 
-        const messages = [
+        console.log("Sending request to OpenAI with document context:", !!documentContext);
+        
+        // Define the proper message type expected by OpenAI
+        type ChatMessage = {
+            role: 'system' | 'user' | 'assistant';
+            content: string;
+        };
+
+        // Create a properly typed array that can accept different message roles
+        const messages: ChatMessage[] = [
             {
-                role: 'system' as const,
+                role: 'system',
                 content: `${enhancedPrompt}\n\nPlease respond with a valid JSON object where the "questions" key maps to an array of exactly ${numQuestions} quiz questions.`
             },
         ];
 
         // Only add user prompt if it's provided
         if (hasPrompt) {
-            messages.push(...prompt);
+            // Map each prompt item to ensure it has the correct structure
+            const promptMessages = prompt.map(p => ({
+                role: p.role as 'user' | 'assistant',
+                content: p.content
+            }));
+            messages.push(...promptMessages);
         } else {
             // If no prompt is provided, add a simple prompt based on the document
             messages.push({
-                role: 'user' as const,
+                role: 'user',
                 content: `Generate ${numQuestions} quiz questions based on the document content provided.`
             });
         }
-
-        console.log("Sending request to OpenAI with document context:", !!documentContext);
         
         const completion = await openai.chat.completions.create({
             model: 'gpt-4o',

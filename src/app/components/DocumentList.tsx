@@ -10,15 +10,28 @@ type Document = {
   chunkCount?: number;
 };
 
-export default function DocumentList() {
+interface DocumentListProps {
+  documents?: Document[];
+  onSelect?: (docId: string) => void;
+  selectedDocId?: string | null;
+}
+
+export default function DocumentList({ documents: externalDocuments, onSelect, selectedDocId }: DocumentListProps = {}) {
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!externalDocuments);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   const fetchDocuments = async () => {
+    // If external documents are provided, use those instead of fetching
+    if (externalDocuments) {
+      setDocuments(externalDocuments);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await fetch('/api/documents');
@@ -37,12 +50,23 @@ export default function DocumentList() {
   };
   
   useEffect(() => {
-    fetchDocuments();
-  }, []);
+    if (externalDocuments) {
+      setDocuments(externalDocuments);
+      setLoading(false);
+    } else {
+      fetchDocuments();
+    }
+  }, [externalDocuments]);
   
   const handleDeleteClick = (document: Document) => {
     setDocumentToDelete(document);
     setShowDeleteModal(true);
+  };
+  
+  const handleDocumentClick = (document: Document) => {
+    if (onSelect) {
+      onSelect(document.id);
+    }
   };
   
   const confirmDelete = async () => {
@@ -101,10 +125,16 @@ export default function DocumentList() {
         {documents.map((document) => (
           <div 
             key={document.id} 
-            className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow relative"
+            className={`bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow relative cursor-pointer ${
+              selectedDocId === document.id ? 'ring-2 ring-blue-500' : ''
+            }`}
+            onClick={() => handleDocumentClick(document)}
           >
             <button 
-              onClick={() => handleDeleteClick(document)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteClick(document);
+              }}
               className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
               aria-label="Delete document"
             >
