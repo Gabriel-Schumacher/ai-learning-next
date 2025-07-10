@@ -1,4 +1,4 @@
-import * as Types from "../types_new";
+import * as Types from "@/lib/types/types_new";
 
 
 // Utility Functions used across the data context utility functions.
@@ -45,7 +45,7 @@ export function createFolder(idSet: Set<number>, name: string, createdAt: Date, 
 }
 
 export function createFile(idSet: Set<number>, type: Types.DataFileTypes, title: string, content: any[] = []): Types.BaseDataFile {
-    let date = new Date();
+    const date = new Date();
     return {
         id: newId(idSet),
         type,
@@ -100,29 +100,29 @@ export function generateFakeFolderStructureRoot(): Types.FolderStructureRoot {
     // NOT IMPLEMENTED
 
     // IDs Property 
-    let idSet = new Set<number>();
+    const idSet = new Set<number>();
 
     // Folders Property
     /** Generate a random amount of folders, from 1-4  */
     const folderCount = Math.floor(Math.random() * 4) + 1; // 1 to 4 folders
-    let foldersFiles = Array.from({ length: folderCount }, (_, i) =>
+    const foldersFiles = Array.from({ length: folderCount }, (_, i) =>
         createFolder(idSet, `Folder ${i + 1}`, new Date())
     );
     /** Generate a random amount of files to put into the folders, from 1-12  */
     const fileCount = Math.floor(Math.random() * 12) + 1; // 1 to 12 files
-    let splitAmount = Math.floor(fileCount / 2); // Used to generate the amount of conversations
-    let remainingAmount = fileCount - splitAmount; // Used to generate the amount of quizzes
+    const splitAmount = Math.floor(fileCount / 2); // Used to generate the amount of conversations
+    const remainingAmount = fileCount - splitAmount; // Used to generate the amount of quizzes
 
     /** Creates an array of conversations */
-    let conversations = Array.from({ length: splitAmount }, (_, i) => {
-        let content: Types.TextContentItem[] = Array.from({ length: 3 }, (_, j) =>
+    const conversations = Array.from({ length: splitAmount }, (_, i) => {
+        const content: Types.TextContentItem[] = Array.from({ length: 3 }, (_, j) =>
             createTextContentItem(idSet, `Conversation response ${j + 1} for conversation ${i + 1}`, j % 2 === 0)
         );
         return createConversation(idSet, `Conversation ${i + 1}`, content);
     });
     /** Creates an array of quizzes */
-    let quizzes = Array.from({ length: remainingAmount }, (_, i) => {
-        let content: Types.QuestionContentItem[] = Array.from({ length: 3 }, (_, j) =>
+    const quizzes = Array.from({ length: remainingAmount }, (_, i) => {
+        const content: Types.QuestionContentItem[] = Array.from({ length: 3 }, (_, j) =>
             createQuestionContentItem(idSet, [
                 createQuestionItem(`Quiz ${i + 1} Question ${j + 1}`, [`Answer A`, `Answer B`, `Answer C`], `Answer A`)
             ])
@@ -130,7 +130,7 @@ export function generateFakeFolderStructureRoot(): Types.FolderStructureRoot {
         return createQuiz(idSet, `Quiz ${i + 1}`, content);
     });
     /** Combines the conversations and quizzes (the files) and then evenly distributes them among the folders */
-    let allFiles = [...conversations, ...quizzes];
+    const allFiles = [...conversations, ...quizzes];
     foldersFiles.forEach((folder, idx) => {
         folder.files = allFiles.filter((_, fileIdx) => fileIdx % folderCount === idx);
     });

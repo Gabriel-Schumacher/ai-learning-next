@@ -1,7 +1,7 @@
 "use client";
 import React, { useReducer, useEffect } from "react";
 import { DataReducer, DATA_ACTION_TYPES } from "./DataReducer";
-import { FolderStructureRoot } from "../types_new";
+import { FolderStructureRoot } from "@/lib/types/types_new";
 
 export interface INITIAL_STATE_TYPE {
     rawData: string | null;

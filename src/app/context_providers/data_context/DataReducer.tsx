@@ -1,6 +1,6 @@
 "use client";
 
-import * as Types from "../types_new";
+import * as Types from "@/lib/types/types_new";
 import { INITIAL_STATE_TYPE as StateType } from "./DataProvider";
 import * as Utils from "./data_utils";
 
@@ -34,7 +34,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
 
                 const localRawData = Utils.getLocalStorageData();
                 if (localRawData === null) {
-                    let fakeData: Types.FolderStructureRoot = Utils.generateFakeFolderStructureRoot();
+                    const fakeData: Types.FolderStructureRoot = Utils.generateFakeFolderStructureRoot();
                     newState.rawData = JSON.stringify(fakeData);
                 } else {
                     newState.rawData = localRawData;
@@ -102,13 +102,13 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 if (!newState.sortedData) {
                     throw new Error("[DataReducer | Action: ADD_FOLDER] No sorted data available to add folder.");
                 }
-                let ids_folderblock = newState.sortedData.ids
+                const ids_folderblock = newState.sortedData.ids
                 if (!ids_folderblock) {
                     throw new Error("[DataReducer | Action: ADD_FOLDER] No sorted data available to add folder.");
                 }
 
-                let folderId = Utils.newId(ids_folderblock);
-                let newFolder: Types.FolderStructure = Utils.createFolder(ids_folderblock, `New Folder ${folderId}`, new Date());
+                const folderId = Utils.newId(ids_folderblock);
+                const newFolder: Types.FolderStructure = Utils.createFolder(ids_folderblock, `New Folder ${folderId}`, new Date());
                 
                 newState.sortedData.folders.push(newFolder);
 
@@ -124,7 +124,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 }
 
                 // Check to see if the folder with the currentFolderId exists in the sortedData.
-                let currentFolder = newState.sortedData.folders.find(folder => folder.id === newState.sortedData?.currentFolderId);
+                const currentFolder = newState.sortedData.folders.find(folder => folder.id === newState.sortedData?.currentFolderId);
                 if (!newState.sortedData.currentFolderId) {
                     throw new Error("[DataReducer | Action: ADD_FILE] No current folder selected to add file to.");
                 } else if (!currentFolder) {
@@ -137,11 +137,11 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 }
 
                 // Ease of reading variables.
-                let ids_fileblock = newState.sortedData.ids;
-                let capitalizedType = action.payload.type.charAt(0).toUpperCase() + action.payload.type.slice(1);
+                const ids_fileblock = newState.sortedData.ids;
+                const capitalizedType = action.payload.type.charAt(0).toUpperCase() + action.payload.type.slice(1);
 
-                let fileId = Utils.newId(ids_fileblock);
-                let newFile: Types.BaseDataFile = Utils.createFile(ids_fileblock, action.payload.type, `New ${capitalizedType} ${fileId}`, []);
+                const fileId = Utils.newId(ids_fileblock);
+                const newFile: Types.BaseDataFile = Utils.createFile(ids_fileblock, action.payload.type, `New ${capitalizedType} ${fileId}`, []);
                 currentFolder.files.push(newFile);
 
                 if (action.payload.setActive) {
@@ -155,7 +155,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                     throw new Error("[DataReducer | Action: ADD_CONTENT] No sorted data available to add content.");
                 }
                 // Check to see if the file with the currentFileId exists in the sortedData.
-                let currentFile = newState.sortedData.folders
+                const currentFile = newState.sortedData.folders
                     .flatMap(folder => folder.files)
                     .find(file => file.id === newState.sortedData?.currentFileId);
                 if (!currentFile) {
