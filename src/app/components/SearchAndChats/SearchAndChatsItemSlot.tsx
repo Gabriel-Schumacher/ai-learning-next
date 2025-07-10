@@ -102,7 +102,10 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                         <button
                             type="button"
                             className='w-full p-2 text-black hover:text-white text-left' 
-                            onClick={() => dispatch({type: "REMOVE_ITEM", payload: dataID ?? 0})}>
+                            onClick={() => {
+                                dispatch({type: "REMOVE_ITEM", payload: dataID ?? 0});
+                                local_dispatch({type: "REMOVE", payload: dataID ?? 0});
+                            }}>
                             Delete
                         </button>
                     </li>

@@ -21,7 +21,8 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
         { name: "Home", clickable: true },
         // { name: "Chat", clickable: false },
         // { name: "Quiz", clickable: false },
-        { name: "Data Creation", clickable: true },
+        { name: "Study", clickable: true },
+        { name: "Essay Assistance", clickable: true },
     ];
 
     const changePage = (index: number) => {
@@ -40,6 +41,8 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
                     return 2;
                 case 'DATA_CREATION': // 2
                     return 2;
+                case 'ESSAY': // 3
+                    return 3;
                 default:
                     return 1; // Default case if currentPage doesn't match any known value
             }
@@ -52,7 +55,7 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
         <nav className="flex flex-col bg-surface-300 dark:bg-surface-800 rounded-xl relative overflow-hidden mb-2">
             <ul className="flex flex-row justify-between w-full p-0 m-0 list-none overflow-hidden hover:[&>div]:rounded-lg">
                 <div
-                    className="absolute top-0 left-0 w-1/2 h-full bg-primary-500 rounded-lg transition-all duration-300 z-0"
+                    className="absolute top-0 left-0 w-1/3 h-full bg-primary-500 rounded-lg transition-all duration-300 z-0"
                     style={{ transform: `translateX(${(currentItem - 1) * 100}%)` }}
                 ></div>
                 {navigationItems.map((item, index) => (

@@ -308,3 +308,119 @@ export function toggleActiveState(data: StateType, id: number): void {
 export interface LocalStorageDataParsedType {
     [key: number]: Folder;
 }
+
+export function deleteItem(data: StateType, id: number): void {
+    
+    const Item = getItemBasedOnID(data, id);
+    const Container = getParentBasedOnID(data, id);
+
+    console.log("Deleting id", id, "found in the container", Container, "and the item", Item);
+
+    if (Array.isArray(Container) && Item) {
+        // If the container is an array, remove the item from it
+        /* eslint-disable-next-line */
+        const index = Container.findIndex((el: any) => el && el.id === id);
+        if (index !== -1) {
+            Container.splice(index, 1);
+        }
+    } else if (
+        Container &&
+        typeof Container === 'object' &&
+        'attached_items' in Container &&
+        /* eslint-disable-next-line */
+        Array.isArray((Container as { attached_items: any[] }).attached_items) &&
+        Item
+    ) {
+        // If the container has attached_items, remove the item from there
+        /* eslint-disable-next-line */
+        const attachedItems = (Container as { attached_items: any[] }).attached_items;
+        /* eslint-disable-next-line */
+        const index = attachedItems.findIndex((el: any) => el && el.id === id);
+        if (index !== -1) {
+            attachedItems.splice(index, 1);
+        }
+    } else {
+        console.warn(`Could not remove item with ID ${id}: container structure not recognized.`);
+    }
+
+    if (Array.isArray(data.sortedData) === false && typeof data.sortedData === 'object' && data.sortedData !== null) {
+        data.sortedData = Object.values(data.sortedData);
+    }
+    localStorage.setItem('user_info_ai_data', JSON.stringify(data.sortedData, null, 2));
+    console.log(`Item with ID ${id} deleted successfully.`);
+}
+
+// eslint-disable-next-line
+function getItemBasedOnID(data: any, id: number): unknown | undefined {
+    let searchableData
+    if (data.sortedData !== undefined) {
+        searchableData = data.sortedData;
+    } else {
+        searchableData = data;
+    }
+
+    // eslint-disable-next-line
+    function _getItemBasedOnID(array: any[], id: number) {
+        if (!Array.isArray(array)) return _getItemBasedOnID(Object.values(array), id);
+        for (const item of array) {
+            if (item.id === id) {
+                return item;
+            }
+            if (item.attached_items && Array.isArray(item.attached_items)) {
+                // eslint-disable-next-line
+                const found: any = _getItemBasedOnID(item.attached_items, id);
+                if (found) {
+                    return found;
+                }
+            }
+        }
+    }
+
+    const foundItem = _getItemBasedOnID(searchableData, id);
+    if (foundItem) {
+        return foundItem;
+    } else {
+        console.warn(`Item with ID ${id} not found in data.`);
+        return undefined;
+    }
+}
+// eslint-disable-next-line
+function getParentBasedOnID(data: any, id: number): unknown | undefined {
+    let searchableData
+    if (data.sortedData !== undefined) {
+        searchableData = data.sortedData;
+    } else if (data.attached_items !== undefined) {
+        searchableData = data.attached_items;
+    } else {
+        // If data is not in the expected format, we assume it's already a flat structure
+        searchableData = data;
+    }
+
+    // eslint-disable-next-line
+    function _getParentBasedOnID(array: any[] | { id?: number }, id: number) {
+        if (!Array.isArray(array) && array.id && array.id === id) {
+            return array; // If the array itself has the id, return it
+        }
+        if (!Array.isArray(array)) return _getParentBasedOnID(Object.values(array), id);
+        for (const item of array) {
+            if (item.id === id) {
+                return array;
+            }
+            if (item.attached_items && Array.isArray(item.attached_items)) {
+                // eslint-disable-next-line
+                const found: any = _getParentBasedOnID(item.attached_items, id);
+                if (found) {
+                    return found;
+                }
+            }
+        }
+    }
+
+    const foundItem = _getParentBasedOnID(searchableData, id);
+    if (foundItem) {
+        return foundItem;
+    } else {
+        console.warn(`Item with ID ${id} not found in data.`);
+        return undefined;
+    }
+}

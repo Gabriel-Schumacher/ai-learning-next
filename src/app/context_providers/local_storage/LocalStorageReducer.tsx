@@ -2,13 +2,14 @@
 
 import { ChatResponse, Conversation, Folder, Quiz, QuizQuestion } from "@/lib/types/types";
 import { INITIAL_STATE_LOCAL_STORAGE_TYPE as StateType } from "./LocalStorageProvider";
-import { getLocalStorageData, convertToSortedJson, generateRandomTestData, payloadIsValidType, saveData, toggleActiveState, removeFolderCurrents } from "./local_utils";
+import { getLocalStorageData, convertToSortedJson, generateRandomTestData, payloadIsValidType, saveData, toggleActiveState, removeFolderCurrents, deleteItem } from "./local_utils";
 
 export type LOCAL_DATA_ACTION_TYPES =
     | { type: 'LOAD'}
     | { type: 'SAVE'; payload: Folder | Folder[] | Conversation | Conversation[] | (Conversation | Quiz)[] | Quiz | QuizQuestion | ChatResponse }
     | { type: 'TEST_CASE_RESET' }
     | { type: 'TOGGLE_ACTIVE'; payload: number }
+    | { type: 'REMOVE'; payload: number }
 
 export const LocalStorageReducer = (state: StateType, action: LOCAL_DATA_ACTION_TYPES): StateType => {
     const newState = { ...state }; // Create a new state object to avoid mutating the original state. In cases where errors are thrown, we return the original state as to prevent rerendering.
@@ -53,6 +54,9 @@ export const LocalStorageReducer = (state: StateType, action: LOCAL_DATA_ACTION_
                 newState.sortedData = sortedData;
 
                 removeFolderCurrents(newState);
+                
+                // We redo this this to force other components to rerender with the new data.
+                newState.sortedData = { ...newState.sortedData,}
 
                 console.log("Got localStorage data successfully.", sortedData);
             } catch (error) {
@@ -83,6 +87,24 @@ export const LocalStorageReducer = (state: StateType, action: LOCAL_DATA_ACTION_
                 console.error("[LocalStorageReducer] Error saving data:", error);
                 newState.localStorageError = `[LocalStorageReducer] Error saving data: ${error instanceof Error ? error.message : 'Unknown error'}`;
             }
+            return newState;
+        case 'REMOVE':
+            // Removes an item based on it's ID from the localStorage data.
+            try {
+                console.debug("[LocalStorageReducer] Attempting to removing item with ID:", action.payload);
+
+                if (action.payload === undefined || action.payload === null) {
+                    throw new Error("Payload is undefined or null.");
+                }
+                const itemId = action.payload;
+
+                deleteItem(newState, itemId);
+                
+                console.debug("[LocalStorageReducer] Item removed successfully:", action.payload);
+            } catch (error) {
+                console.error("[LocalStorageReducer] Error removing data:", error);
+                newState.localStorageError = `[LocalStorageReducer] Error removing data: ${error instanceof Error ? error.message : 'Unknown error'}`;
+            };
             return newState;
         case 'TEST_CASE_RESET':
             TestCaseResetFunction();

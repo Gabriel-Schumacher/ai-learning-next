@@ -1,9 +1,10 @@
 'use client';
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { PlusSign, Chevron, SearchIcon } from "../IconsIMGSVG";
 import { AiDataProviderContext } from "../AiContextProvider/AiDataProvider";
 import Slot from "./SearchAndChatsItemSlot";
 import { LocalStorageContextProvider } from "@/app/context_providers/local_storage/LocalStorageProvider";
+import { Conversation, Folder, Quiz } from "@/lib/types/types";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -13,6 +14,10 @@ import { LocalStorageContextProvider } from "@/app/context_providers/local_stora
 const SearchAndChats: React.FC = () => {
     const [foldersHidden, setFoldersHidden] = useState<boolean>(false);
     const [chatsHidden, setChatsHidden] = useState<boolean>(false);
+
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [folders, setFolders] = useState<Folder[]>([]);
+    const [chats, setChats] = useState<(Conversation | Quiz)[]>([]);
 
     const context = useContext(AiDataProviderContext);
     if (!context) {
@@ -43,6 +48,56 @@ const SearchAndChats: React.FC = () => {
         }
     };
 
+    // Update the folders and chats when the data is loaded.
+    // This doesn't update it if the folders and chats are already set, to prevent unnecessary re-renders, or rerenders caused by just selecting or chatting. 
+    useEffect(() => {
+        if (!folders && data.folders) {
+            setFolders(data.folders);
+        }
+        if (!chats && data.conversations) {
+            setChats(data.conversations);
+        }
+    }, [data.folders, data.conversations, folders, chats]);
+
+    // Testing purposes console logging.
+    useEffect(() => {
+        if (searchQuery !== "" && searchQuery !== undefined)
+            console.debug("Search query updated: ", searchQuery);
+        else
+            console.debug("Search query cleared.");
+    }, [searchQuery]);
+
+    // Update the search query state when the search is removed.
+    useEffect(() => {
+        if ((searchQuery == "" || searchQuery == undefined) && data.folders) {
+            console.debug("Search query cleared, updating folders.", data.folders);
+            setFolders(data.folders);
+        }
+        if ((searchQuery == "" || searchQuery == undefined) && data.conversations) {
+            console.debug("Search query cleared, updating chats.", data.conversations);
+            setChats(data.conversations);
+        }
+    }, [searchQuery, data.folders, data.conversations]);
+
+    useEffect(() => {
+        // When the search query changes, filter the folders and chats based on the search query.
+        if (searchQuery !== "") {
+            const filteredFolders = data.folders?.filter(folder =>
+                folder.name.toLowerCase().includes(searchQuery.toLowerCase())
+            ) || [];
+            const filteredChats = data.conversations?.filter(chat =>
+                chat.title.toLowerCase().includes(searchQuery.toLowerCase())
+            ) || [];
+
+            setFolders(filteredFolders);
+            setChats(filteredChats);
+        } else {
+            // If the search query is empty, reset to the original folders and chats.
+            setFolders(data.folders || []);
+            setChats(data.conversations || []);
+        }
+    }, [searchQuery, data.folders, data.conversations]);
+
     return (
         <aside className="card lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg grid grid-rows-[1fr_auto] gap-0">
             {/* Top Content */}
@@ -56,6 +111,7 @@ const SearchAndChats: React.FC = () => {
                         type="text"
                         placeholder="What are you looking for?"
                         className="w-full text-surface-950 placeholder:text-surface-900 dark:text-surface-50 dark:placeholder:text-surface-200 bg-transparent focus:outline-none"
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     <SearchIcon />
                 </label>
@@ -110,8 +166,8 @@ const SearchAndChats: React.FC = () => {
                     <ul
                         className={`flex flex-col gap-2 mb-4 ${foldersHidden ? "hidden" : ""}`}
                     >
-                        {data.folders &&
-                            data.folders.map((folder, index) => (
+                        {folders &&
+                            folders.map((folder, index) => (
                                 <Slot
                                     key={index}
                                     header={folder.name}
@@ -149,8 +205,8 @@ const SearchAndChats: React.FC = () => {
                     <ul
                         className={`max-h-full flex flex-col gap-2 mb-4 ${chatsHidden ? "hidden" : "" }`}
                     >
-                        {data.conversations &&
-                            data.conversations.map((chat, index) => (
+                        {chats &&
+                            chats.map((chat, index) => (
                                 <Slot
                                     key={index}
                                     data-chat-active={

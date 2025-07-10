@@ -1,66 +1,95 @@
 "use client"
-import Link from 'next/link'
+import SearchAndChats from "./components/SearchAndChats/SearchAndChats"
+import AiChat from "./components/AiChat"
+import AiMenu from "./components/AiMenu"
+import FigmaNavigation from "./components/FigmaNavigation"
+import { useContext } from "react"
+import { AiDataProviderContext } from "./components/AiContextProvider/AiDataProvider"
+import AiQuiz from "./components/AiQuiz/AiQuiz"
+import DataCreation from "./routes/datacreation/page"
+import QuizContextProvider from "./components/AiQuiz/QuizContext"
 
-export default function Home() {
-  return (
-    <main>
-        <div className="w-full grid place-items-center grid-cols-1 lg:grid-cols-2 place-self-center gap-2">
-            
-            <div className="w-full flex flex-col justify-center items-start gap-2">
-                <h1 className="h2 dark:text-surface-50">AI Learning Assistant</h1>
-                <p className="dark:text-surface-50">Our AI learning assistant is designed to provide personalized, real-time support to help you learn more effectively. Whether you&#39;re studying for an exam, picking up a new skill, or tackling a tough topic, our AI assistant makes learning engaging and efficient. It&#39;s like having a tutor available 24/7 to guide you through challenges and help you reach your goals faster.</p>
-                <div className="flex flex-row gap-2">
-                    <Link href="/AiChat"><button type="button" className="btn lg">Get Started</button></Link>
-                    <Link href="/AiChat"><button className="btn lg">Practice Test</button></Link>
-                </div>
-            </div>
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-            <div className="w-full flex flex-col justify-center items-start gap-2">
-                <div className="h-[100px] lg:h-36 bg-gray-500 rounded-xl grid justify-start items-end p-8 w-full">
-                    <h2 className="text-white font-semibold text-lg">Essay Builder</h2>
-                </div>
-                <div className="h-[100px] lg:h-36 bg-gray-500 rounded-xl grid justify-start items-end p-8 w-full">
-                    <h2 className="text-white font-semibold text-lg">Flashcard Generator</h2>
-                </div>
-                <div className="h-[100px] lg:h-36 bg-gray-500 rounded-xl grid justify-start items-end p-8 w-full">
-                    <h2 className="text-white font-semibold text-lg">ePub Reader</h2>
-                </div>
-            </div>
+function ChatBot() {
+    const context = useContext(AiDataProviderContext);
+    if (!context) {
+        throw new Error("AiDataProviderContext must be used within a AiDataProvider");
+    }
+    const { data } = context;
+    // /*
+    //     What to do when rendering the page.
+    // */
+    // useEffect(() => {
+    //     const fetchChatHistory = async () => {
+    //         dispatch({ type: "SET_LOADING", payload: true })
+    //         try {
+    //             if (data.folders && data.folders.length > 0) {
+    //                 return // Don't override it if there already is data.
+    //             }
+    //             let USER_ID = localStorage.getItem("userId")
+    //             if (!USER_ID) {
+    //                 USER_ID = "guest"
+    //             }
+    //             const chatHistory = await fetch(`${BASE_URL}/api/chatHistory/${USER_ID}`)
+    //             if (!chatHistory.ok) {
+    //                 dispatch({ type: "SET_ERROR", payload: "Failed to fetch chat history" })
+    //             }
+    //             const DATA = await chatHistory.json()
+    //             dispatch({ type: "SET_FOLDERS", payload: DATA.folders })
+    //         } catch (error) {
+    //             console.error("Error fetching conversations:", error)
+    //             dispatch({ type: "SET_ERROR", payload: (error as Error).message })
+    //         }
+    //     }
+    //     fetchChatHistory().then(() => {
+    //         dispatch({ type: "SET_LOADING", payload: false })
+    //     })
+    // }
+    // , [dispatch, data.folders])
 
-        </div>
+    return (
+      <main className="flex flex-col h-full lg:flex-row gap-2 w-full">
+        <SearchAndChats />
+        <div className="w-full mr-2 grid grid-rows-[auto_1fr]">
+            <FigmaNavigation actions={() => {}}/>
+            <div className="w-full h-full">
+                { !data.error &&
+                    <>
+                        {/* Menu, What greets the user or what shows when they are starting a new conversation. */}
+                        {data.currentPage === "HOME" &&
+                            <AiMenu />
+                        }
+                        {/* When Chatting */}
+                        {data.currentPage === "CHAT" &&
+                            <AiChat />
+                        }
+                        {/* Quiz */}
+                        {data.currentPage === "QUIZ" &&
+                            <QuizContextProvider>
+                                <AiQuiz />
+                            </QuizContextProvider>
+                        }
+                        {/* Data Creation */}
+                        {data.currentPage === "DATA_CREATION" &&
+                                <DataCreation />
+                        }
+                    </>
+                }
 
-        <div className="card w-full bg-primary-900 p-4 grid place-items-center place-self-center my-8">
-            <h2 className="h4 text-white text-center">Designed to Maximize Your Learning</h2>
-        </div>
-
-        <div className="w-full grid place-items-center grid-cols-1 gap-4 place-self-center">
-
-            <div className="w-full grid place-items-center grid-cols-1 lg:grid-cols-2 place-self-center gap-4">
-                <div className="w-full flex flex-col justify-center items-start gap-2">
-                    <h2 className="h2 dark:text-surface-50">Essay Building, made easy.</h2>
-                    <p className="dark:text-surface-50">Our AI learning assistant is designed to provide personalized, real-time support to help you learn more effectively. Whether you&#39;re studying for an exam, picking up a new skill, or tackling a tough topic, our AI assistant makes learning engaging and efficient. It&#39;s like having a tutor available 24/7 to guide you through challenges and help you reach your goals faster.</p>
-                </div>
-
-                <div className="w-full flex flex-col justify-center items-start gap-2">
-                    <div className="h-[300px] lg:h-72 bg-gray-200 rounded-xl grid justify-start items-end p-8 w-full">
-                        <h2 className="text-[#2D2D2A] font-semibold text-lg">Image Text</h2>
+                {/* Error Message */}
+                {data.error &&
+                    <div className="w-full h-full grid place-items-center">
+                        <div>
+                            <p className="bg-error-500 rounded py-1 px-2 text-surface-950-50 font-bold mb-2">Sorry, there was an error:</p>
+                            <p className="text-surface-900 dark:text-surface-50 text-center">{data.error}</p>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
-
-            <div className="w-full grid place-items-center grid-cols-1 lg:grid-cols-2 place-self-center gap-4">
-                <div className="w-full flex flex-col justify-center items-start gap-2">
-                    <h2 className="h2 dark:text-surface-50">Create Flashcards with no hassle</h2>
-                    <p className="dark:text-surface-50">Our AI learning assistant is designed to provide personalized, real-time support to help you learn more effectively. Whether you&#39;re studying for an exam, picking up a new skill, or tackling a tough topic, our AI assistant makes learning engaging and efficient. It&#39;s like having a tutor available 24/7 to guide you through challenges and help you reach your goals faster.</p>
-                </div>
-                <div className="w-full flex flex-col justify-center items-start gap-2">
-                    <div className="h-[300px] lg:h-72 bg-gray-200 rounded-xl grid justify-start items-end p-8 w-full">
-                        <h2 className="text-[#2D2D2A] font-semibold text-lg">Image Text</h2>
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </main>
-  );
-}
+      </main>
+    )
+  }
+  
+  export default ChatBot

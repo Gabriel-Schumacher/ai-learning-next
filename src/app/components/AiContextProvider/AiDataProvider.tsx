@@ -68,7 +68,7 @@ function AiDataProvider({ children }: { children: React.ReactNode }) {
                 console.log("Data already initialized, skipping initialization.");
             }
         }
-    }, [data.folders, local_data.rawData]);
+    }, [data.folders, local_data.rawData, local_data.sortedData]);
 
     return (
         <AiDataProviderContext.Provider value={{ data, dispatch }}>

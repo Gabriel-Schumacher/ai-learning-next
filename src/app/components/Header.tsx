@@ -7,8 +7,6 @@ function HeaderAndNav() {
     const currentPath = usePathname();
     const [navigationItems, setNavigationItems] = useState([
         {name: "Home", path: "/", active:false, },
-        {name: "Writing Aid", path: "/routes/writingaid", active:false, },
-        {name: "Chatbot", path: "/routes/chatbot", active:false, },
         {name: "Data Creation", path: "/routes/datacreation", active:false, },
         {name: "Quiz", path: "/routes/quiz", active:false, },
     ]);
