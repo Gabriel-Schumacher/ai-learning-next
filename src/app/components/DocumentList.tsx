@@ -12,7 +12,7 @@ type Document = {
 
 interface DocumentListProps {
   documents?: Document[];
-  onSelect?: (docId: string) => void;
+  onSelect?: (docId: string | null) => void;
   selectedDocId?: string | null;
 }
 
@@ -65,7 +65,7 @@ export default function DocumentList({ documents: externalDocuments, onSelect, s
   
   const handleDocumentClick = (document: Document) => {
     if (onSelect) {
-      onSelect(document.id);
+      onSelect(selectedDocId === document.id ? null : document.id);
     }
   };
   
@@ -133,7 +133,7 @@ export default function DocumentList({ documents: externalDocuments, onSelect, s
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                handleDeleteClick(document);
+                handleDeleteClick(document)
               }}
               className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
               aria-label="Delete document"
@@ -146,9 +146,6 @@ export default function DocumentList({ documents: externalDocuments, onSelect, s
               <p className="text-sm text-gray-600 mb-3">{document.description}</p>
             )}
             <div className="flex justify-between items-center text-xs text-gray-500">
-              <span>
-                {document.chunkCount ? `${document.chunkCount} chunks` : 'Processing...'}
-              </span>
               {document.createdAt && (
                 <span>
                   {new Date(document.createdAt).toLocaleDateString()}

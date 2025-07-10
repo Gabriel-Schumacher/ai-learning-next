@@ -70,8 +70,8 @@ function LibraryPage() {
     setError(errorMsg);
   };
 
-  const handleDocumentSelect = (docId: string) => {
-    setSelectedDoc(docId);
+  const handleDocumentSelect = (docId: string | null) => {
+      setSelectedDoc(docId);
   };
 
   return (

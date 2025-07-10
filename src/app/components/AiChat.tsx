@@ -35,7 +35,18 @@ const MARKED = new Marked(
 )
 
 // AI STUFF END FROM TESTCHAT
-const AiChat: React.FC = () => {
+
+type AiChatProps = {
+    initialMessages?: { role: 'user' | 'assistant', content: string }[];
+    customEndpoint?: string;
+    customSystemPrompt?: string;
+};
+
+const AiChat: React.FC<AiChatProps> = ({
+    initialMessages,
+    customEndpoint,
+    customSystemPrompt
+}) => {
 
     const [textAreaValue, setTextAreaValue] = useState<string>("");
     const [prevConversationObjForDisplay, setPrevConversationObjForDisplay] = useState<Conversation | null>(null);
@@ -76,6 +87,27 @@ const AiChat: React.FC = () => {
     }, [readableStream.text]);
     // AI RESPONSE STUFF END
 
+    // If initialMessages is provided, initialize responses with them
+    useEffect(() => {
+        if (initialMessages && initialMessages.length && data.currentConversation) {
+            // Only add if not already present
+            if (data.currentConversation.responses.length === 0) {
+                initialMessages.forEach(msg => {
+                    dispatch({
+                        type: "ADD_RESPONSE",
+                        payload: {
+                            body: msg.content,
+                            isAiResponse: msg.role === 'assistant',
+                            type: 'response',
+                            id: -1,
+                            time: new Date(),
+                        }
+                    });
+                });
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialMessages, data.currentConversation]);
 
     // FUNCTIONAL START
 
@@ -126,15 +158,17 @@ const AiChat: React.FC = () => {
                     content: newResponse.body,
                 });
 
+                const endpoint = customEndpoint || '/api/chat';
+                const systemPrompt = customSystemPrompt || 'teacher';
                 const answer = readableStream.request(
-                    new Request('/api/chat', {
+                    new Request(endpoint, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
                             chats: chatHistoryAiSubmission,
-                            systemPrompt: 'teacher',
+                            systemPrompt,
                             subject: 'General',
                             deepSeek: false,
                         }),
