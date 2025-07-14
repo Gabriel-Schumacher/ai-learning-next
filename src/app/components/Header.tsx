@@ -6,8 +6,7 @@ import Link from "next/link";
 function HeaderAndNav() {
     const currentPath = usePathname();
     const [navigationItems, setNavigationItems] = useState([
-        {name: "Home", path: "/", active:false, },
-        {name: "Writing Aid", path: "/routes/writingaid", active:false, },
+        {name: "Core Part of the App", path: "/", active:false, },
         {name: "Library", path: "/routes/library", active:false, },
     ]);
     const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);

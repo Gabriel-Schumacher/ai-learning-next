@@ -25,7 +25,7 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
         // { name: "Chat", clickable: false },
         // { name: "Quiz", clickable: false },
         { name: "Study", clickable: true, pageOption: "DATA_CREATION" },
-        { name: "Essay Assistance", clickable: false, pageOption: "ESSAY" },
+        { name: "Essay Assistance", clickable: true, pageOption: "ESSAY" },
     ];
 
     const changePage = (index: number) => {

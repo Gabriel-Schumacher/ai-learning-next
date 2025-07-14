@@ -47,16 +47,16 @@ function WritingAid() {
   };
 
   return (
-    <main className="bg-white shadow-md rounded-sm m-4 p-4">
+   <div className="rounded-lg card w-full h-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
         <div>
           <WritingAidChat writingText={editorContent} />
         </div>
-        <div>
+        <div className='rounded-lg overflow-hidden bg-surface-950-50 text-surface-50-950'>
           <RichTextEditor ref={editorRef} onChange={handleEditorChange} />
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 

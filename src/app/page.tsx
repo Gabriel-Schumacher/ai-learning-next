@@ -8,6 +8,7 @@ import { DataContextProvider } from "@/app/context_providers/data_context/DataPr
 // import AiQuiz from "./components/AiQuizNOTINUSE/AiQuiz"
 import Quiz from "./routes/quiz/page"
 import DataCreation from "./routes/datacreation/page"
+import WritingAid from "./routes/writingaid/page"
 // import QuizContextProvider from "./components/AiQuizNOTINUSE/QuizContext"
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -48,6 +49,10 @@ function Home() {
                                 <AiQuiz />
                             </QuizContextProvider>
                             */
+                        }
+                        {/*WritingAid/Essay */}
+                        {data.sortedData?.currentPage === "ESSAY" &&
+                            <WritingAid />
                         }
                         {/* Error when no page is set. */}
                         {!data.sortedData?.currentPage &&
