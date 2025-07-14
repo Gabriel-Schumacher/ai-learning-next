@@ -100,7 +100,7 @@ const PDFUpload: React.FC<PDFUploadProps> = ({ onTextExtracted, onError }) => {
   };
 
   return (
-    <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+    <div className="border-2 border-dashed border-gray-300 dark:bg-surface-200 bg-surface-400 rounded-md p-4 text-center">
       <input
         type="file"
         accept="application/pdf"
@@ -118,7 +118,7 @@ const PDFUpload: React.FC<PDFUploadProps> = ({ onTextExtracted, onError }) => {
         {isProcessing ? 'Processing...' : isScriptLoaded ? 'Select PDF' : 'Loading PDF.js...'}
       </label>
 
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mt-2 text-sm text-gray-800">
         {isScriptLoaded ? 'Click to select a PDF file' : 'Loading PDF processor...'}
       </p>
     </div>

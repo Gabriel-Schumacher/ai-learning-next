@@ -141,7 +141,7 @@ export default function DocumentList({ documents: externalDocuments, onSelect, s
               <Trash2 size={16} />
             </button>
             
-            <h3 className="font-medium text-lg mb-2 pr-6">{document.title}</h3>
+            <h3 className="text-surface-800 font-medium text-lg mb-2 pr-6">{document.title}</h3>
             {document.description && (
               <p className="text-sm text-gray-600 mb-3">{document.description}</p>
             )}

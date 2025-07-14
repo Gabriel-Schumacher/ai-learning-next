@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "./components/Header";
 import DataStorageProvider from "./context_providers/data_context/DataProvider";
-import AiDataProvider from './components/AiContextProvider/AiDataProvider';
-import LocalStorageProvider from "./context_providers/local_storage/LocalStorageProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,14 +29,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         id="root"
       >
-        <LocalStorageProvider>
-          <AiDataProvider>
-            <DataStorageProvider>
-              <Header />
-              {children}
-            </DataStorageProvider>
-          </AiDataProvider>
-        </LocalStorageProvider>
+        <DataStorageProvider>
+          {children}
+        </DataStorageProvider>
       </body>
     </html>
   );

@@ -44,6 +44,8 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
                     return 2;
                 case 'DATA_CREATION': // 2
                     return 2;
+                case 'LIBRARY': // 2
+                    return 2;
                 case 'ESSAY': // 3
                     return 3;
                 default:

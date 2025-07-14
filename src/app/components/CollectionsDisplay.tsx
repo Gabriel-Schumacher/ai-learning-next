@@ -12,6 +12,9 @@ import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Marked } from "marked";
 import DOMPurify from "dompurify";
+import ButtonLink from "./ButtonLink";
+
+
 
 const marked = new Marked();
 
@@ -406,7 +409,7 @@ function CollectionsDisplay({
   }
 
   return (
-    <div>
+    <>
       {/* Edit Questions Mode */}
       {editQuestionsMode && (
         <div className="bg-surface-200 dark:bg-surface-800 p-12 rounded-lg shadow-md mb-4 flex flex-col gap-4">
@@ -490,16 +493,21 @@ function CollectionsDisplay({
 
       {/* Display Available Collections */}
       {studyMode === false && activity === 0 && (
-        <div>
+        <>
           {questionLog.length > 0 && (
-            <div className="mt-4">
-              <h2 className="text-2xl font-semibold mb-2">
-                Your study collections
-              </h2>
+            <>
+              <div className="grid grid-cols-[1fr_auto]">
+                <h2 className="text-2xl font-semibold">
+                  Your study collections
+                </h2>
+                <ButtonLink local_href="LIBRARY">
+                  Library
+                </ButtonLink>
+              </div>
               <ul className="flex flex-col gap-4">
                 {questionLog.map((quizSet, index) => (
                   <li
-                    className="bg-surface-200 dark:bg-surface-800 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-100 dark:bg-surface-700 hover:dark:bg-surface-700 hover:cursor-pointer hover:shadow-xl"
+                    className="bg-surface-50 dark:bg-surface-900 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-300 dark:bg-surface-700 hover:dark:bg-surface-700 hover:cursor-pointer hover:shadow-xl"
                     key={index}
                     onClick={() => handleQuizSelection(index)}
                   >
@@ -523,19 +531,18 @@ function CollectionsDisplay({
                   New Collection
                 </button>
               </div>
-            </div>
+            </>
           )}
-        </div>
+        </>
       )}
       {/* If the user doesn't have collections, but it's not in creation mode */}
       {questionLog.length === 0 && !editQuestionsMode && (
               <div className="text-center mt-4">
                 <p className="mb-4">You don&#39;t have any study collections yet!</p>
-              <button className="btn" onClick={onNewCollection}>
-                  <div className="w-[24px] h-[24px]">
-                      <PlusIcon color={"text-surface-50"}/>                        
-                  </div>
-
+                <button className="btn" onClick={onNewCollection}>
+                <div className="w-[24px] h-[24px]">
+                    <PlusIcon color={"text-surface-50"}/>                        
+                </div>
                 New Collection
               </button>
             </div>
@@ -545,7 +552,7 @@ function CollectionsDisplay({
         parsedQuestions.length > 0 &&
         activity === 0 &&
         !editQuestionsMode && (
-          <div className="bg-surface-200 dark:bg-surface-800 p-4 rounded-xl shadow-md w-full flex flex-col gap-4">
+          <>
             <div className="flex justify-between">
               <p className="text-2xl font-semibold text-primary-500">
                 {selectedQuizTitle}
@@ -616,12 +623,12 @@ function CollectionsDisplay({
                 Back
               </button>
             </div>
-          </div>
+          </>
         )}
 
       {/* Display FlashCards */}
       {studyMode === true && activity === 1 && parsedQuestions.length > 0 && (
-        <div className="bg-surface-200 dark:bg-surface-800 p-4 rounded-xl flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center gap-6">
           <div className="flex justify-between w-full max-w-md items-center">
             <p>{currentQuestionIndex + 1}/{parsedQuestions.length}</p>    
             <button className="btn" onClick={finishFlashCards}>Finish</button>        
@@ -679,7 +686,7 @@ function CollectionsDisplay({
 
       {/* Display Quiz */}
       {studyMode === true && activity === 2 && parsedQuestions.length > 0 && (
-        <div className="bg-surface-200 dark:bg-surface-800 p-4 rounded-xl flex flex-col items-center gap-6 w-full mx-auto">
+        <div className="flex flex-col items-center gap-6">
           {!quizFinished ? (
             <>
               <div className="flex justify-between w-full items-center max-w-md">
@@ -786,7 +793,7 @@ function CollectionsDisplay({
 
       {/* Study Guide Display */}
       {studyMode === true && activity === 3 && (
-        <div className="bg-surface-200 dark:bg-surface-800 p-4 rounded-xl flex flex-col items-center gap-6 w-full mx-auto">
+        <div className="flex flex-col items-center gap-6">
           <div className="flex justify-between w-full max-w-md items-center">
             <p className="text-xl font-semibold">{selectedQuizTitle} - Study Guide</p>
             <button className="btn" onClick={cancelSelectedCollection}>Back</button>
@@ -811,7 +818,7 @@ function CollectionsDisplay({
         </div>
       )}
       
-    </div>
+    </>
   );
 }
 export default CollectionsDisplay;

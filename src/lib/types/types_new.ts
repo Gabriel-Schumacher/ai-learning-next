@@ -31,7 +31,7 @@
                     - content (array of FlashCardItem)
 */
 
-export type PageOptions = 'HOME' | 'CHAT' | 'QUIZ' | 'DATA_CREATION' | 'ESSAY'; // Used to determine the current page in the application. For an example, look at FigmaNavigation.tsx
+export type PageOptions = 'HOME' | 'CHAT' | 'QUIZ' | 'DATA_CREATION' | 'ESSAY' | 'LIBRARY'; // Used to determine the current page in the application. For an example, look at FigmaNavigation.tsx
 
 export interface FolderStructureRoot {
     ids: Set<number> | number[]; // Set of unique identifiers for the folders

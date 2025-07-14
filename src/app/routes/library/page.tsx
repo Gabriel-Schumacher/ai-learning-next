@@ -75,7 +75,7 @@ function LibraryPage() {
   };
 
   return (
-    <div className="p-4">
+    <div className="card w-full h-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
       <h1 className="text-2xl font-bold mb-4">Library</h1>
       <p className="mb-6">
         Upload PDF documents to extract and vectorize their content.

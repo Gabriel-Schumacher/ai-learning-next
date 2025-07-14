@@ -112,7 +112,7 @@ function Quiz() {
     };
 
     return (
-        <main>
+        <div className="rounded-lg card w-full h-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
             <h1 className="text-4xl font-bold mb-4">{title ? title : "Quiz App"}</h1>
             {/* Display Available Quizzes */}   
             { studyMode === false && (
@@ -194,7 +194,7 @@ function Quiz() {
                     Submit Quiz
                 </button>
             )}
-        </main>
+        </div>
     );
 }
 export default Quiz;

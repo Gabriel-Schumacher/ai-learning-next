@@ -30,14 +30,12 @@ function DataCreationPage() {
     }, []);
 
     return (
-        <div>
+        <div className="card w-full h-full grid grid-rows-[max-content_1fr] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
             {stage === 0 && (
                 <DataCreation onSave={handleSave} onCancel={handleCancel} />
             )}
             {stage === 1 && (
-              <div>
                 <CollectionsDisplay onNewCollection={() => setStage(0)} />
-              </div>
             )}
         </div>
     );

@@ -9,6 +9,7 @@ import { DataContextProvider } from "@/app/context_providers/data_context/DataPr
 import Quiz from "./routes/quiz/page"
 import DataCreation from "./routes/datacreation/page"
 import WritingAid from "./routes/writingaid/page"
+import LibraryPage from "./routes/library/page"
 // import QuizContextProvider from "./components/AiQuizNOTINUSE/QuizContext"
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
@@ -21,7 +22,7 @@ function Home() {
     const { data } = context;
 
     return (
-      <main className="flex flex-col h-full lg:flex-row gap-2 w-full">
+      <main className="flex flex-col h-full lg:flex-row gap-2 w-full p-4">
         <SearchAndChats />
         <div className="w-full mr-2 grid grid-rows-[auto_1fr]">
             <FigmaNavigation actions={() => {}}/>
@@ -54,6 +55,11 @@ function Home() {
                         {data.sortedData?.currentPage === "ESSAY" &&
                             <WritingAid />
                         }
+                        {/* Library */}
+                        {data.sortedData?.currentPage === "LIBRARY" &&
+                            <LibraryPage />
+                        }
+                        {/* Settings */}
                         {/* Error when no page is set. */}
                         {!data.sortedData?.currentPage &&
                         <div className="w-full h-full grid place-items-center">
