@@ -12,9 +12,7 @@
 #root { 
     /* This rule is for the body. */
     @apply grid;
-    @apply grid-rows-[max-content_1fr_max-content];
     @apply min-h-screen;
-    @apply gap-4;
     @apply bg-surface-50;
     @apply dark:bg-surface-950
 }
