@@ -4,7 +4,7 @@ import type { Conversation, ChatResponse, Quiz, QuizQuestion } from '@/lib/types
 // Generate a fake chat response
 const generateFakeResponse = (): ChatResponse => ({
   id: Math.floor(Math.random() * 1000),
-  type: 'text',
+  type: 'response',
   time: new Date(),
   body: 'This is a test message.',
   isAiResponse: Math.random() < 0.5,
@@ -48,6 +48,7 @@ const generateFakeQuiz = (): Quiz => {
   const convertQuizToQuizQuestions = (param: typeof quiz): QuizQuestion[] =>
     param.map((q) => ({
       id: q.id,
+      type: "question",
       question: q.question,
       answers: q.options,
       correct_answer: q.answer,
