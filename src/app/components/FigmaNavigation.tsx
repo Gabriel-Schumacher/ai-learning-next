@@ -1,6 +1,7 @@
 'use client';
 import { useState, useContext, useEffect} from "react";
-import { AiDataProviderContext } from "./AiContextProvider/AiDataProvider";
+import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
+import * as Types from "@/lib/types/types_new";
 // import { INITIAL_DATA_STATE_TYPE } from "./AiContextProvider/AiDataProvider"
 
 
@@ -11,28 +12,30 @@ interface FigmaNavigationProps {
 
 const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {    
     const [currentItem, setCurrentItem] = useState<number>(1); // Default to the first item
-    const context = useContext(AiDataProviderContext);
+    const context = useContext(DataContextProvider);
     if (!context) {
-        throw new Error("AiDataProviderContext must be used within a AiDataProvider");
+        throw new Error(
+            "DataContextProvider must be used within a DataContextProvider"
+        );
     }
     const { data, dispatch } = context;
 
     const navigationItems = [
-        { name: "Home", clickable: true },
+        { name: "Home", clickable: true, pageOption: "HOME" },
         // { name: "Chat", clickable: false },
         // { name: "Quiz", clickable: false },
-        { name: "Study", clickable: true },
-        { name: "Essay Assistance", clickable: true },
+        { name: "Study", clickable: true, pageOption: "DATA_CREATION" },
+        { name: "Essay Assistance", clickable: false, pageOption: "ESSAY" },
     ];
 
     const changePage = (index: number) => {
-        dispatch({ type: "SET_PAGE", payload: navigationItems[index].name.toUpperCase().replace(/ /g, "_") });
-        dispatch({ type: "REMOVE_CURRENT_ITEM" });
+        dispatch({ type: "SET_PAGE", payload: navigationItems[index].pageOption as Types.PageOptions });
+        dispatch({ type: "TOGGLE_CURRENT_FILE", payload: -1 })
     }
 
     useEffect(() => {
         const itemDependingOnPage: number = (() => {
-            switch (data.currentPage) {
+            switch (data.sortedData?.currentPage) {
                 case 'HOME': // 1
                     return 1;
                 case 'CHAT':
@@ -49,7 +52,7 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
         })();
     
         setCurrentItem(itemDependingOnPage);
-    }, [data.currentPage]); // Update currentItem when currentPage changes
+    }, [data.sortedData?.currentPage]); // Update currentItem when currentPage changes
 
     return (
         <nav className="flex flex-col bg-surface-300 dark:bg-surface-800 rounded-xl relative overflow-hidden mb-2">

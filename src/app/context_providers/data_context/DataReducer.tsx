@@ -1,5 +1,5 @@
 "use client";
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as Types from "@/lib/types/types_new";
 import { INITIAL_STATE_TYPE as StateType } from "./DataProvider";
 import * as Utils from "./data_utils";
@@ -34,6 +34,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
 
                 const localRawData = Utils.getLocalStorageData();
                 if (localRawData === null) {
+                    console.warn("[DataReducer] No data found in localStorage. Initializing with fake data.");
                     const fakeData: Types.FolderStructureRoot = Utils.generateFakeFolderStructureRoot();
                     newState.rawData = JSON.stringify(fakeData);
                 } else {
@@ -53,6 +54,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 newState.sortedData.currentFolderId = undefined;
                 newState.sortedData.currentFileId = undefined;
 
+                Utils.saveData(newState.sortedData); // Saves it to localStorage so that it can be used later.
                 return newState;
             case 'SAVE':
                 // Since all changes happen to the sorted Data, and the sorted data SHOULD be of type FolderStructureRoot, we can just save the sorted data to localStorage.
@@ -72,16 +74,25 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
             case 'SET_PAGE':
                 // This action is used to set the current page in the application.
                 // It can be used to navigate between different pages in the application.
+                // This is MANUALLY done, so we should also reset active folders and files.
                 if (!newState.sortedData) {
                     throw new Error("[DataReducer | Action: SET_PAGE] No sorted data available to set page.");
                 }
                 newState.sortedData.currentPage = action.payload;
+                if (action.payload === 'HOME') {
+                    newState.sortedData.currentFolderId = undefined;
+                    newState.sortedData.currentFileId = undefined;
+                }
                 return newState;
             case 'TOGGLE_CURRENT_FOLDER':
                 if (!newState.sortedData) {
                     throw new Error("[DataReducer | Action: TOGGLE_FOLDER] No sorted data available to toggle folder.");
                 }
-                if (!newState.sortedData.ids.has(action.payload)) {
+                const ids = newState.sortedData.ids;
+                const hasId = Array.isArray(ids)
+                    ? ids.includes(action.payload)
+                    : ids.has(action.payload);
+                if (!hasId) {
                     throw new Error(`[DataReducer | Action: TOGGLE_FOLDER] No data has the id ${action.payload}.`);
                 }
 
@@ -92,10 +103,65 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 if (!newState.sortedData) {
                     throw new Error("[DataReducer | Action: TOGGLE_FILE] No sorted data available to toggle file.");
                 }
-                if (!newState.sortedData.ids.has(action.payload)) {
+                if (action.payload === -1) {
+                    // If the payload is -1, it just means to unselect the current file.
+                    newState.sortedData.currentFileId = undefined;
+                    return newState;
+                }
+                const ids_file = newState.sortedData.ids;
+                const hasFileId = Array.isArray(ids_file)
+                    ? ids_file.includes(action.payload)
+                    : ids_file.has(action.payload);
+                if (!hasFileId) {
+                    console.log("[DataReducer | Action: TOGGLE_FILE] Folders Searched", newState.sortedData.ids);
                     throw new Error(`[DataReducer | Action: TOGGLE_FILE] No data has the id ${action.payload}.`);
                 }
 
+                // Handle Page Switching (NOT TOGGLING THE FILE VARIABLE)
+                if (newState.sortedData.currentFileId === action.payload) {
+                    // Reset to home page if the current file is toggled off.
+                    const currentItemFile = Utils.getItemById(newState.sortedData.folders, action.payload);
+                    if (!currentItemFile) {
+                        newState.sortedData.currentPage = 'HOME';
+                    } else {
+                        switch (currentItemFile.type) {
+                            case 'conversation':
+                                newState.sortedData.currentPage = 'HOME';
+                                break;
+                            case 'quiz':
+                                newState.sortedData.currentPage = 'QUIZ';
+                                break;
+                            case 'flashcard':
+                                newState.sortedData.currentPage = 'QUIZ'; // Flashcards are treated as quizzes in this context.
+                                break;
+                            default:
+                                throw new Error(`[DataReducer | Action: TOGGLE_FILE] Unhandled file type: ${(currentItemFile as any).type}.`);
+                        }
+                    }
+                    
+                } else {
+                    const fileType = newState.sortedData.folders
+                        .flatMap(folder => folder.files)
+                        .find(file => file.id === action.payload)?.type;
+                    if (!fileType) {
+                        throw new Error(`[DataReducer | Action: TOGGLE_FILE] No file found with id ${action.payload}.`);
+                    }
+
+                    switch (fileType) {
+                        case 'conversation':
+                            newState.sortedData.currentPage = 'CHAT';
+                            break;
+                        case 'flashcard':
+                            newState.sortedData.currentPage = 'QUIZ';
+                            break;
+                        case 'quiz':
+                            newState.sortedData.currentPage = 'QUIZ';
+                            break;
+                        default:
+                            throw new Error(`[DataReducer | Action: TOGGLE_FILE] Unknown file type: ${fileType}.`);
+                    }
+                }
+                // Change the currentFileId to the one being toggled.
                 newState.sortedData.currentFileId = (newState.sortedData.currentFileId === action.payload) ? undefined : action.payload;
                 return newState;
             case 'ADD_FOLDER':
@@ -104,7 +170,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 }
                 const ids_folderblock = newState.sortedData.ids
                 if (!ids_folderblock) {
-                    throw new Error("[DataReducer | Action: ADD_FOLDER] No sorted data available to add folder.");
+                    throw new Error("[DataReducer | Action: ADD_FOLDER] No ids found to use to create a new folder.");
                 }
 
                 const folderId = Utils.newId(ids_folderblock);
@@ -116,9 +182,20 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                     // If the action payload indicates to set this folder as active, we do so.
                     newState.sortedData.currentFolderId = newFolder.id;
                 }
+                if (
+                    (Array.isArray(newState.sortedData.ids) && !newState.sortedData.ids.includes(newFolder.id)) ||
+                    (!Array.isArray(newState.sortedData.ids) && !(newState.sortedData.ids as Set<number>).has(newFolder.id))
+                ) {
+                    if (Array.isArray(newState.sortedData.ids)) {
+                        newState.sortedData.ids.push(newFolder.id);
+                    } else {
+                        (newState.sortedData.ids as Set<number>).add(newFolder.id);
+                    }
+                }
                 return newState;
             case 'ADD_FILE':
                 // Check if the sortedData is available and has the necessary properties.
+
                 if (!newState.sortedData || !newState.sortedData.ids) {
                     throw new Error("[DataReducer | Action: ADD_FILE] No sorted data available to add file.");
                 }
@@ -132,7 +209,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 }
                 
                 // Check if the file type being created is a valid type.
-                if (!Object.values(Types.DataFileTypes).includes(action.payload.type)) {
+                if (!Types.DataFileTypes(action.payload.type)) {
                     throw new Error(`[DataReducer | Action: ADD_FILE] Invalid file type: ${action.payload.type}. Expected one of: ${Object.values(Types.DataFileTypes).join(', ')}.`);
                 }
 
@@ -146,6 +223,16 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
 
                 if (action.payload.setActive) {
                     newState.sortedData.currentFileId = newFile.id;
+                }
+                if (
+                    (Array.isArray(newState.sortedData.ids) && !newState.sortedData.ids.includes(newFile.id)) ||
+                    (!Array.isArray(newState.sortedData.ids) && !(newState.sortedData.ids as Set<number>).has(newFile.id))
+                ) {
+                    if (Array.isArray(newState.sortedData.ids)) {
+                        newState.sortedData.ids.push(newFile.id);
+                    } else {
+                        (newState.sortedData.ids as Set<number>).add(newFile.id);
+                    }
                 }
 
                 return newState;
@@ -162,8 +249,8 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                     throw new Error("[DataReducer | Action: ADD_CONTENT] Current file for the content to be added to was not found in the sorted data.");
                 }
                 // Check if the content type being added is a valid type.
-                if (!Object.values(Types.ContentTypes).includes(action.payload.type)) {
-                    throw new Error(`[DataReducer | Action: ADD_CONTENT] Invalid content type: ${action.payload.type}. Expected one of: ${Object.values(Types.ContentTypes).join(', ')}.`);
+                if (!Types.ContentItemTypes.includes(action.payload.type)) {
+                    throw new Error(`[DataReducer | Action: ADD_CONTENT] Invalid content type: ${action.payload.type}. Expected one of: ${Types.ContentItemTypes.join(', ')}.`);
                 }
                 // Checks if the type passed and the type being requested to be added match.
                 if (action.payload.contentItem.type !== action.payload.type) {
@@ -196,16 +283,13 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                     case 'question':
                         // We have to make sure that the content that was passed is a valid QuestionContentItem. (Since any BaseContentItem can be passed in.)
                         // This means we have to special checks on the items property, since it SHOULD be an array of QuestionItemsType.
-                        if (!Array.isArray(itemToBeAdded.items)) {
-                            throw new Error("[DataReducer | Action: ADD_CONTENT] Question content item must have items of type array.");
+                        if (!Utils.checkItemQuestions(itemToBeAdded as Types.QuestionContentItem)) {
+                            throw new Error("[DataReducer | Action: ADD_CONTENT] The Question content is either missing information or formatted incorrectly..");
                         }
-
-                        // The checkItemQuestions function checks if every object in the array is of type QuestionItemsType, or a valid object that can be converted to it. In cases where the items are not valid, it will throw out that object and continue with the rest. (Meaning if there was a random string or boolean, for example, the returned array would not contain those items.)
-                        itemToBeAdded.items = Utils.checkItemQuestions(itemToBeAdded.items);
 
                         itemToBeAdded = Utils.createQuestionContentItem(
                             newState.sortedData.ids,
-                            itemToBeAdded.items as Types.QuestionItemsType[]
+                            itemToBeAdded.items as Types.QuestionItemsType
                         );
 
                         break;
@@ -216,49 +300,81 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                         throw new Error(`[DataReducer | Action: ADD_CONTENT] Content type ${itemToBeAdded.type}'s ability to be added has not been implemented.`);
                 }
 
+                if (
+                    (Array.isArray(newState.sortedData.ids) && !newState.sortedData.ids.includes(itemToBeAdded.id)) ||
+                    (!Array.isArray(newState.sortedData.ids) && !(newState.sortedData.ids as Set<number>).has(itemToBeAdded.id))
+                ) {
+                    if (Array.isArray(newState.sortedData.ids)) {
+                        newState.sortedData.ids.push(itemToBeAdded.id);
+                    } else {
+                        (newState.sortedData.ids as Set<number>).add(itemToBeAdded.id);
+                    }
+                }
                 currentFile.content.push(itemToBeAdded);
                 return newState;
             case 'DELETE_ITEM':
                 if (!newState.sortedData) throw new Error("[DataReducer | Action: DELETE_ITEM] No sorted data available to delete item.");
-
-                // Check if the item with the given ID exists in the sortedData.
-                const itemToDelete = newState.sortedData.folders
-                    .flatMap(folder => folder.files)
-                    .flatMap(file => file.content)
-                    .find(item => item.id === action.payload.id);
+                
+                const itemToDelete = Utils.getItemById(newState.sortedData.folders, action.payload.id);
+                const parentOfItemToDelete = Utils.getParentByItemId(newState.sortedData.folders, action.payload.id);
 
                 if (!itemToDelete) throw new Error(`[DataReducer | Action: DELETE_ITEM] Item with ID ${action.payload.id} not found.`);
 
-                // If the item is a folder, we should check to see if the active file is a member of it.
+                /**
+                 * First we need to handle the 'meta' data of the item being deleted.
+                 * (Things that would be impacted by the deletion of item, and if not handled, would cause desynchronization of the state.)
+                 * For example, if the item being deleted is a folder, we need to check if the current file being displayed is in that folder, and if so, reset the currentFileId so that the UI does not try to display a file that no longer exists.
+                 */
                 if (itemToDelete.type === 'folder' && newState.sortedData.currentFileId) {
-                    // Check if the current file is in the folder being deleted.
-                    const currentFile = newState.sortedData.folders
-                        .flatMap(folder => folder.files)
-                        .find(file => file.id === newState.sortedData?.currentFileId);
                     
-                    if (currentFile && currentFile.content.some(contentItem => contentItem.id === action.payload.id)) {
+                    // Check if the current file is in the folder being deleted.
+                    if (itemToDelete && itemToDelete.files.some((file: Types.BaseDataFile) => file.id === newState.sortedData?.currentFileId)) {
                         // If the current file is in the folder being deleted, we should reset the currentFileId.
+                        newState.sortedData.currentFileId = undefined;
+                        newState.sortedData.currentPage = 'HOME'; // Reset to home page if the current file is deleted.
+                    }
+                    
+                    // If the current folder is being deleted, we should reset the currentFolderId.
+                    if (itemToDelete && itemToDelete.id === newState.sortedData?.currentFolderId) {
+                        newState.sortedData.currentFolderId = undefined;
+                        newState.sortedData.currentPage = 'HOME'; // Reset to home page if the current folder is deleted.
+                    }
+                } else {
+                    if (newState.sortedData.currentFileId && itemToDelete.id === newState.sortedData.currentFileId) {
+                        // If the current file is being deleted, we should reset the currentFileId.
                         newState.sortedData.currentFileId = undefined;
                         newState.sortedData.currentPage = 'HOME'; // Reset to home page if the current file is deleted.
                     }
                 }
 
-                // Remove the item from the sortedData.
-                newState.sortedData.folders.forEach(folder => {
-                    folder.files.forEach(file => {
-                        file.content = file.content.filter(item => item.id !== action.payload.id);
-                    });
-                });
+                /**
+                 * Next, we need to handle the actual deletion of the item.
+                */
+                if (parentOfItemToDelete && typeof parentOfItemToDelete === 'object' && 'type' in parentOfItemToDelete) {
+                    switch (parentOfItemToDelete.type) {
+                        case 'folder':
+                            parentOfItemToDelete.files = parentOfItemToDelete.files.filter(file => file.id !== action.payload.id);
+                            break;
+                        case 'conversation':
+                        case 'quiz':
+                        case 'flashcard':
+                            parentOfItemToDelete.content = parentOfItemToDelete.content.filter(item => item.id !== action.payload.id);
+                            break;
+                        case 'text':
+                        case 'image':
+                        case 'video':
+                        case 'audio':
+                        case 'question':
+                            throw new Error(`[DataReducer | Action: DELETE_ITEM] Cannot delete item of type ${parentOfItemToDelete.type} directly. It should be deleted through its parent file.`);
+                        default:
+                            throw new Error(`[DataReducer | Action: DELETE_ITEM] Unhandled parent type: ${(parentOfItemToDelete as any).type || 'unknown'}.`);
+                    }
+                } else if (itemToDelete.type === 'folder') {
+                    // If there isn't a parent, it indicates that the target being deleted is a top-level folder.
+                    // In this case, we can directly remove the folder from the sortedData.folders array
+                    newState.sortedData.folders = newState.sortedData.folders.filter(folder => folder.id !== action.payload.id);
+                }
 
-                // If the item was the current file or folder, reset the currentFileId or currentFolderId.
-                if (newState.sortedData.currentFileId === action.payload.id) {
-                    newState.sortedData.currentFileId = undefined;
-                    newState.sortedData.currentPage = 'HOME'; // Reset to home page if the current file is deleted.
-                }
-                if (newState.sortedData.currentFolderId === action.payload.id) {
-                    newState.sortedData.currentFolderId = undefined;
-                    newState.sortedData.currentPage = 'HOME'; // Reset to home page if the current folder is deleted.
-                }
                 return newState;
             case 'DELETE_ITEM_IN_FILE':
                 if (!newState.sortedData) throw new Error("[DataReducer | Action: DELETE_ITEM_IN_FILE] No sorted data available to delete item in file.");
@@ -287,8 +403,8 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 throw new Error(`Unknown action type: ${action.type}`);
         }
     } catch (error) {
-        console.error("[DataReducer] Error processing action:", error);
-        newState.errorMessage = `[DataReducer] Error processing action: ${error instanceof Error ? error.message : 'Unknown error'}`;
-        return newState;
+        console.error("[DataReducer] - ", error);
+        const errorMessage = `[DataReducer] - ${error instanceof Error ? error.message : 'Unknown error'}`;
+        return {...state, errorMessage}; // Return the original state with the error message set, preserving all other state properties. This is in case a error is thrown after changes have been made to the newState and thus corrupt the state.
     }
 };

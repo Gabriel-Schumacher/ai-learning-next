@@ -1,8 +1,8 @@
 import {Aa, Document, ChatBoxFilled} from "./IconsIMGSVG";
 import TextArea from "./TextArea";
 import {useState, useContext} from "react";
-import { ChatResponse, Conversation, Folder } from "../../lib/types/types";
-import { AiDataProviderContext } from "./AiContextProvider/AiDataProvider";
+import * as Types from "@/lib/types/types_new";
+import {DataContextProvider} from "@/app/context_providers/data_context/DataProvider";
 
 const AiMenu: React.FC = () => {
 
@@ -13,37 +13,26 @@ const AiMenu: React.FC = () => {
             (e.nativeEvent instanceof KeyboardEvent && e.nativeEvent.key === "Enter" && !e.nativeEvent.shiftKey) || e.nativeEvent instanceof MouseEvent
         ) {
             e.preventDefault(); // Prevent default behavior for Enter key
-            const newFolder: Folder = {
+            const newMessage: Types.TextContentItem = {
                 id: -1,
-                name: "New Folder",
-                current: true,
-                attached_items: [],
-            }
-            const newConversation: Conversation = {
-                id: -1,
-                title: "New Conversation",
-                type: "conversation",
-                current: true,
-                responses: [],
+                type: "text",
+                items: textAreaValue,
+                createdAt: new Date(), // Assigns a Date object directly
+                updatedAt: new Date(), // Assigns a Date object directly
+                isAiResponse: false, // Assuming this is a user message
             };
-            const newMessage: ChatResponse = {
-                body: textAreaValue,
-                isAiResponse: false,
-                type: 'text',
-                id: -1,
-                time: new Date(), // Assigns a Date object directly
-            };
-            dispatch({ type: "ADD_FOLDER", payload: newFolder });
-            dispatch({ type: "ADD_CONVERSATION", payload: newConversation });
-            dispatch({ type: "ADD_RESPONSE", payload: newMessage });
+            dispatch({ type: "ADD_FOLDER", payload: {setActive: true} });
+            dispatch({ type: "ADD_FILE", payload: {setActive: true, type: 'conversation'} });
+            dispatch({ type: "ADD_CONTENT", payload: {type: 'text', contentItem: newMessage} });
+            dispatch({ type: "SET_PAGE", payload: 'CHAT' });
             // Start a new conversation logic here.
             setTextAreaValue(""); // Clear the text area after submission
         }
     }
 
-    const context = useContext(AiDataProviderContext);
+    const context = useContext(DataContextProvider);
     if (!context) {
-        throw new Error("AiDataProviderContext must be used within a AiDataProvider");
+        throw new Error("DataContextProvider must be used within a DataContextProvider");
     }
     const { dispatch } = context;
 

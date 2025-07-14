@@ -31,10 +31,10 @@
                     - content (array of FlashCardItem)
 */
 
-export type PageOptions = 'HOME' | 'CHAT' | 'QUIZ' | 'DATA_CREATION'; // Used to determine the current page in the application. For an example, look at FigmaNavigation.tsx
+export type PageOptions = 'HOME' | 'CHAT' | 'QUIZ' | 'DATA_CREATION' | 'ESSAY'; // Used to determine the current page in the application. For an example, look at FigmaNavigation.tsx
 
 export interface FolderStructureRoot {
-    ids: Set<number>; // Set of unique identifiers for the folders
+    ids: Set<number> | number[]; // Set of unique identifiers for the folders
     folders: FolderStructure[]; // FolderStructure, representing the folders in the root
     currentFolderId?: number; // Optional ID of the current folder, if any. This makes it much easier to figure out what folder is currently being viewed.
     currentFileId?: number; // Optional ID of the current file, if any. This makes it much easier to figure out what file is currently being viewed.
@@ -60,7 +60,8 @@ export interface FolderStructure {
     These are items that we would expect under a folder. These is not the content of the files themselves.
 */
 
-export type DataFileTypes = "conversation" | "quiz" | "flashcard";
+export const DataFileTypesList = ["conversation", "quiz", "flashcard"] as const; // This is used to determine the type of data file for error messages and types.
+export type DataFileTypes = typeof DataFileTypesList[number];
 
 // Here the T = any refers to the content type of the item. This allows for flexibility in the content type stored within each data item.
 // For example, a conversation might have content of type TextContentItem, while a quiz might have content of type QuizQuestion.
@@ -79,10 +80,10 @@ export interface BaseDataFile<T = any> {
 export interface FlashCardDeckFile extends BaseDataFile {
     type: "flashcard";
 }
-export interface ConversationFile extends BaseDataFile<TextContentItem> {
+export interface ConversationFile extends BaseDataFile<TextContentItem | QuestionContentItem> {
     type: "conversation";
 }
-export interface QuizFile extends BaseDataFile {
+export interface QuizFile extends BaseDataFile<QuestionContentItem> {
     type: "quiz";
 }
 
@@ -91,12 +92,13 @@ export interface QuizFile extends BaseDataFile {
 // Content of the files
 //
 
-export type ContentTypes = "text" | "image" | "video" | "audio" | "question"; // This is used to determine the type of content.
+export const ContentItemTypes = ["text", "image", "video", "audio", "question"] as const; // This is used to determine the type of content for error messages and types.
+export type ContentTypes = typeof ContentItemTypes[number]; // This is used to determine the type of content.
 
 export interface BaseContentItem {
     id: number;
     type: ContentTypes;
-    items: string | QuestionItemsType[]; // This is the actual content, like text, image URL, video URL, etc.
+    items: string | QuestionItemsType; // This is the actual content, like text, image URL, video URL, etc.
     createdAt: Date; // This is used to sort the content in the conversation.
     updatedAt?: Date; // This is optional and can be used to track updates to the content.
 }
@@ -117,7 +119,7 @@ export type QuestionItemsType = {
 };
 export interface QuestionContentItem extends BaseContentItem {
     type: "question";
-    items: QuestionItemsType[];
+    items: QuestionItemsType;
 }
 
 export interface ImageContentItem extends BaseContentItem {
@@ -138,6 +140,7 @@ export interface AudioContentItem extends BaseContentItem {
 
 
 
+// I don't think I used these anywhere, but they are here for reference in case I need them in the future.
 // Utility function to check if a value is a valid DataFileTypes
 export function DataFileTypes(value: any): value is DataFileTypes {
     return value === "conversation" || value === "quiz" || value === "flashcard";

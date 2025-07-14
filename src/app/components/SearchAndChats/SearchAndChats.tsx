@@ -1,10 +1,9 @@
 'use client';
 import { useState, useContext, useEffect } from "react";
 import { PlusSign, Chevron, SearchIcon } from "../IconsIMGSVG";
-import { AiDataProviderContext } from "../AiContextProvider/AiDataProvider";
+import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
 import Slot from "./SearchAndChatsItemSlot";
-import { LocalStorageContextProvider } from "@/app/context_providers/local_storage/LocalStorageProvider";
-import { Conversation, Folder, Quiz } from "@/lib/types/types";
+import * as Types from "@/lib/types/types_new";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -13,27 +12,26 @@ import { Conversation, Folder, Quiz } from "@/lib/types/types";
  */
 const SearchAndChats: React.FC = () => {
     const [foldersHidden, setFoldersHidden] = useState<boolean>(false);
-    const [chatsHidden, setChatsHidden] = useState<boolean>(false);
+    const [filesHidden, setFilesHidden] = useState<boolean>(false);
 
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [folders, setFolders] = useState<Folder[]>([]);
-    const [chats, setChats] = useState<(Conversation | Quiz)[]>([]);
+    const [folders, setFolders] = useState<Types.FolderStructure[] | undefined>([]);
+    const [files, setFiles] = useState<Types.BaseDataFile[] | undefined>([]);
+    const [baseFoldersAndFiles, setbaseFoldersAndFiles] = useState<{
+        folders: Types.FolderStructure[] | undefined;
+        files: Types.BaseDataFile[] | undefined;
+    }>({
+        folders: undefined,
+        files: undefined,
+    });
 
-    const context = useContext(AiDataProviderContext);
+    const context = useContext(DataContextProvider);
     if (!context) {
         throw new Error(
-            "AiDataProviderContext must be used within a AiDataProvider"
+            "DataContextProvider must be used within a DataContextProvider"
         );
     }
     const { data, dispatch } = context;
-
-    const localContext = useContext(LocalStorageContextProvider)
-    if (!localContext) {
-        throw new Error(
-            "LocalStorageContextProvider must be used within a LocalStorageProvider"
-        );
-    }
-    const { local_data, local_dispatch } = localContext;
 
     // Causes the rotation of the chevron icon when clicked. This also results in the folders or chats being hidden or shown.
     const toggleRotation = (e: React.MouseEvent, type: "files" | "chats") => {
@@ -43,60 +41,82 @@ const SearchAndChats: React.FC = () => {
             if (type === "files") {
                 setFoldersHidden(!foldersHidden);
             } else if (type === "chats") {
-                setChatsHidden(!chatsHidden);
+                setFilesHidden(!filesHidden);
             }
         }
     };
 
-    // Update the folders and chats when the data is loaded.
-    // This doesn't update it if the folders and chats are already set, to prevent unnecessary re-renders, or rerenders caused by just selecting or chatting. 
+    // Update the Core Local Component States when the provider data changes.
+    /**
+     * In other words, if something changes in the core data, update the local state of the component to have that data.
+     */
     useEffect(() => {
-        if (!folders && data.folders) {
-            setFolders(data.folders);
-        }
-        if (!chats && data.conversations) {
-            setChats(data.conversations);
-        }
-    }, [data.folders, data.conversations, folders, chats]);
+        if (data.sortedData?.folders) {
 
-    // Testing purposes console logging.
-    useEffect(() => {
-        if (searchQuery !== "" && searchQuery !== undefined)
-            console.debug("Search query updated: ", searchQuery);
-        else
-            console.debug("Search query cleared.");
-    }, [searchQuery]);
+            // Get all files found in EVERY folder.
+            const folderFiles = data.sortedData.folders?.flatMap(folder => folder.files || []) || [];
 
-    // Update the search query state when the search is removed.
-    useEffect(() => {
-        if ((searchQuery == "" || searchQuery == undefined) && data.folders) {
-            console.debug("Search query cleared, updating folders.", data.folders);
-            setFolders(data.folders);
+            // Change the Folders.
+            setbaseFoldersAndFiles(() => ({
+                folders: data.sortedData?.folders || [],
+                files: folderFiles || [],
+            }));
         }
-        if ((searchQuery == "" || searchQuery == undefined) && data.conversations) {
-            console.debug("Search query cleared, updating chats.", data.conversations);
-            setChats(data.conversations);
-        }
-    }, [searchQuery, data.folders, data.conversations]);
 
+    }, [data, data.sortedData?.folders]);
+
+    // Update the LOCAL states used for displaying the folders and chats when the PROVIDER data changes.
+    /**
+     * This effect is used to update the folders and chats when the data provider updates.
+     * It is called when the component mounts and whenever the data provider updates. It does not depend on the search query.
+     */ 
     useEffect(() => {
-        // When the search query changes, filter the folders and chats based on the search query.
-        if (searchQuery !== "") {
-            const filteredFolders = data.folders?.filter(folder =>
+        if (baseFoldersAndFiles.folders) {
+            setFolders(baseFoldersAndFiles.folders);
+        }
+        if (baseFoldersAndFiles.files) {
+            setFiles(baseFoldersAndFiles.files);
+        }
+    }, [baseFoldersAndFiles]);
+
+    // If the search query changes OR if the base folders and chats change, filter the folders and chats based on the search query.
+    /**
+     * This effect is used to filter the folders and chats based on the search query.
+     * It is called whenever the search query changes or when the base folders and chats change.
+     * It does not depend on the data provider, but rather on the local state of the component.
+    */
+    useEffect(() => {
+        if (searchQuery && searchQuery !== "") {
+            const filteredFolders = baseFoldersAndFiles.folders?.filter(folder =>
                 folder.name.toLowerCase().includes(searchQuery.toLowerCase())
             ) || [];
-            const filteredChats = data.conversations?.filter(chat =>
+            const filteredChats = baseFoldersAndFiles.files?.filter(chat =>
                 chat.title.toLowerCase().includes(searchQuery.toLowerCase())
             ) || [];
 
-            setFolders(filteredFolders);
-            setChats(filteredChats);
+            if (filteredFolders.length !== baseFoldersAndFiles.folders?.length) {
+                setFolders(filteredFolders);
+            }
+            if (filteredChats.length !== baseFoldersAndFiles.files?.length) {
+                setFiles(filteredChats);
+            }
         } else {
             // If the search query is empty, reset to the original folders and chats.
-            setFolders(data.folders || []);
-            setChats(data.conversations || []);
+            // We also should only show files that are in the target folder, if there even is one.
+
+            let filesInFolder: Types.BaseDataFile[] | undefined = [];
+            if (data.sortedData?.currentFolderId) {
+                const targetFolder = baseFoldersAndFiles.folders?.find(folder =>
+                    folder.id === data.sortedData?.currentFolderId
+                );
+                if (targetFolder) {
+                    filesInFolder = targetFolder.files || [];
+                }
+            }
+            setFolders(baseFoldersAndFiles.folders);
+            setFiles(filesInFolder);
         }
-    }, [searchQuery, data.folders, data.conversations]);
+    }, [searchQuery, data.sortedData?.currentFolderId, baseFoldersAndFiles.folders, baseFoldersAndFiles.files]);
 
     return (
         <aside className="card lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg grid grid-rows-[1fr_auto] gap-0">
@@ -132,17 +152,7 @@ const SearchAndChats: React.FC = () => {
                         <button
                             className="bg-transparent border-none p-0 m-0"
                             onClick={() => {
-                                dispatch({ type: "ADD_FOLDER" });
-                                local_dispatch({
-                                    type: "SAVE",
-                                    payload: {
-                                        id: -1,
-                                        name: "Saved Folder",
-                                        type: "folder",
-                                        current: false,
-                                        attached_items: []
-                                    },
-                                });
+                                dispatch({ type: "ADD_FOLDER", payload: { setActive: true } });
                             }}
                         >
                             <PlusSign
@@ -173,7 +183,7 @@ const SearchAndChats: React.FC = () => {
                                     header={folder.name}
                                     type={"folder"}
                                     isActive={
-                                        folder.id === data._currentFolderID
+                                        folder.id === data.sortedData?.currentFolderId
                                     }
                                     dataID={folder.id}
                                 />
@@ -187,7 +197,7 @@ const SearchAndChats: React.FC = () => {
                     {/* Header (Section title, Collapse Button */}
                     <div className="subheader grid-cols-[1fr_auto] gap-2">
                         <span className="block w-full font-semibold text-surface-950 dark:text-surface-50">
-                            Folder Content
+                            Files
                         </span>
                         {/* Collapse or Expand */}
                         <button
@@ -201,24 +211,24 @@ const SearchAndChats: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Folder Content */}
+                    {/* Files */}
                     <ul
-                        className={`max-h-full flex flex-col gap-2 mb-4 ${chatsHidden ? "hidden" : "" }`}
+                        className={`max-h-full flex flex-col gap-2 mb-4 ${filesHidden ? "hidden" : "" }`}
                     >
-                        {chats &&
-                            chats.map((chat, index) => (
+                        {files &&
+                            files.map((file, index) => (
                                 <Slot
                                     key={index}
                                     data-chat-active={
-                                        chat.current ? true : false
+                                        file.id === data.sortedData?.currentFileId
                                     }
-                                    header={chat.title}
-                                    type={"chat"}
+                                    header={file.title}
+                                    type={file.type !== 'conversation' ? "quiz" : "chat"}
                                     isActive={
-                                        chat.id ===
-                                        data._currentConversationID
+                                        file.id ===
+                                        data.sortedData?.currentFileId
                                     }
-                                    dataID={chat.id}
+                                    dataID={file.id}
                                 />
                             ))}
                     </ul>
@@ -229,9 +239,9 @@ const SearchAndChats: React.FC = () => {
 
             {/* New Conversation Button */}
             <button
-                disabled={data._currentFolderID ? false : true}
+                disabled={data.sortedData?.currentFolderId ? false : true}
                 onClick={() => {
-                    dispatch({ type: "ADD_CONVERSATION" });
+                    dispatch({ type: "ADD_FILE", payload: { type: "conversation", setActive: true } });
                 }}
                 className="btn w-full flex justify-between mt-1"
             >

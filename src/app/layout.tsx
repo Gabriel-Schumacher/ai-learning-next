@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
+import DataStorageProvider from "./context_providers/data_context/DataProvider";
 import AiDataProvider from './components/AiContextProvider/AiDataProvider';
 import LocalStorageProvider from "./context_providers/local_storage/LocalStorageProvider";
 
@@ -33,8 +34,10 @@ export default function RootLayout({
       >
         <LocalStorageProvider>
           <AiDataProvider>
-            <Header />
+            <DataStorageProvider>
+              <Header />
               {children}
+            </DataStorageProvider>
           </AiDataProvider>
         </LocalStorageProvider>
       </body>

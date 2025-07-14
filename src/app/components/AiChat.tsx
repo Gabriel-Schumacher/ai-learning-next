@@ -1,6 +1,6 @@
-import { ChatResponse, Conversation } from "../../lib/types/types";
+import * as Types from "@/lib/types/types_new";
 import TextArea from "./TextArea";
-import {useEffect, useState, useContext} from "react";
+import {useCallback, useEffect, useState, useContext} from "react";
 import LoadingIcon from "./LoadingIcon";
 import { Response } from "./Response";
 
@@ -15,8 +15,10 @@ import typescript from 'highlight.js/lib/languages/typescript';
 import css from 'highlight.js/lib/languages/css';
 import cpp from 'highlight.js/lib/languages/cpp';
 import csharp from 'highlight.js/lib/languages/csharp';
-import { AiDataProviderContext } from "./AiContextProvider/AiDataProvider";
-import { LocalStorageContextProvider } from "../context_providers/local_storage/LocalStorageProvider";
+
+import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
+import { text } from "stream/consumers";
+
 hljs.registerLanguage('javascript', javascript);
 hljs.registerLanguage('typescript', typescript);
 hljs.registerLanguage('html', javascript); // Use JavaScript highlighting for HTML
@@ -38,21 +40,14 @@ const MARKED = new Marked(
 const AiChat: React.FC = () => {
 
     const [textAreaValue, setTextAreaValue] = useState<string>("");
-    const [prevConversationObjForDisplay, setPrevConversationObjForDisplay] = useState<Conversation | null>(null);
+    const [currentConversation, setCurrentConversation] = useState<Types.ConversationFile | null>(null);
+    const [prevConversationObjForDisplay, setPrevConversationObjForDisplay] = useState<Types.ConversationFile | null>(null);
 
-    const context = useContext(AiDataProviderContext);
+    const context = useContext(DataContextProvider);
     if (!context) {
-        throw new Error("AiDataProviderContext must be used within a AiDataProvider");
+        throw new Error("DataContextProvider must be used within a DataContextProvider");
     }
     const { data, dispatch } = context;
-
-    const localContext = useContext(LocalStorageContextProvider)
-        if (!localContext) {
-            throw new Error(
-                "LocalStorageContextProvider must be used within a LocalStorageProvider"
-            );
-        }
-        const { local_dispatch } = localContext;
 
     // AI RESPONSE STUFF START
     const readableStream = useReadableStream();
@@ -79,6 +74,83 @@ const AiChat: React.FC = () => {
 
     // FUNCTIONAL START
 
+    const handleAiMessage = useCallback(async (MESSAGE: string) => {
+
+        /** SERVER STUFF */
+        // Send the text to the server and attempt to get a response.
+        // The readable stream isn't handled here, this is just sending the info and handeling the final result.
+        // The readable stream is handled in the useReadableStream hook component.
+        try {
+            // Convert the chat history to what openAI wants to receive.
+            if (data.sortedData?.currentFileId === undefined) return;
+            type aiChatsType = {
+                role: 'user' | 'assistant';
+                content: string | Types.QuestionItemsType[];
+            };
+            // Casting it as a conversation because this page should only show when it's a conversation and not a quiz.
+            const currentConversation = data.sortedData.folders.flatMap((folder: Types.FolderStructure) => folder.files)
+                .find((file: Types.BaseDataFile) => file.id === data.sortedData?.currentFileId) as Types.ConversationFile | undefined;
+            const chatHistoryAiSubmission: aiChatsType[] | [] = currentConversation?.content.map((message) => {
+                if ('isAiResponse' in message) {
+                    // TextContentItem
+                    return {
+                        role: message.isAiResponse ? 'assistant' : 'user',
+                        content: typeof message.items === 'string'
+                            ? message.items : "", // Ensure content is a string
+                    };
+                } else {
+                    // QuestionContentItem fallback
+                    return {
+                        role: 'user',
+                        content: '', // or handle appropriately for your use case
+                    };
+                }
+            }) || [];
+            // Since react handles dispatches after the funciton is done, we need to add the new response to the chat history. If we don't, the second to last response will be the one that is sent to the server.
+            chatHistoryAiSubmission.push({
+                role: 'user',
+                content: MESSAGE,
+            });
+
+            const answer = readableStream.request(
+                new Request('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chats: chatHistoryAiSubmission,
+                        systemPrompt: 'teacher',
+                        subject: 'General',
+                        deepSeek: false,
+                    }),
+                })
+            );
+
+            const answerText = (await answer) as string;
+
+            const parsedAnswer = await MARKED.parse(answerText);
+            const purifiedText = DOMPurify.sanitize(parsedAnswer)
+                .replace(/<script>/g, '&lt;script&gt;')
+                .replace(/<\/script>/g, '&lt;/script&gt;');
+
+            const newAiChatResponse: Types.TextContentItem = {
+                items: purifiedText,
+                isAiResponse: true,
+                type: 'text', // Need to figure out how to figure out the type of response.
+                id: -1,
+                createdAt: new Date(), // Assigns a Date object directly
+            };
+
+            // Use functional update again to avoid stale state
+            dispatch({ type: "ADD_CONTENT", payload: { type: 'text', contentItem: newAiChatResponse }});
+            //setPrevConversationObjForDisplay(updatedConversationObjForDisplay);
+
+        } catch (e) {
+            console.error('Error in handleEnterPress, SERVER STUFF:', e);
+        }
+    }, [data.sortedData, readableStream, dispatch]);
+    
     const handleEnterPress = async (e: React.KeyboardEvent<HTMLTextAreaElement> | React.MouseEvent<HTMLButtonElement>) => {
         if (
             (e.nativeEvent instanceof KeyboardEvent && e.nativeEvent.key === "Enter" && !e.nativeEvent.shiftKey) || e.nativeEvent instanceof MouseEvent
@@ -89,98 +161,53 @@ const AiChat: React.FC = () => {
             if (readableStream.loading) return; 
             // If the text area is empty, don't send a message.
             if (textAreaValue.trim() === "") return; 
-            
+
             /** CLIENT STUFF */
-            const newResponse: ChatResponse = {
-                body: textAreaValue,
+            const newResponse: Types.TextContentItem = {
+                items: textAreaValue,
                 isAiResponse: false,
-                type: 'response', // Need to figure out how to figure out the type of response.
+                type: 'text', // Need to figure out how to figure out the type of response.
                 id: -1,
-                time: new Date(), // Assigns a Date object directly
+                createdAt: new Date(), // Assigns a Date object directly
             };
-            dispatch({ type: "ADD_RESPONSE", payload: newResponse });
-            local_dispatch({ type: "SAVE", payload: newResponse });
-            setTextAreaValue(""); 
+            dispatch({ type: "ADD_CONTENT", payload: { type: 'text', contentItem: newResponse } });
+            setTextAreaValue("");
 
-            /** SERVER STUFF */
-            // Send the text to the server and attempt to get a response.
-            // The readable stream isn't handled here, this is just sending the info and handeling the final result.
-            // The readable stream is handled in the useReadableStream hook component.
-            try {
-                // Convert the chat history to what openAI wants to receive.
-                if (data.currentConversation === undefined) return;
-                type aiChatsType = {
-                    role: 'user' | 'assistant';
-                    content: string;
-                };
-                // Casting it as a conversation because this page should only show when it's a conversation and not a quiz.
-                const chatHistoryAiSubmission: aiChatsType[] = (data.currentConversation as Conversation).responses.map((message: ChatResponse) => {
-                    return {
-                        role: message.isAiResponse ? 'assistant' : 'user',
-                        content: message.body,
-                    };
-                });
-                // Since react handles dispatches after the funciton is done, we need to add the new response to the chat history. If we don't, the second to last response will be the one that is sent to the server.
-                chatHistoryAiSubmission.push({
-                    role: 'user',
-                    content: newResponse.body,
-                });
-
-                const answer = readableStream.request(
-                    new Request('/api/chat', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            chats: chatHistoryAiSubmission,
-                            systemPrompt: 'teacher',
-                            subject: 'General',
-                            deepSeek: false,
-                        }),
-                    })
-                );
-
-                const answerText = (await answer) as string;
-    
-                const parsedAnswer = await MARKED.parse(answerText);
-                const purifiedText = DOMPurify.sanitize(parsedAnswer)
-                    .replace(/<script>/g, '&lt;script&gt;')
-                    .replace(/<\/script>/g, '&lt;/script&gt;');
-    
-                const newAiChatResponse: ChatResponse = {
-                    body: purifiedText,
-                    isAiResponse: true,
-                    type: 'response', // Need to figure out how to figure out the type of response.
-                    id: -1,
-                    time: new Date(), // Assigns a Date object directly
-                };
-
-                // Use functional update again to avoid stale state
-                dispatch({ type: "ADD_RESPONSE", payload: newAiChatResponse });
-                local_dispatch({ type: "SAVE", payload: newAiChatResponse });
-                    //setPrevConversationObjForDisplay(updatedConversationObjForDisplay);
-    
-            } catch (e) {
-                console.error('Error in handleEnterPress, SERVER STUFF:', e);
-            }
+            handleAiMessage(textAreaValue);
         }
     }
 
-    const removeFromHistoryHandler = (id: number) => {
-        // Passes it up so that the component that handles the parent of ConversationObjForDisplay can remove it from the history and cause a rerender.
-       dispatch({ type: "REMOVE_RESPONSE", payload: id });
-    }
+    // If this is a conversation with one message, sent by the user, we should automatically send the message to the AI so it can respond.
+    useEffect(() => {
+        if (
+            currentConversation &&
+            currentConversation.content.length === 1 &&
+            currentConversation.content[0].type === 'text' &&
+            !currentConversation.content[0].isAiResponse &&
+            readableStream.loading === false
+            ) {
+            // If the current conversation has only one message and it's from the user, send it to the AI.
+            handleAiMessage(currentConversation.content[0].items as string);
+        }
+    }, [currentConversation, handleAiMessage]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (data.currentConversation && prevConversationObjForDisplay !== data.currentConversation) {
-                setPrevConversationObjForDisplay(data.currentConversation as Conversation);
+            if (currentConversation && prevConversationObjForDisplay !== currentConversation) {
+                setPrevConversationObjForDisplay(currentConversation);
             }
         }, 0);
 
         return () => clearTimeout(timer);
-    }, [prevConversationObjForDisplay, data.currentConversation]);
+    }, [prevConversationObjForDisplay, currentConversation]);
+
+    useEffect(() => {
+        if (data.sortedData?.currentFileId !== undefined) {
+            const currentConversation = data.sortedData.folders.flatMap((folder: Types.FolderStructure) => folder.files)
+                .find((file: Types.BaseDataFile) => file.id === data.sortedData?.currentFileId) as Types.ConversationFile | undefined;
+            setCurrentConversation(currentConversation || null);
+        }
+    }, [data.sortedData?.currentFileId, data.sortedData?.folders]);
 
     // FUNCTIONAL END
 
@@ -193,23 +220,23 @@ const AiChat: React.FC = () => {
                 {/* Response Classes are done here so that tailwind actually works */}
                 <div className="chat overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-surface-400 scrollbar-track-surface-200 dark:scrollbar-thumb-surface-700 dark:scrollbar-track-surface-800">
                     {/* Loading Icon */}
-                    {(data.loading || !data.currentConversation) && <div className="w-full h-full grid place-items-center"><LoadingIcon /></div>}
+                    {!currentConversation && <div className="w-full h-full grid place-items-center"><LoadingIcon /></div>}
 
                     {/* If there is no chat history, show a message */}
-                    {!data.loading && !data.currentConversation && (
+                    {!currentConversation && (
                         <div className="w-full h-full grid place-items-center">
                             <p className="text-surface-900 dark:text-surface-50">No chat history available.</p>
                         </div>
                     )}
 
                     {/* Chat History */}
-                    {!data.loading && data.currentConversation && (
+                    { currentConversation && (
                         <>
-                        {data.currentConversation.responses?.map((response, index) => {
+                        {currentConversation.content?.map((response, index) => {
                             return (
-                                <Response key={index} chatResponse={response as ChatResponse} removeFromHistory={() => removeFromHistoryHandler(index)} />
-                            );})
-                        }
+                                <Response key={index} chatResponse={response as Types.TextContentItem} />
+                            );
+                        })}
                         {readableStream.loading && (
                             readableStream.text === '' ? (
                                 <div className="AIRESPONSE"><LoadingIcon /></div>

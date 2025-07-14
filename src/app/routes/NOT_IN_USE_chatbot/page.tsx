@@ -5,10 +5,10 @@ import AiMenu from "../../components/AiMenu"
 import FigmaNavigation from "../../components/FigmaNavigation"
 import { useContext } from "react"
 import { AiDataProviderContext } from "../../components/AiContextProvider/AiDataProvider"
-import AiQuiz from "../../components/AiQuiz/AiQuiz"
+import AiQuiz from "../../components/AiQuizNOTINUSE/AiQuiz"
 import DataCreation from "../datacreation/page"
 
-import QuizContextProvider from "../../components/AiQuiz/QuizContext"
+import QuizContextProvider from "../../components/AiQuizNOTINUSE/QuizContext"
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 function ChatBot() {

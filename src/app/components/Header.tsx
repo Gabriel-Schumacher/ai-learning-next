@@ -7,8 +7,7 @@ function HeaderAndNav() {
     const currentPath = usePathname();
     const [navigationItems, setNavigationItems] = useState([
         {name: "Home", path: "/", active:false, },
-        {name: "Data Creation", path: "/routes/datacreation", active:false, },
-        {name: "Quiz", path: "/routes/quiz", active:false, },
+        {name: "Data Creation", path: "/routes/datacreation", active:false, }
     ]);
     const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
 

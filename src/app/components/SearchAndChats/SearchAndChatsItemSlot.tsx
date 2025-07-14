@@ -1,12 +1,11 @@
 'use client';
 import {useState, useContext, useEffect} from 'react';
-import { Bullet, Folder, ChatBox, ThreeDotsEllipsis } from '../IconsIMGSVG';
-import { AiDataProviderContext } from '../AiContextProvider/AiDataProvider';
-import { LocalStorageContextProvider } from '@/app/context_providers/local_storage/LocalStorageProvider';
+import { Bullet, Folder, ChatBox, ThreeDotsEllipsis, QuizIcon } from '../IconsIMGSVG';
+import { DataContextProvider } from '@/app/context_providers/data_context/DataProvider';
 
 interface SlotProps {
     header: string;
-    type: 'folder' | 'chat';
+    type: 'folder' | 'chat' | 'quiz';
     isActive?: boolean;
     dataID?: number;
 }
@@ -21,17 +20,13 @@ interface SlotProps {
  */
 const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
-    const context = useContext(AiDataProviderContext);
-        if (!context) {
-            throw new Error("AiDataProviderContext must be used within a AiDataProvider");
-        }
-    const { dispatch } = context;
-
-    const localContext = useContext(LocalStorageContextProvider);
-    if (!localContext) {
-        throw new Error("LocalStorageContextProvider must be used within a LocalStorageProvider");
+    const context = useContext(DataContextProvider);
+    if (!context) {
+        throw new Error(
+            "DataContextProvider must be used within a DataContextProvider"
+        );
     }
-    const { local_dispatch } = localContext;
+    const { dispatch } = context;
 
     // console.log("Slot Rendered: ", header, type, isActive, dataID);
     // console.log("When Slot was rendered, the current folder in data is: ", data._currentFolderID);
@@ -65,34 +60,33 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     return (
         <li className='grid grid-cols-[1fr_auto] relative bg-surface-50 dark:bg-surface-900 rounded-lg place-items-center hover:cursor-pointer transition-all '>
             {/* Icon and File Name */}
-            {/* FOLDER */}
-                {(type === 'folder') && (
-                    <button type='button' className="grid grid-cols-[auto_1fr] gap-2 h-full place-items-center justify-items-start relative w-full hover:bg-surface-100 dark:hover:bg-surface-950 p-2 rounded-lg rounded-r-none"
-                    onClick={() => {
-                        dispatch({
-                            type: "TOGGLE_CURRENT_FOLDER",
-                            payload: dataID !== undefined ? dataID : -1,
-                        });
-                        local_dispatch({type: "TOGGLE_ACTIVE", payload: dataID || -1})
-                    }}>
-                        <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<Folder width='w-3' background={false} special={true} /></div>
-                        <span className="text-black dark:text-white block w-full text-start truncate h-min text-sm">{header}</span>
-                    </button>
-                )}
-            {/* CHAT OR QUIZ OR NOTE TYPES */}
-                {(type !== 'folder') && (
-                    <button type='button' className="grid grid-cols-[auto_1fr] gap-2 h-full place-items-center justify-items-start relative w-full hover:bg-surface-100 dark:hover:bg-surface-950 p-2 rounded-lg rounded-r-none"
-                    onClick={() => {
-                        dispatch({
-                            type: "TOGGLE_CURRENT_ITEM",
-                            payload: dataID !== undefined ? dataID : -1,
-                        });
-                        local_dispatch({type: "TOGGLE_ACTIVE", payload: dataID || -1})
-                    }}>
-                        <div className='flex flex-row gap-2'>{isActive && <Bullet background={false}  />}<ChatBox width='w-3' background={false} special={true} /></div>
-                        <span className="text-black dark:text-white block w-full text-start truncate h-min text-sm">{header}</span>
-                    </button>
-                )}
+    
+                <button type='button' className="grid grid-cols-[auto_1fr] gap-2 h-full place-items-center justify-items-start relative w-full hover:bg-surface-100 dark:hover:bg-surface-950 p-2 rounded-lg rounded-r-none"
+                onClick={() => {
+                    dispatch({
+                        type: (type === "folder") ? "TOGGLE_CURRENT_FOLDER" : "TOGGLE_CURRENT_FILE",
+                        payload: dataID !== undefined ? dataID : -1,
+                    });
+                }}>
+                    <div className='flex flex-row gap-2'>
+                        {isActive && <Bullet background={false}  />}
+                        {(() => {
+                            switch (type) {
+                                case "folder":
+                                    return <Folder width='w-3' background={false} special={true} />;
+                                case "chat":
+                                    return <ChatBox width='w-3' background={false} special={true} />;
+                                case "quiz":
+                                    return <QuizIcon width='w-3' background={false} special={true} />;
+                                // Add more cases here for new types
+                                default:
+                                    return null;
+                            }
+                        })()}
+                    </div>
+                    <span className="text-black dark:text-white block w-full text-start truncate h-min text-sm">{header}</span>
+                </button>
+
             {/* Options Button */}
             <div className='rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center focus-within:[&>ul]:flex focus:[&>ul]:opacity-100 transition-all'>
                 <button className="p-2 bg-transparent border-none m-0 cursor-pointer focus:[&_+_ul]:flex focus:[&_+_ul]:opacity-100" onClick={()=>{handleButtonClick()}}><ThreeDotsEllipsis width='w-3' background={false} /></button>
@@ -103,8 +97,7 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                             type="button"
                             className='w-full p-2 text-black hover:text-white text-left' 
                             onClick={() => {
-                                dispatch({type: "REMOVE_ITEM", payload: dataID ?? 0});
-                                local_dispatch({type: "REMOVE", payload: dataID ?? 0});
+                                dispatch({type: "DELETE_ITEM", payload: {id: dataID ?? 0}});
                             }}>
                             Delete
                         </button>

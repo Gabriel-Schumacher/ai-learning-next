@@ -1,32 +1,31 @@
 import './css/response.css';
-import { ChatResponse } from '../../lib/types/types';
+import * as Types from '@/lib/types/types_new';
 
 interface ResponseProps {
-    chatResponse: ChatResponse;
-    removeFromHistory: (index: number) => void;
+    chatResponse: Types.TextContentItem;
 }
 
 
-export const Response: React.FC<ResponseProps> = ({chatResponse, removeFromHistory}) => {
+export const Response: React.FC<ResponseProps> = ({chatResponse}) => {
 
     const BASIC_STYLE = `${chatResponse.isAiResponse ? "AIRESPONSE" : "USERRESPONSE"}`;
 
-    const removeResponse = () => {
-        removeFromHistory(chatResponse.id);
-    };
+    if (typeof chatResponse.items !== 'string') {
+        chatResponse.items = JSON.stringify(chatResponse.items);
+    }
 
-    if (chatResponse.body.startsWith('<p>') && chatResponse.body.endsWith('</p>')) {
-        chatResponse.body = chatResponse.body.slice(3, -4);
-    } else if (chatResponse.body.startsWith('<div>') && chatResponse.body.endsWith('</div>')) {
-        chatResponse.body = chatResponse.body.slice(5, -6);
+    if (chatResponse.items.startsWith('<p>') && chatResponse.items.endsWith('</p>')) {
+        chatResponse.items = chatResponse.items.slice(3, -4);
+    } else if (chatResponse.items.startsWith('<div>') && chatResponse.items.endsWith('</div>')) {
+        chatResponse.items = chatResponse.items.slice(5, -6);
     }
 
     return (
         <>
-            {chatResponse.type === "response" && 
-                <div className={BASIC_STYLE} dangerouslySetInnerHTML={{ __html: chatResponse.body }}></div>
+            {chatResponse.type === "text" && 
+                <div className={BASIC_STYLE} dangerouslySetInnerHTML={{ __html: chatResponse.items }}></div>
             }
-            {chatResponse.type !== "response" &&
+            {chatResponse.type !== "text" &&
                 <div className={BASIC_STYLE}>This response type has not been set up in Response.tsx</div>
             }
         </>

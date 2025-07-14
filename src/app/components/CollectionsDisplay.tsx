@@ -409,7 +409,7 @@ function CollectionsDisplay({
     <div>
       {/* Edit Questions Mode */}
       {editQuestionsMode && (
-        <div className="bg-surface-200 p-12 rounded-lg shadow-md mb-4 flex flex-col gap-4">
+        <div className="bg-surface-200 dark:bg-surface-800 p-12 rounded-lg shadow-md mb-4 flex flex-col gap-4">
           <h2 className="text-primary-500 mb-4">Edit Collection: {editTitle}</h2>
           <div className="flex justify-between mb-2 gap-2">
             <div>
@@ -499,7 +499,7 @@ function CollectionsDisplay({
               <ul className="flex flex-col gap-4">
                 {questionLog.map((quizSet, index) => (
                   <li
-                    className="bg-surface-200 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-100  hover:cursor-pointer hover:shadow-xl"
+                    className="bg-surface-200 dark:bg-surface-800 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-100 dark:bg-surface-700 hover:dark:bg-surface-700 hover:cursor-pointer hover:shadow-xl"
                     key={index}
                     onClick={() => handleQuizSelection(index)}
                   >
@@ -545,7 +545,7 @@ function CollectionsDisplay({
         parsedQuestions.length > 0 &&
         activity === 0 &&
         !editQuestionsMode && (
-          <div className="bg-surface-200 p-4 rounded-xl shadow-md w-full flex flex-col gap-4">
+          <div className="bg-surface-200 dark:bg-surface-800 p-4 rounded-xl shadow-md w-full flex flex-col gap-4">
             <div className="flex justify-between">
               <p className="text-2xl font-semibold text-primary-500">
                 {selectedQuizTitle}
@@ -565,7 +565,7 @@ function CollectionsDisplay({
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               <div
-                className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
+                className="card bg-surface-50-950 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
                 onClick={() => setActivity(1)}
               >
                 <div className="text-center flex flex-col items-center gap-2">
@@ -579,7 +579,7 @@ function CollectionsDisplay({
                   your knowledge.
                 </p>
               </div>
-              <div className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
+              <div className="card bg-surface-50-950 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
                 onClick={() => setActivity(2)}>
                 <div className="text-center flex flex-col items-center gap-2">
                   <div className="w-[48px] h-[48px] text-primary-500 mx-auto">
@@ -593,7 +593,7 @@ function CollectionsDisplay({
                 </p>
               </div>
               <div
-                className="card bg-surface-50 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
+                className="card bg-surface-50-950 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
                 onClick={() => {
                   setActivity(3);
                   handleStudyGuide();
@@ -621,7 +621,7 @@ function CollectionsDisplay({
 
       {/* Display FlashCards */}
       {studyMode === true && activity === 1 && parsedQuestions.length > 0 && (
-        <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6">
+        <div className="bg-surface-200 dark:bg-surface-800 p-4 rounded-xl flex flex-col items-center gap-6">
           <div className="flex justify-between w-full max-w-md items-center">
             <p>{currentQuestionIndex + 1}/{parsedQuestions.length}</p>    
             <button className="btn" onClick={finishFlashCards}>Finish</button>        
@@ -637,7 +637,7 @@ function CollectionsDisplay({
               }`}
             >
               {/* Front */}
-              <div className="card-face card-front absolute w-full h-full backface-hidden bg-surface-100 rounded-lg shadow-md">
+              <div className="card-face card-front absolute w-full h-full backface-hidden bg-surface-100 dark:bg-surface-700 rounded-lg shadow-md">
                 <div className="flex flex-col justify-center items-center w-full h-full p-4 text-center">
                   <p className="text-sm">Question:</p>
                   <p className="text-xl font-medium">
@@ -647,7 +647,7 @@ function CollectionsDisplay({
               </div>
 
               {/* Back */}
-              <div className="card-face card-back absolute w-full h-full backface-hidden bg-surface-100 rounded-lg shadow-md transform rotate-y-180">
+              <div className="card-face card-back absolute w-full h-full backface-hidden bg-surface-100 dark:bg-surface-700 rounded-lg shadow-md transform rotate-y-180">
                 <div className="flex flex-col justify-center items-center w-full h-full p-4 text-center">
                   <p className="text-sm">Answer:</p>
                   <p className="text-xl font-medium">
@@ -679,7 +679,7 @@ function CollectionsDisplay({
 
       {/* Display Quiz */}
       {studyMode === true && activity === 2 && parsedQuestions.length > 0 && (
-        <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6 w-full mx-auto">
+        <div className="bg-surface-200 dark:bg-surface-800 p-4 rounded-xl flex flex-col items-center gap-6 w-full mx-auto">
           {!quizFinished ? (
             <>
               <div className="flex justify-between w-full items-center max-w-md">
@@ -690,7 +690,7 @@ function CollectionsDisplay({
                   Finish
                 </button>
               </div>
-              <div className="w-full bg-surface-100 rounded-lg shadow-md p-4 max-w-md">
+              <div className="w-full bg-surface-100 dark:bg-surface-700 rounded-lg shadow-md p-4 max-w-md">
                 <p className="text-lg font-medium mb-4">
                   {parsedQuestions[quizCurrentIndex].question}
                 </p>
@@ -705,13 +705,13 @@ function CollectionsDisplay({
                         } else if (option === quizSelectedOption) {
                           btnClass += "bg-red-200 border-red-600 border-3 ";
                         } else {
-                          btnClass += "bg-surface-50 ";
+                          btnClass += "bg-surface-50-950 ";
                         }
                       } else {
                         if (quizSelectedOption === option) {
                           btnClass += "bg-primary-500 border-tertiary-500 border-3 ";
                         } else {
-                          btnClass += "bg-surface-50 ";
+                          btnClass += "bg-surface-50-950 ";
                         }
                       }
                       return (
@@ -786,12 +786,12 @@ function CollectionsDisplay({
 
       {/* Study Guide Display */}
       {studyMode === true && activity === 3 && (
-        <div className="bg-surface-200 p-4 rounded-xl flex flex-col items-center gap-6 w-full mx-auto">
+        <div className="bg-surface-200 dark:bg-surface-800 p-4 rounded-xl flex flex-col items-center gap-6 w-full mx-auto">
           <div className="flex justify-between w-full max-w-md items-center">
             <p className="text-xl font-semibold">{selectedQuizTitle} - Study Guide</p>
             <button className="btn" onClick={cancelSelectedCollection}>Back</button>
           </div>
-          <div className="w-full bg-surface-100 rounded-lg shadow-md p-4 max-w-2xl min-h-[200px]">
+          <div className="w-full bg-surface-100 dark:bg-surface-700 rounded-lg shadow-md p-4 max-w-2xl min-h-[200px]">
             {studyGuideLoading && (
               <div className="flex flex-col items-center gap-4">
                 <div className="text-center text-primary-500">Generating study guide...</div>
