@@ -5,6 +5,8 @@ import PDFUpload from "@/app/components/PDFUpload";
 import SearchDocuments from "@/app/components/SearchDocuments";
 import DocumentList from "@/app/components/DocumentList";
 import ClientOnly from "@/app/components/ClientOnly";
+import Toast from "@/app/components/Toast";
+import Modal from "@/app/components/Modal";
 
 function LibraryPage() {
   const [pdfText, setPdfText] = useState<string>("");
@@ -12,6 +14,10 @@ function LibraryPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
+  let showingToast = false;
+  let isError = false;
+  const [toastMessage, setToastMessage] = useState<string>("Welcome to the Library!");
+  let modal = true;
 
   // Fetch existing documents on component mount
   useEffect(() => {
@@ -25,9 +31,11 @@ function LibraryPage() {
         const data = await response.json();
         setDocuments(data.documents);
       } else {
+        handleToastMessage("Failed to fetch documents", true);
         console.error("Failed to fetch documents");
       }
     } catch (err) {
+      handleToastMessage("Error fetching documents", true);
       console.error("Error fetching documents:", err);
     }
   };
@@ -55,11 +63,13 @@ function LibraryPage() {
       });
 
       if (!response.ok) {
+        handleToastMessage("Failed to process document", true);
         throw new Error("Failed to process document");
       }
 
       await fetchDocuments(); // Refresh document list
       setIsProcessing(false);
+      handleToastMessage("Document processed successfully!", false);
     } catch (err: any) {
       setError(err.message || "Error processing document");
       setIsProcessing(false);
@@ -74,8 +84,28 @@ function LibraryPage() {
       setSelectedDoc(docId);
   };
 
+  function handleToastMessage(message: string, error: boolean) {
+    isError = error;
+    if (error) {
+      isError = true
+    } 
+    isError = false;
+    setToastMessage(message);
+    showingToast = true;
+    setTimeout(() => {
+      showingToast = false;
+      setToastMessage("");
+    }, 3000); // Hide toast after 3 seconds
+  }
+
+  function handleCancelModal() {
+    modal = false;
+    console.log("Modal cancelled");
+  }
+
   return (
     <div className="p-4">
+        {Toast(toastMessage, isError, showingToast)}
       <h1 className="text-2xl font-bold mb-4">Library</h1>
       <p className="mb-6">
         Upload PDF documents to extract and vectorize their content.
@@ -147,7 +177,9 @@ function LibraryPage() {
           </p>
         </div>
       )}
+
     </div>
+
   );
 }
 
