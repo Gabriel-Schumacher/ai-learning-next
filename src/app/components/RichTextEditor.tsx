@@ -76,7 +76,28 @@ const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(({ 
     setContent,
   }));
 
-  return <div ref={editorRef} style={{ height: '400px' }} />;
+  return (
+    <>
+      <style>
+        {`
+          /* Set Quill toolbar icon color to white */
+          .ql-toolbar .ql-stroke {
+            stroke: #fff !important;
+          }
+          .ql-toolbar .ql-fill {
+            fill: #fff !important;
+          }
+          .ql-toolbar .ql-picker,
+          .ql-toolbar .ql-picker-label,
+          .ql-toolbar .ql-picker-item,
+          .ql-toolbar button {
+            color: #fff !important;
+          }
+        `}
+      </style>
+      <div className="bg-white text-black" ref={editorRef} style={{ height: '400px' }} />
+    </>
+  );
 });
 
 RichTextEditor.displayName = 'RichTextEditor';
