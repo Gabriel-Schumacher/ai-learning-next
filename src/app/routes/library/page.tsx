@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 //import DriveIcon from "@/app/components/customSvg/Drive";
-import PDFUpload from "@/app/components/PDFUpload";
-import SearchDocuments from "@/app/components/SearchDocuments";
-import DocumentList from "@/app/components/DocumentList";
+import PDFUpload from "@/app/components/Library/PDFUpload";
+import SearchDocuments from "@/app/components/Library/SearchDocuments";
+import DocumentList from "@/app/components/Library/DocumentList";
 import ClientOnly from "@/app/components/ClientOnly";
 
 function LibraryPage() {

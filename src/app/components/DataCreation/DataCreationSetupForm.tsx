@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import BookIcon from "@/app/components/customSvg/Book";
 import DataSetupStepper from "@/app/components/DataCreation/DataSetupStepper";
-import DocumentSelectionModal from "@/app/components/DocumentSelectionModal";
+import DocumentSelectionModal from "@/app/components/Library/DocumentSelectionModal";
 
 type Document = {
   id: string;
