@@ -204,15 +204,10 @@ function CollectionsDisplay({
     setQuizCorrect(null);
   };
 
-  // Helper for reordering IDs
-  function reorderQuestionIds(questions: any[]) {
-    return questions.map((q, idx) => ({ ...q, id: idx + 1 }));
-  }
-
   // Edit mode handlers
   function enterEditQuestionsMode(index: number) {
     const collection = questionLog[index];
-    setEditQuestions(collection.questions.map((q: any, idx: number) => ({ ...q, id: idx + 1 })));
+    setEditQuestions(collection.questions.map((q: any) => ({ ...q })));
     setEditTitle(collection.title || `Collection ${index + 1}`);
     setEditQuestionsMode(true);
     setEditingQuestionId(null);
@@ -226,7 +221,9 @@ function CollectionsDisplay({
   }
 
   function handleEditQuestionRemove(id: number) {
-    setEditQuestions((prev) => reorderQuestionIds(prev.filter((q) => q.id !== id)));
+    setEditQuestions((prev) =>
+      prev.filter((q) => q.id !== id)
+    );
     setEditingQuestionId(null);
   }
 
@@ -234,13 +231,13 @@ function CollectionsDisplay({
     setEditQuestions((prev) => [
       ...prev,
       {
-        id: prev.length + 1,
+        id: Date.now() + Math.floor(Math.random() * 10000), // Unique, stable ID
         question: "",
         answer: "",
         options: [],
       },
     ]);
-    setEditingQuestionId(editQuestions.length + 1);
+    setEditingQuestionId(null);
   }
 
   function handleEditDragEnd(event: any) {
@@ -249,7 +246,8 @@ function CollectionsDisplay({
     const oldIndex = editQuestions.findIndex((q) => q.id === active.id);
     const newIndex = editQuestions.findIndex((q) => q.id === over.id);
     const reordered = arrayMove(editQuestions, oldIndex, newIndex);
-    setEditQuestions(reorderQuestionIds(reordered));
+    // Do NOT renumber IDs here!
+    setEditQuestions(reordered);
   }
 
   function handleEditSaveCollection() {
@@ -259,10 +257,12 @@ function CollectionsDisplay({
       selectedQuizIndex >= 0 &&
       selectedQuizIndex < questionLog.length
     ) {
+      // Renumber IDs only when saving
+      const renumberedQuestions = editQuestions.map((q, idx) => ({ ...q, id: idx + 1 }));
       const updatedLog = [...questionLog];
       updatedLog[selectedQuizIndex] = {
         ...updatedLog[selectedQuizIndex],
-        questions: editQuestions,
+        questions: renumberedQuestions,
         title: editTitle,
       };
       setQuestionLog(updatedLog);
