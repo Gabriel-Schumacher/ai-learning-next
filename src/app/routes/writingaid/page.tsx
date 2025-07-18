@@ -1,9 +1,9 @@
 "use client";
 import dynamic from 'next/dynamic';
 import React, { useRef, useState } from 'react';
-import WritingAidChat from '@/app/components/WritingAidChat';
+import WritingAidChat from '@/app/components/WritingAid/WritingAidChat';
 
-const RichTextEditor = dynamic(() => import('@/app/components/RichTextEditor'), {
+const RichTextEditor = dynamic(() => import('@/app/components/WritingAid/RichTextEditor'), {
   ssr: false,
 });
 

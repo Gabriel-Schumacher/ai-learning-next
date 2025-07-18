@@ -1,9 +1,6 @@
 import React, { useState } from "react";
-import FolderIcon from "@/app/components/customSvg/Folder";
-import PencilIcon from "@/app/components/customSvg/Pencil";
-import DriveIcon from "@/app/components/customSvg/Drive";
 import BookIcon from "@/app/components/customSvg/Book";
-import DataSetupStepper from "@/app/components/DataSetupStepper";
+import DataSetupStepper from "@/app/components/DataCreation/DataSetupStepper";
 import DocumentSelectionModal from "@/app/components/DocumentSelectionModal";
 
 type Document = {

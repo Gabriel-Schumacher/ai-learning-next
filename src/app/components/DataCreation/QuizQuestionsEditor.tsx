@@ -2,7 +2,7 @@ import React from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 import LoadingIcon from "@/app/components/LoadingIcon";
-import QuestionEdit from "@/app/components/QuestionEdit";
+import QuestionEdit from "@/app/components/DataCreation/QuestionEdit";
 
 type Question = { id: number; question: string; answer: string; options?: string[] };
 

@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useReadableStream } from "@/app/components/useReadableStream";
-import DataCreationSetupForm from "@/app/components/DataCreationSetupForm";
-import QuizQuestionsEditor from "@/app/components/QuizQuestionsEditor";
+import DataCreationSetupForm from "@/app/components/DataCreation/DataCreationSetupForm";
+import QuizQuestionsEditor from "@/app/components/DataCreation/QuizQuestionsEditor";
 
 import { DataCreationStep } from "@/lib/enums/dataCreationSetup";
 import { useToast } from "@/app/components/ToastContext";

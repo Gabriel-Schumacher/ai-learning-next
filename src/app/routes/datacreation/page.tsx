@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, use } from "react";
-import DataSetup from "@/app/components/DataSetup";
-import CollectionsDisplay from "@/app/components/CollectionsDisplay";
+import DataSetup from "@/app/components/DataCreation/DataSetup";
+import CollectionsDisplay from "@/app/components/DataCreation/CollectionsDisplay";
 import { useToast } from "@/app/components/ToastContext";
 import { Stage } from "@/lib/enums/dataCreationStage";
 
