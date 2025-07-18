@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import FolderIcon from "@/app/components/customSvg/Folder";
 import PencilIcon from "@/app/components/customSvg/Pencil";
 import DriveIcon from "@/app/components/customSvg/Drive";
+import BookIcon from "@/app/components/customSvg/Book";
 import DataSetupStepper from "@/app/components/DataSetupStepper";
 import DocumentSelectionModal from "@/app/components/DocumentSelectionModal";
 
@@ -113,22 +114,10 @@ export default function DataCreationSetupForm({
             <div className="flex gap-4">
                 <button 
                   type="button"
-                  className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"
-                >
-                    <div className="w-[24px] h-[24px]"><FolderIcon /></div>File Upload
-                </button>
-                <button 
-                  type="button"
                   onClick={() => setShowDocumentModal(true)}
                   className="bg-primary-500 text-white rounded-full p-2 shadow-lg flex gap-1 hover:bg-primary-300 hover:shadow-xl"
                 >
-                    <div className="w-[24px] h-[24px]"><PencilIcon /></div>Library
-                </button>
-                <button 
-                  type="button"
-                  className="bg-white text-primary-500 rounded-full p-2 shadow-lg flex gap-1 hover:bg-surface-100 hover:shadow-xl"
-                >
-                    <div className="w-[24px] h-[24px]"><DriveIcon /></div>Google Drive Upload
+                    <div className="w-[24px] h-[24px]"><BookIcon color="fill-white"/></div>Library
                 </button>
             </div>
           </div>
