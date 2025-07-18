@@ -1,7 +1,7 @@
 import OneIcon from "@/app/components/customSvg/One";
 import TwoIcon from "@/app/components/customSvg/Two";
 
-export default function DataCreationStepper({ step }: { step: number }) {
+export default function DataSetupStepper({ step }: { step: number }) {
   return (
     <div className="flex gap-4">
       <div className={`flex gap-1 ${step === 1 ? "text-primary-500" : "text-surface-700"}`}>

@@ -30,7 +30,7 @@ export default function QuizQuestionsEditor({
   setEditingQuestionId,
   saveQuestion,
   removeQuestion,
-  addQuestion,
+  addQuestion, 
   handleDragEnd,
 }: Props) {
   return (

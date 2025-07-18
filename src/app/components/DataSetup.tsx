@@ -2,18 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useReadableStream } from "@/app/components/useReadableStream";
-import DataCreationStepper from "@/app/components/DataCreationStepper";
 import DataCreationSetupForm from "@/app/components/DataCreationSetupForm";
 import QuizQuestionsEditor from "@/app/components/QuizQuestionsEditor";
+
+import { DataCreationStep } from "@/lib/enums/dataCreationSetup";
+import { useToast } from "@/app/components/ToastContext";
 
 import { arrayMove } from "@dnd-kit/sortable"; // Import sortable utilities
 
 
-function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () => void; }) {
+
+function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => void; }) {
   const response = useReadableStream();
+  const { showToast } = useToast();
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1);
   const [subject, setSubject] = useState<string>("");
-  const [step, setStep] = useState<number>(1);
+  const [step, setStep] = useState<DataCreationStep>(DataCreationStep.Setup);
   const [isLoadingQuizData, setIsLoadingQuizData] = useState<boolean>(false);
   const [editedQuestions, setEditedQuestions] = useState<{ [id: number]: { question: string; answer: string; options?: string[] } }>({});
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
@@ -26,7 +30,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
         try {
           const parsedData = JSON.parse(quizData);
           if (parsedData.questions && parsedData.questions.length > 0) {
-            setStep(2);
+            setStep(DataCreationStep.Questions);
           }
         } catch (e) {
           console.error("Error parsing quizData during initialization:", e);
@@ -116,7 +120,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
         event.currentTarget.reset();
       }
       
-      setStep(2);
+      setStep(DataCreationStep.Questions);
 
       const answerText = (await answer) as string;
       try {
@@ -146,7 +150,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
   function clearQuizData() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("quizData");
-      setStep(1);
+      setStep(DataCreationStep.Setup);
     }
   }
 
@@ -172,7 +176,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
       const parsedQuizData = quizData ? JSON.parse(quizData) : null;
       const parsedSavedSets = savedSets ? JSON.parse(savedSets) : [];
       localStorage.removeItem("quizData");
-      setStep(1);
+      setStep(DataCreationStep.Setup);
 
       // Use the provided subject or generate a default name
       const collectionName = subject || 'Untitled Collection';
@@ -183,8 +187,12 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
           { title: collectionName, questions: parsedQuizData.questions },
         ];
         localStorage.setItem("savedQuizSets", JSON.stringify(updatedSavedSets));
+        // Optionally show a toast on save
+        showToast("Collection saved!", false);
         onSave();
       } else {
+        // Optionally show a toast on error
+        showToast("No quiz data available to save.", true);
         console.error("No quiz data available to save.");
       }
     }
@@ -193,7 +201,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
   function handleCancel() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("quizData");
-      setStep(1);
+      setStep(DataCreationStep.Setup);
       if (onCancel) onCancel();
     }
   }
@@ -308,7 +316,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
   return (
     <div>
       <div className="flex flex-col">
-        {step === 1 && (
+        {step === DataCreationStep.Setup && (
           <DataCreationSetupForm
             subject={subject}
             setSubject={setSubject}
@@ -321,7 +329,7 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
             step={step} // Pass step to the form
           />
         )}
-        {step === 2 && (
+        {step === DataCreationStep.Questions && (
           <div>
             <h2 className="text-primary-500 mb-4">Topic: {subject}</h2>
             {selectedDocumentTitle && (
@@ -364,4 +372,4 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
   );
 }
 
-export default DataCreation;
+export default DataSetup;

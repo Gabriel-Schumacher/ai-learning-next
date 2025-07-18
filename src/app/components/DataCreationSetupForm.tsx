@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import FolderIcon from "@/app/components/customSvg/Folder";
 import PencilIcon from "@/app/components/customSvg/Pencil";
 import DriveIcon from "@/app/components/customSvg/Drive";
-import DataCreationStepper from "@/app/components/DataCreationStepper";
+import DataSetupStepper from "@/app/components/DataSetupStepper";
 import DocumentSelectionModal from "@/app/components/DocumentSelectionModal";
 
 type Document = {
@@ -77,7 +77,7 @@ export default function DataCreationSetupForm({
           <h1 className="text-primary-500 h2">Welcome to Data Creation!</h1>
           <p>How would you like to study?</p>
         </div>
-        <DataCreationStepper step={step} />
+        <DataSetupStepper step={step} />
         <div>
           <label htmlFor="topic" className="text-primary-500">
             Collection Name

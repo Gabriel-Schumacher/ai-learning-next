@@ -3,8 +3,9 @@ import SearchAndChats from "./components/SearchAndChats/SearchAndChats"
 import AiChat from "./components/AiChat"
 import AiMenu from "./components/AiMenu"
 import FigmaNavigation from "./components/FigmaNavigation"
-import { useContext } from "react"
+import { useContext, useState } from "react"
 import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider"
+import Toast from './components/Toast'
 // import AiQuiz from "./components/AiQuizNOTINUSE/AiQuiz"
 import Quiz from "./routes/quiz/page"
 import DataCreation from "./routes/datacreation/page"
@@ -16,6 +17,8 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 function Home() {
     const context = useContext(DataContextProvider);
+    const [toast, setToast] = useState<{ message: string; error?: boolean } | null>(null);
+
     if (!context) {
         throw new Error("DataContextProvider must be used within a DataContextProvider");
     }
@@ -83,6 +86,15 @@ function Home() {
                 }
             </div>
         </div>
+        {toast && (
+            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
+                <Toast
+                    message={toast.message}
+                    error={toast.error}
+                    onClose={() => setToast(null)}
+                />
+            </div>
+        )}
       </main>
     )
   }
