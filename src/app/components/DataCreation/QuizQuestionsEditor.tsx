@@ -52,6 +52,7 @@ export default function QuizQuestionsEditor({
     <>
       {isLoadingQuizData ? (
         <div className="flex justify-center items-center">
+          <p className="text-gray-500">Loading questions...</p>
           <LoadingIcon />
         </div>
       ) : (
