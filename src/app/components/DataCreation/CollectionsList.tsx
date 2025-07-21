@@ -1,6 +1,6 @@
 import React from "react";
-import PlusIcon from "./customSvg/Plus";
-import ButtonLink from "./ButtonLink";
+import PlusIcon from "../customSvg/Plus";
+import ButtonLink from "../ButtonLink";
 
 export default function CollectionsList({
   questionLog,

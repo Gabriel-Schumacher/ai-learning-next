@@ -5,6 +5,7 @@ import PDFUpload from "@/app/components/Library/PDFUpload";
 import SearchDocuments from "@/app/components/Library/SearchDocuments";
 import DocumentList from "@/app/components/Library/DocumentList";
 import ClientOnly from "@/app/components/ClientOnly";
+import ButtonLink from "@/app/components/ButtonLink";
 
 function LibraryPage() {
   const [pdfText, setPdfText] = useState<string>("");
@@ -71,22 +72,23 @@ function LibraryPage() {
   };
 
   const handleDocumentSelect = (docId: string | null) => {
-      setSelectedDoc(docId);
+    setSelectedDoc(docId);
   };
 
   return (
-    <div className="card w-full h-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
-      <h1 className="text-2xl font-bold mb-4">Library</h1>
+    <div className="card w-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
+      <div className="grid grid-cols-[1fr_auto]">
+        <h2 className="text-2xl font-semibold">Library</h2>
+        <ButtonLink local_href="DATA_CREATION">Study</ButtonLink>
+      </div>
       <p className="mb-6">
         Upload PDF documents to extract and vectorize their content.
       </p>
-
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
           {error}
         </div>
       )}
-
       <div className="mb-8">
         <ClientOnly>
           <PDFUpload
@@ -94,7 +96,6 @@ function LibraryPage() {
             onError={handleError}
           />
         </ClientOnly>
-
         {isProcessing && (
           <div className="mt-4 p-3 bg-blue-100 text-blue-700 rounded-lg flex items-center">
             <svg
