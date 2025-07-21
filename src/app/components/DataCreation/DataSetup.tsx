@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useReadableStream } from "@/app/components/useReadableStream";
 import DataCreationSetupForm from "@/app/components/DataCreation/DataCreationSetupForm";
 import QuizQuestionsEditor from "@/app/components/DataCreation/QuizQuestionsEditor";
+import EditCollection from "@/app/components/EditCollection"; // <-- Add this import
 
 import { DataCreationStep } from "@/lib/enums/dataCreationSetup";
 import { useToast } from "@/app/components/ToastContext";
@@ -35,6 +36,8 @@ function DataSetup({
   const [questions, setQuestions] = useState<
     { id: number; question: string; answer: string; options?: string[] }[]
   >([]);
+  const [editQuestions, setEditQuestions] = useState<any[]>([]);
+  const [editTitle, setEditTitle] = useState<string>("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -44,6 +47,8 @@ function DataSetup({
           const parsedData = JSON.parse(quizData);
           if (parsedData.questions && parsedData.questions.length > 0) {
             setQuestions(parsedData.questions);
+            setEditQuestions(parsedData.questions.map((q: any) => ({ ...q })));
+            setEditTitle(parsedData.subject || parsedData.title || "Untitled Collection");
             setStep(DataCreationStep.Questions);
           }
         } catch (e) {
@@ -166,6 +171,8 @@ function DataSetup({
           }
           localStorage.setItem("quizData", JSON.stringify(parsedData));
           setQuestions(parsedData.questions); // update state
+          setEditQuestions(parsedData.questions.map((q: any) => ({ ...q }))); // <-- Set editQuestions
+          setEditTitle(collectionName); // <-- Set editTitle
         } else {
           throw new Error("Missing 'questions' key in parsed data");
         }
@@ -177,6 +184,70 @@ function DataSetup({
       console.error("Error in handleSubmit:", e);
       setIsLoadingQuizData(false);
     }
+  }
+
+  // --- EditCollection handlers for initial creation ---
+  function handleEditQuestionSave(id: number, localEdit: any) {
+    setEditQuestions((prev) =>
+      prev.map((q) => (q.id === id ? { ...q, ...localEdit } : q))
+    );
+    setEditingQuestionId(null);
+  }
+
+  function handleEditQuestionRemove(id: number) {
+    setEditQuestions((prev) => prev.filter((q) => q.id !== id));
+    setEditingQuestionId(null);
+  }
+
+  function handleEditAddQuestion() {
+    setEditQuestions((prev) => [
+      ...prev,
+      {
+        id: Date.now() + Math.floor(Math.random() * 10000), // Unique, stable ID
+        question: "",
+        answer: "",
+        options: [],
+      },
+    ]);
+    setEditingQuestionId(null);
+  }
+
+  function handleEditDragEnd(event: any) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = editQuestions.findIndex((q) => q.id === active.id);
+    const newIndex = editQuestions.findIndex((q) => q.id === over.id);
+    const reordered = arrayMove(editQuestions, oldIndex, newIndex);
+    setEditQuestions(reordered);
+  }
+
+  function handleEditSaveCollection() {
+    // Renumber IDs only when saving
+    const renumberedQuestions = editQuestions.map((q, idx) => ({ ...q, id: idx + 1 }));
+    // Save to localStorage as a new collection
+    const savedSets = localStorage.getItem("savedQuizSets");
+    const parsedSavedSets = savedSets ? JSON.parse(savedSets) : [];
+    const updatedSavedSets = [
+      ...parsedSavedSets,
+      { title: editTitle || "Untitled Collection", questions: renumberedQuestions },
+    ];
+    localStorage.setItem("savedQuizSets", JSON.stringify(updatedSavedSets));
+    localStorage.removeItem("quizData");
+    setQuestions([]);
+    setEditQuestions([]);
+    setEditTitle("");
+    setStep(DataCreationStep.Setup);
+    showToast("Collection saved!", false);
+    onSave();
+  }
+
+  function handleEditCancel() {
+    localStorage.removeItem("quizData");
+    setQuestions([]);
+    setEditQuestions([]);
+    setEditTitle("");
+    setStep(DataCreationStep.Setup);
+    if (onCancel) onCancel();
   }
 
   function clearQuizData() {
@@ -375,46 +446,21 @@ function DataSetup({
           />
         )}
         {step === DataCreationStep.Questions && (
-          <div>
-            <h2 className="text-primary-500 mb-4">Topic: {subject}</h2>
-            {selectedDocumentTitle && (
-              <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
-                <p className="text-sm text-blue-700">
-                  <span className="font-medium">Document source:</span>{" "}
-                  {selectedDocumentTitle}
-                </p>
-              </div>
-            )}
-            {!isLoadingQuizData && questions.length === 0 && (
-              <div className="flex justify-end mb-2 gap-2">
-                <button
-                  type="button"
-                  className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                  onClick={clearQuizData}
-                >
-                  Back
-                </button>
-                <button
-                  type="button"
-                  className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                  onClick={saveData}
-                >
-                  Save Collection
-                </button>
-              </div>
-            )}
-
-            <QuizQuestionsEditor
-              isLoadingQuizData={isLoadingQuizData}
-              questions={questions} // use state
-              editingQuestionId={editingQuestionId}
-              setEditingQuestionId={setEditingQuestionId}
-              saveQuestion={saveQuestion}
-              removeQuestion={removeQuestion}
-              addQuestion={addQuestion}
-              handleDragEnd={handleDragEnd}
-            />
-          </div>
+          <EditCollection
+            editQuestions={editQuestions}
+            editTitle={editTitle}
+            editingQuestionId={editingQuestionId}
+            setEditQuestions={setEditQuestions}
+            setEditTitle={setEditTitle}
+            setEditingQuestionId={setEditingQuestionId}
+            handleEditQuestionSave={handleEditQuestionSave}
+            handleEditQuestionRemove={handleEditQuestionRemove}
+            handleEditAddQuestion={handleEditAddQuestion}
+            handleEditDragEnd={handleEditDragEnd}
+            handleEditSaveCollection={handleEditSaveCollection}
+            handleEditCancel={handleEditCancel}
+            // handleDeleteCollection not needed for initial creation
+          />
         )}
       </div>
     </div>

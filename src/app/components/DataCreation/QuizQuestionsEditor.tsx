@@ -26,8 +26,6 @@ function SortableItem({ id, children }: { id: number; children: React.ReactNode 
     opacity: isDragging ? 0.7 : 1,
     zIndex: isDragging ? 100 : "auto",
     cursor: "grab",
-    border: "2px dashed #3b82f6", // Debug border
-    background: isDragging ? "#e0e7ff" : "white", // Debug background
   };
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
