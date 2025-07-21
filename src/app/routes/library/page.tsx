@@ -6,6 +6,7 @@ import SearchDocuments from "@/app/components/Library/SearchDocuments";
 import DocumentList from "@/app/components/Library/DocumentList";
 import ClientOnly from "@/app/components/ClientOnly";
 import ButtonLink from "@/app/components/ButtonLink";
+import LoadingIcon from "@/app/components/LoadingIcon";
 
 function LibraryPage() {
   const [pdfText, setPdfText] = useState<string>("");
@@ -13,6 +14,7 @@ function LibraryPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
+  const [fetching, setFetching] = useState(false);
 
   // Fetch existing documents on component mount
   useEffect(() => {
@@ -22,9 +24,11 @@ function LibraryPage() {
   const fetchDocuments = async () => {
     try {
       const response = await fetch("/api/documents");
+      setFetching(true);
       if (response.ok) {
         const data = await response.json();
         setDocuments(data.documents);
+        setFetching(false);
       } else {
         console.error("Failed to fetch documents");
       }
@@ -147,7 +151,18 @@ function LibraryPage() {
               : pdfText}
           </p>
         </div>
+      ) }
+      {!documents.length && !isProcessing && (
+        <div className="text-center mt-8">
+          <p className="text-gray-500">No documents found. Upload a PDF to get started.</p>
+        </div>
       )}
+      {fetching && (
+        <div className="flex justify-center mt-4">
+          <LoadingIcon />
+        </div>
+      )}
+      
     </div>
   );
 }

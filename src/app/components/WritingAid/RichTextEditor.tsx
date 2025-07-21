@@ -95,7 +95,7 @@ const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(({ 
           }
         `}
       </style>
-      <div className="bg-white text-black" ref={editorRef} style={{ height: '400px' }} />
+      <div className="bg-white text-black" ref={editorRef} style={{ height: '800px' }} />
     </>
   );
 });
