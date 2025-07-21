@@ -27,12 +27,12 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         <ToastContext.Provider value={{ showToast }}>
             {children}
             {toast && (
-                <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-                    <Toast
-                        message={toast.message}
-                        error={toast.error}
-                        onClose={() => setToast(null)}
-                    />
+                <div className="fixed top-4 right-5 z-50">
+                        <Toast
+                            message={toast.message}
+                            error={toast.error}
+                            onClose={() => setToast(null)}
+                        />                        
                 </div>
             )}
         </ToastContext.Provider>

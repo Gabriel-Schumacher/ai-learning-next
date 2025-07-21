@@ -10,19 +10,31 @@ import { useToast } from "@/app/components/ToastContext";
 
 import { arrayMove } from "@dnd-kit/sortable"; // Import sortable utilities
 
-
-
-function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => void; }) {
+function DataSetup({
+  onSave,
+  onCancel,
+}: {
+  onSave: () => void;
+  onCancel: () => void;
+}) {
   const response = useReadableStream();
   const { showToast } = useToast();
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1);
   const [subject, setSubject] = useState<string>("");
   const [step, setStep] = useState<DataCreationStep>(DataCreationStep.Setup);
   const [isLoadingQuizData, setIsLoadingQuizData] = useState<boolean>(false);
-  const [editedQuestions, setEditedQuestions] = useState<{ [id: number]: { question: string; answer: string; options?: string[] } }>({});
-  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
-  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
-  const [questions, setQuestions] = useState<{ id: number; question: string; answer: string; options?: string[] }[]>([]);
+  const [editedQuestions, setEditedQuestions] = useState<{
+    [id: number]: { question: string; answer: string; options?: string[] };
+  }>({});
+  const [editingQuestionId, setEditingQuestionId] = useState<number | null>(
+    null
+  );
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<
+    string | null
+  >(null);
+  const [questions, setQuestions] = useState<
+    { id: number; question: string; answer: string; options?: string[] }[]
+  >([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -35,6 +47,7 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
             setStep(DataCreationStep.Questions);
           }
         } catch (e) {
+          showToast("Error loading quiz data. Please try again.", true);
           console.error("Error parsing quizData during initialization:", e);
         }
       }
@@ -53,6 +66,7 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
           preventDefault: () => event.preventDefault(),
         } as React.FormEvent<HTMLFormElement>;
         handleSubmit(syntheticEvent);
+        showToast("Form submitted successfully!", false);
       }
     }
   }
@@ -60,7 +74,13 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
   // Update function signature to accept the extracted form data
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>,
-    extractedData?: { message?: string; topic?: string; numQuestions?: string; documentId?: string, documentTitle?: string }
+    extractedData?: {
+      message?: string;
+      topic?: string;
+      numQuestions?: string;
+      documentId?: string;
+      documentTitle?: string;
+    }
   ) {
     event.preventDefault();
     if (response.loading) return;
@@ -68,27 +88,36 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
 
     // Use extracted data if provided, otherwise get from form
     const formData: FormData = new FormData(event.currentTarget);
-    const message = extractedData?.message || formData.get("message")?.toString().trim();
-    const topicInput = extractedData?.topic || formData.get("topic")?.toString().trim();
-    const numberInputStr = extractedData?.numQuestions || formData.get("numQuestions")?.toString() || "1";
+    const message =
+      extractedData?.message || formData.get("message")?.toString().trim();
+    const topicInput =
+      extractedData?.topic || formData.get("topic")?.toString().trim();
+    const numberInputStr =
+      extractedData?.numQuestions ||
+      formData.get("numQuestions")?.toString() ||
+      "1";
     const numberInput = parseInt(numberInputStr, 10);
-    const sanitizedNumQuestions = isNaN(numberInput) || numberInput < 1 ? 1 : numberInput;
-    
+    const sanitizedNumQuestions =
+      isNaN(numberInput) || numberInput < 1 ? 1 : numberInput;
+
     // Get document ID from extracted data or form
-    const documentId = extractedData?.documentId || formData.get("documentId")?.toString();
-    
+    const documentId =
+      extractedData?.documentId || formData.get("documentId")?.toString();
+
     // Store the document title for display purposes
     if (extractedData?.documentTitle) {
       setSelectedDocumentTitle(extractedData.documentTitle);
     }
 
     // Set a default collection name if none provided
-    const collectionName = topicInput || (selectedDocumentTitle ? 
-      `Questions from ${selectedDocumentTitle}` : 
-      'Untitled Collection');
-    
+    const collectionName =
+      topicInput ||
+      (selectedDocumentTitle
+        ? `Questions from ${selectedDocumentTitle}`
+        : "Untitled Collection");
+
     setSubject(collectionName);
-    
+
     if (!message && !documentId) return; // Return if no message and no document
     setNumberOfQuestions(sanitizedNumQuestions);
 
@@ -96,12 +125,12 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
 
     try {
       console.log("Sending request with documentId:", documentId);
-      
+
       // Add debug logging to trace the issue
       if (documentId) {
         console.log("Using document ID:", documentId);
       }
-      
+
       const answer = response.request(
         new Request("/api/dataCreation", {
           method: "POST",
@@ -116,12 +145,12 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
           }),
         })
       );
-      
+
       // Only reset the form if we're using the actual form element
       if (!extractedData) {
         event.currentTarget.reset();
       }
-      
+
       setStep(DataCreationStep.Questions);
 
       const answerText = (await answer) as string;
@@ -132,7 +161,7 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
           if (documentId && selectedDocumentTitle) {
             parsedData.metadata = {
               documentId,
-              documentTitle: selectedDocumentTitle
+              documentTitle: selectedDocumentTitle,
             };
           }
           localStorage.setItem("quizData", JSON.stringify(parsedData));
@@ -155,6 +184,7 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
       localStorage.removeItem("quizData");
       setQuestions([]);
       setStep(DataCreationStep.Setup);
+      showToast("Quiz data cleared.", false);
     }
   }
 
@@ -169,7 +199,7 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
       setStep(DataCreationStep.Setup);
 
       // Use the provided subject or generate a default name
-      const collectionName = subject || 'Untitled Collection';
+      const collectionName = subject || "Untitled Collection";
 
       if (parsedQuizData && parsedQuizData.questions) {
         const updatedSavedSets = [
@@ -196,7 +226,10 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
     }
   }
 
-  function saveQuestion(id: number, localEdit: { question: string; answer: string; options?: string[] }) {
+  function saveQuestion(
+    id: number,
+    localEdit: { question: string; answer: string; options?: string[] }
+  ) {
     const quizData = localStorage.getItem("quizData");
     if (quizData) {
       try {
@@ -216,8 +249,13 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
           return question;
         });
         // Reassign ids after edit
-        const renumberedQuestions = updatedQuestions.map((q: any, idx: number) => ({ ...q, id: idx + 1 }));
-        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: renumberedQuestions }));
+        const renumberedQuestions = updatedQuestions.map(
+          (q: any, idx: number) => ({ ...q, id: idx + 1 })
+        );
+        localStorage.setItem(
+          "quizData",
+          JSON.stringify({ ...parsedData, questions: renumberedQuestions })
+        );
         setQuestions(renumberedQuestions); // update state
         setEditedQuestions((prev) => {
           const updatedEditedQuestions = { ...prev };
@@ -225,6 +263,7 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
           return updatedEditedQuestions;
         });
         setEditingQuestionId(null);
+        showToast("Question saved successfully!", false);
       } catch (e) {
         console.error("Error saving question:", e);
       }
@@ -237,10 +276,17 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
     if (quizData) {
       try {
         const parsedData = JSON.parse(quizData);
-        const updatedQuestions = parsedData.questions.filter((question: any) => question.id !== id);
+        const updatedQuestions = parsedData.questions.filter(
+          (question: any) => question.id !== id
+        );
         // Reassign ids after remove
-        const renumberedQuestions = updatedQuestions.map((q: any, idx: number) => ({ ...q, id: idx + 1 }));
-        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: renumberedQuestions }));
+        const renumberedQuestions = updatedQuestions.map(
+          (q: any, idx: number) => ({ ...q, id: idx + 1 })
+        );
+        localStorage.setItem(
+          "quizData",
+          JSON.stringify({ ...parsedData, questions: renumberedQuestions })
+        );
         setQuestions(renumberedQuestions); // update state
         setEditedQuestions((prev) => {
           const newEditedQuestions = { ...prev };
@@ -250,8 +296,10 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
         if (editingQuestionId === id) {
           setEditingQuestionId(null);
         }
+        showToast("Question removed successfully!", false);
       } catch (e) {
         console.error("Error removing question:", e);
+        showToast("Error removing question. Please try again.", true);
       }
     }
   }
@@ -268,7 +316,10 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
         options: [],
       },
     ];
-    localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
+    localStorage.setItem(
+      "quizData",
+      JSON.stringify({ ...parsedData, questions: updatedQuestions })
+    );
     setQuestions(updatedQuestions); // update state
     setEditedQuestions((prev) => ({
       ...prev,
@@ -285,14 +336,20 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
     const newIndex = questions.findIndex((q) => q.id === over.id);
     let reorderedQuestions = arrayMove(questions, oldIndex, newIndex);
     // Reassign ids after reorder
-    reorderedQuestions = reorderedQuestions.map((q, idx) => ({ ...q, id: idx + 1 }));
+    reorderedQuestions = reorderedQuestions.map((q, idx) => ({
+      ...q,
+      id: idx + 1,
+    }));
     setQuestions(reorderedQuestions); // update state
     // Also update localStorage
     const quizData = localStorage.getItem("quizData");
     if (quizData) {
       try {
         const parsedData = JSON.parse(quizData);
-        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: reorderedQuestions }));
+        localStorage.setItem(
+          "quizData",
+          JSON.stringify({ ...parsedData, questions: reorderedQuestions })
+        );
       } catch (e) {
         console.error("Error updating quizData after reorder:", e);
       }
@@ -323,26 +380,30 @@ function DataSetup({ onSave, onCancel }: { onSave: () => void; onCancel: () => v
             {selectedDocumentTitle && (
               <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
                 <p className="text-sm text-blue-700">
-                  <span className="font-medium">Document source:</span> {selectedDocumentTitle}
+                  <span className="font-medium">Document source:</span>{" "}
+                  {selectedDocumentTitle}
                 </p>
               </div>
             )}
-            <div className="flex justify-end mb-2 gap-2">
-              <button
-                type="button"
-                className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                onClick={clearQuizData}
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                onClick={saveData}
-              >
-                Save Collection
-              </button>
-            </div>
+            {!isLoadingQuizData && questions.length === 0 && (
+              <div className="flex justify-end mb-2 gap-2">
+                <button
+                  type="button"
+                  className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                  onClick={clearQuizData}
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                  onClick={saveData}
+                >
+                  Save Collection
+                </button>
+              </div>
+            )}
+
             <QuizQuestionsEditor
               isLoadingQuizData={isLoadingQuizData}
               questions={questions} // use state
