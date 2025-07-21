@@ -2,8 +2,9 @@ import React from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import LoadingIcon from "../LoadingIcon";
 
-function SortableItem({ id, children }: { id: number; children: React.ReactNode }) {
+function SortableItem({ id, children }: { id: number; children: React.ReactNode; }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -28,8 +29,31 @@ function QuestionEdit({ question, onSave, onRemove }: { question: any, onSave: (
   const [localEdit, setLocalEdit] = React.useState({
     question: question.question ?? "",
     answer: question.answer ?? "",
-    options: Array.isArray(question.options) ? [...question.options] : [],
+    options: Array.isArray(question.options) && question.options.length > 0
+      ? [...question.options]
+      : [""], // Ensure at least one option
   });
+
+  // Add option (max 4)
+  const handleAddOption = () => {
+    if (localEdit.options.length < 4) {
+      setLocalEdit((prev) => ({
+        ...prev,
+        options: [...prev.options, ""],
+      }));
+    }
+  };
+
+  // Remove option (min 1)
+  const handleRemoveOption = (index: number) => {
+    if (localEdit.options.length > 1) {
+      setLocalEdit((prev) => {
+        const newOptions = [...prev.options];
+        newOptions.splice(index, 1);
+        return { ...prev, options: newOptions };
+      });
+    }
+  };
 
   return (
     <>
@@ -44,7 +68,7 @@ function QuestionEdit({ question, onSave, onRemove }: { question: any, onSave: (
       {localEdit.options && localEdit.options.length > 0 && (
         <ul className="list-none">
           {localEdit.options.map((option, index) => (
-            <li key={index} className="text-primary-500 list-none mb-2">
+            <li key={index} className="text-primary-500 list-none mb-2 flex gap-2 items-center">
               <input
                 className="input bg-white rounded-xl shadow-lg"
                 type="text"
@@ -57,10 +81,30 @@ function QuestionEdit({ question, onSave, onRemove }: { question: any, onSave: (
                 placeholder={`Edit option ${index + 1}`}
                 data-drag-disabled
               />
+              <button
+                type="button"
+                className="bg-red-500 text-white rounded-full px-2 py-1 ml-2 text-xs"
+                onClick={() => handleRemoveOption(index)}
+                disabled={localEdit.options.length <= 1}
+                title={localEdit.options.length <= 1 ? "At least one option required" : "Remove option"}
+              >
+                &minus;
+              </button>
             </li>
           ))}
         </ul>
       )}
+      <div className="flex mb-2">
+        <button
+          type="button"
+          className="bg-primary-500 text-white rounded-full px-3 py-1 text-xs shadow hover:bg-primary-300"
+          onClick={handleAddOption}
+          disabled={localEdit.options.length >= 4}
+          title={localEdit.options.length >= 4 ? "Maximum 4 options" : "Add option"}
+        >
+          + Option
+        </button>
+      </div>
       <input
         className="input bg-white rounded-xl shadow-lg mb-2"
         type="text"
@@ -103,17 +147,27 @@ export default function EditCollection({
   handleEditSaveCollection,
   handleEditCancel,
   handleDeleteCollection,
+  loading, // <-- destructure loading from props
+  firstEdit,
 }: any) {
   return (
     <div className="bg-surface-200 dark:bg-surface-800 p-12 rounded-lg shadow-md mb-4 flex flex-col gap-4">
-      <h2 className="text-primary-500 mb-4">Edit Collection: {editTitle}</h2>
+
+      {!loading ? (
+      <div>
+      <h2 className="text-primary-500 mb-4">Edit Collection: {editTitle}</h2>        
       <div className="flex justify-between mb-2 gap-2">
+
         <div>
-          <button
-            type="button"
-            className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-            onClick={handleDeleteCollection}
-          >Delete this Collection</button>
+          {/* Only show Delete button if NOT firstEdit */}
+          {!firstEdit && (
+            <button
+              type="button"
+              className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+              onClick={handleDeleteCollection}
+            >Delete this Collection</button>            
+          )}
+
         </div>
         <div className="flex gap-2">
           <button
@@ -131,7 +185,7 @@ export default function EditCollection({
             Save Collection
           </button>
         </div>
-      </div>
+      </div>        
       <DndContext collisionDetection={closestCenter} onDragEnd={handleEditDragEnd}>
         <SortableContext items={editQuestions.map((q: any) => q.id)}>
           {editQuestions.map((question: any) => (
@@ -156,13 +210,16 @@ export default function EditCollection({
                     )}
                     <p className="text-primary-500 my-1">Answer: {question.answer || "No answer available."}</p>
                     <div className="flex gap-2">
-                      <button
-                        type="button"
-                        className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                        onClick={() => setEditingQuestionId(question.id)}
-                      >
-                        Edit
-                      </button>
+                      {/* Only show Edit button if loading is not true */}
+                      {!loading && (
+                        <button
+                          type="button"
+                          className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
+                          onClick={() => setEditingQuestionId(question.id)}
+                        >
+                          Edit
+                        </button>
+                      )}
                     </div>
                   </>
                 )}
@@ -180,6 +237,13 @@ export default function EditCollection({
           + Question
         </button>
       </div>
+      {/* Add this closing div to match the opening <div> after {!loading ? ( */}
+      </div>
+      ) : (
+        <div className="flex justify-center">
+          <LoadingIcon />
+        </div>
+      )}
     </div>
   );
 }

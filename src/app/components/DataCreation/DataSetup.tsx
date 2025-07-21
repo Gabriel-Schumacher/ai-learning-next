@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useReadableStream } from "@/app/components/useReadableStream";
 import DataCreationSetupForm from "@/app/components/DataCreation/DataCreationSetupForm";
 import QuizQuestionsEditor from "@/app/components/DataCreation/QuizQuestionsEditor";
-import EditCollection from "@/app/components/EditCollection"; // <-- Add this import
+import EditCollection from "@/app/components/DataCreation/EditCollection"; // <-- Add this import
 
 import { DataCreationStep } from "@/lib/enums/dataCreationSetup";
 import { useToast } from "@/app/components/ToastContext";
@@ -24,6 +24,7 @@ function DataSetup({
   const [subject, setSubject] = useState<string>("");
   const [step, setStep] = useState<DataCreationStep>(DataCreationStep.Setup);
   const [isLoadingQuizData, setIsLoadingQuizData] = useState<boolean>(false);
+  const [firstEdit, setFirstEdit] = useState<boolean>(false);
   const [editedQuestions, setEditedQuestions] = useState<{
     [id: number]: { question: string; answer: string; options?: string[] };
   }>({});
@@ -50,6 +51,7 @@ function DataSetup({
             setEditQuestions(parsedData.questions.map((q: any) => ({ ...q })));
             setEditTitle(parsedData.subject || parsedData.title || "Untitled Collection");
             setStep(DataCreationStep.Questions);
+            setFirstEdit(true); // <-- Set firstEdit true for unsaved collection
           }
         } catch (e) {
           showToast("Error loading quiz data. Please try again.", true);
@@ -192,11 +194,13 @@ function DataSetup({
       prev.map((q) => (q.id === id ? { ...q, ...localEdit } : q))
     );
     setEditingQuestionId(null);
+    showToast("Question saved successfully!", false);
   }
 
   function handleEditQuestionRemove(id: number) {
     setEditQuestions((prev) => prev.filter((q) => q.id !== id));
     setEditingQuestionId(null);
+    showToast("Question removed successfully!", false);
   }
 
   function handleEditAddQuestion() {
@@ -210,6 +214,7 @@ function DataSetup({
       },
     ]);
     setEditingQuestionId(null);
+    showToast("New question added!", false);
   }
 
   function handleEditDragEnd(event: any) {
@@ -237,6 +242,7 @@ function DataSetup({
     setEditQuestions([]);
     setEditTitle("");
     setStep(DataCreationStep.Setup);
+    setFirstEdit(false); // <-- Set firstEdit false after saving
     showToast("Collection saved!", false);
     onSave();
   }
@@ -250,182 +256,12 @@ function DataSetup({
     if (onCancel) onCancel();
   }
 
-  function clearQuizData() {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("quizData");
-      setQuestions([]);
-      setStep(DataCreationStep.Setup);
-      showToast("Quiz data cleared.", false);
-    }
-  }
-
-  function saveData() {
-    if (typeof window !== "undefined") {
-      const quizData = localStorage.getItem("quizData");
-      const savedSets = localStorage.getItem("savedQuizSets");
-      const parsedQuizData = quizData ? JSON.parse(quizData) : null;
-      const parsedSavedSets = savedSets ? JSON.parse(savedSets) : [];
-      localStorage.removeItem("quizData");
-      setQuestions([]);
-      setStep(DataCreationStep.Setup);
-
-      // Use the provided subject or generate a default name
-      const collectionName = subject || "Untitled Collection";
-
-      if (parsedQuizData && parsedQuizData.questions) {
-        const updatedSavedSets = [
-          ...parsedSavedSets,
-          { title: collectionName, questions: parsedQuizData.questions },
-        ];
-        localStorage.setItem("savedQuizSets", JSON.stringify(updatedSavedSets));
-        // Optionally show a toast on save
-        showToast("Collection saved!", false);
-        onSave();
-      } else {
-        // Optionally show a toast on error
-        showToast("No quiz data available to save.", true);
-        console.error("No quiz data available to save.");
-      }
-    }
-  }
-
   function handleCancel() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("quizData");
       setStep(DataCreationStep.Setup);
       if (onCancel) onCancel();
     }
-  }
-
-  function saveQuestion(
-    id: number,
-    localEdit: { question: string; answer: string; options?: string[] }
-  ) {
-    const quizData = localStorage.getItem("quizData");
-    if (quizData) {
-      try {
-        const parsedData = JSON.parse(quizData);
-        const updatedQuestions = parsedData.questions.map((question: any) => {
-          if (question.id === id) {
-            let mergedOptions = question.options;
-            if (Array.isArray(question.options)) {
-              mergedOptions = localEdit.options ?? question.options;
-            }
-            return {
-              ...question,
-              ...localEdit,
-              options: mergedOptions,
-            };
-          }
-          return question;
-        });
-        // Reassign ids after edit
-        const renumberedQuestions = updatedQuestions.map(
-          (q: any, idx: number) => ({ ...q, id: idx + 1 })
-        );
-        localStorage.setItem(
-          "quizData",
-          JSON.stringify({ ...parsedData, questions: renumberedQuestions })
-        );
-        setQuestions(renumberedQuestions); // update state
-        setEditedQuestions((prev) => {
-          const updatedEditedQuestions = { ...prev };
-          delete updatedEditedQuestions[id];
-          return updatedEditedQuestions;
-        });
-        setEditingQuestionId(null);
-        showToast("Question saved successfully!", false);
-      } catch (e) {
-        console.error("Error saving question:", e);
-      }
-    }
-  }
-
-  function removeQuestion(id: number) {
-    if (isLoadingQuizData) return;
-    const quizData = localStorage.getItem("quizData");
-    if (quizData) {
-      try {
-        const parsedData = JSON.parse(quizData);
-        const updatedQuestions = parsedData.questions.filter(
-          (question: any) => question.id !== id
-        );
-        // Reassign ids after remove
-        const renumberedQuestions = updatedQuestions.map(
-          (q: any, idx: number) => ({ ...q, id: idx + 1 })
-        );
-        localStorage.setItem(
-          "quizData",
-          JSON.stringify({ ...parsedData, questions: renumberedQuestions })
-        );
-        setQuestions(renumberedQuestions); // update state
-        setEditedQuestions((prev) => {
-          const newEditedQuestions = { ...prev };
-          delete newEditedQuestions[id];
-          return newEditedQuestions;
-        });
-        if (editingQuestionId === id) {
-          setEditingQuestionId(null);
-        }
-        showToast("Question removed successfully!", false);
-      } catch (e) {
-        console.error("Error removing question:", e);
-        showToast("Error removing question. Please try again.", true);
-      }
-    }
-  }
-
-  function addQuestion() {
-    const quizData = localStorage.getItem("quizData");
-    const parsedData = quizData ? JSON.parse(quizData) : { questions: [] };
-    const updatedQuestions = [
-      ...parsedData.questions,
-      {
-        id: parsedData.questions.length + 1,
-        question: "",
-        answer: "",
-        options: [],
-      },
-    ];
-    localStorage.setItem(
-      "quizData",
-      JSON.stringify({ ...parsedData, questions: updatedQuestions })
-    );
-    setQuestions(updatedQuestions); // update state
-    setEditedQuestions((prev) => ({
-      ...prev,
-      [updatedQuestions.length]: updatedQuestions[updatedQuestions.length - 1],
-    }));
-    setEditingQuestionId(updatedQuestions.length);
-    setStep((prevStep) => prevStep);
-  }
-
-  function handleDragEnd(event: any) {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    const oldIndex = questions.findIndex((q) => q.id === active.id);
-    const newIndex = questions.findIndex((q) => q.id === over.id);
-    let reorderedQuestions = arrayMove(questions, oldIndex, newIndex);
-    // Reassign ids after reorder
-    reorderedQuestions = reorderedQuestions.map((q, idx) => ({
-      ...q,
-      id: idx + 1,
-    }));
-    setQuestions(reorderedQuestions); // update state
-    // Also update localStorage
-    const quizData = localStorage.getItem("quizData");
-    if (quizData) {
-      try {
-        const parsedData = JSON.parse(quizData);
-        localStorage.setItem(
-          "quizData",
-          JSON.stringify({ ...parsedData, questions: reorderedQuestions })
-        );
-      } catch (e) {
-        console.error("Error updating quizData after reorder:", e);
-      }
-    }
-    setStep((prevStep) => prevStep);
   }
 
   // UI
@@ -459,7 +295,8 @@ function DataSetup({
             handleEditDragEnd={handleEditDragEnd}
             handleEditSaveCollection={handleEditSaveCollection}
             handleEditCancel={handleEditCancel}
-            // handleDeleteCollection not needed for initial creation
+            loading={isLoadingQuizData} // Pass loading state
+            firstEdit={firstEdit} // Pass firstEdit state
           />
         )}
       </div>

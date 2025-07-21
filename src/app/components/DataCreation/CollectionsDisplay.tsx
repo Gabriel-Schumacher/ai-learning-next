@@ -6,7 +6,7 @@ import ListIcon from "@/app/components/customSvg/List";
 import BookIcon from "@/app/components/customSvg/Book";
 import EditIcon from "../customSvg/Edit";
 import { useToast } from "../ToastContext";
-import EditCollection from "../EditCollection";
+import EditCollection from "./EditCollection";
 import CollectionsList from "./CollectionsList"; // Ensure the file exists and is correctly named
 import Flashcards from "../StudyActivities/Flashcards";
 import Quiz from "../StudyActivities/Quiz";
