@@ -151,7 +151,7 @@ export default function EditCollection({
   firstEdit,
 }: any) {
   return (
-    <div className="bg-surface-200 dark:bg-surface-800 p-12 rounded-lg shadow-md mb-4 flex flex-col gap-4">
+    <div className="bg-surface-200 dark:bg-surface-800 p-12 rounded-lg mb-4 flex flex-col gap-4">
 
       {!loading ? (
       <div>
@@ -167,7 +167,6 @@ export default function EditCollection({
               onClick={handleDeleteCollection}
             >Delete this Collection</button>            
           )}
-
         </div>
         <div className="flex gap-2">
           <button
@@ -240,7 +239,8 @@ export default function EditCollection({
       {/* Add this closing div to match the opening <div> after {!loading ? ( */}
       </div>
       ) : (
-        <div className="flex justify-center">
+        <div className="flex flex-col justify-center text-center items-center gap-4">
+          <p className="text-gray-500">Loading questions...</p>
           <LoadingIcon />
         </div>
       )}

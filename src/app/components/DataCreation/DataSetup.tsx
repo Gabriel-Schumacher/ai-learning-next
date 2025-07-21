@@ -24,7 +24,7 @@ function DataSetup({
   const [subject, setSubject] = useState<string>("");
   const [step, setStep] = useState<DataCreationStep>(DataCreationStep.Setup);
   const [isLoadingQuizData, setIsLoadingQuizData] = useState<boolean>(false);
-  const [firstEdit, setFirstEdit] = useState<boolean>(false);
+  const [firstEdit, setFirstEdit] = useState<boolean>(true);
   const [editedQuestions, setEditedQuestions] = useState<{
     [id: number]: { question: string; answer: string; options?: string[] };
   }>({});
@@ -51,7 +51,7 @@ function DataSetup({
             setEditQuestions(parsedData.questions.map((q: any) => ({ ...q })));
             setEditTitle(parsedData.subject || parsedData.title || "Untitled Collection");
             setStep(DataCreationStep.Questions);
-            setFirstEdit(true); // <-- Set firstEdit true for unsaved collection
+            setFirstEdit(false); // <-- Set firstEdit true for unsaved collection
           }
         } catch (e) {
           showToast("Error loading quiz data. Please try again.", true);

@@ -70,7 +70,7 @@ export default function DataCreationSetupForm({
 
   return (
     <form className="space-y-4" onSubmit={handleFormSubmit}>
-      <div className="bg-surface-200 p-12 rounded-lg shadow-md mb-4 flex flex-col gap-3">
+      <div className="bg-surface-200 p-12 mb-4 flex flex-col gap-3">
         <div className="mb-4">
           <h1 className="text-primary-500 h2">Welcome to Data Creation!</h1>
           <p>How would you like to study?</p>
