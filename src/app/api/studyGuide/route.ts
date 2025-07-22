@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import * as Types from "@/lib/types/types_new"
 
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY as string,
@@ -7,27 +8,30 @@ const openai = new OpenAI({
 // Accepts: { questions: QuizQuestionResponse[], title: string }
 export async function POST(req: Request) {
   try {
+    console.log("[Server] 'received study guide request'");
     const body = await req.json();
     const { questions, title } = body;
- 
-    if (!questions || !Array.isArray(questions)) {
-      return new Response("Missing or invalid questions", { status: 400 });
-    }
+    
+    const jsonifiedQuestions = JSON.parse(questions) as Types.QuestionContentItem[];
 
     // Build a readable summary of the questions for the prompt
-    const questionsText = questions
-      .map((q: any, idx: number) => {
-        let opts = "";
-        if (q.options && Array.isArray(q.options)) {
-          opts = q.options
-            .map((opt: string, i: number) => `    - ${opt}`)
-            .join("\n");
-        }
-        return `Q${idx + 1}: ${q.question}\nOptions:\n${opts}\nAnswer: ${
-          q.answer
-        }\n`;
-      })
-      .join("\n");
+    const stringifiedQuestions = jsonifiedQuestions.map((questionItem, index) => {
+      return `Q${index + 1}: ${questionItem.items.question}\nOptions: ${questionItem.items.answers ? questionItem.items.answers.join(", ") : "None"}\nAnswer: ${questionItem.items.correctAnswer || "None"}\n`;
+    }).join("\n");
+
+    // const questionsText = questions
+    //   .map((q: any, idx: number) => {
+    //     let opts = "";
+    //     if (q.options && Array.isArray(q.options)) {
+    //       opts = q.options
+    //         .map((opt: string, i: number) => `    - ${opt}`)
+    //         .join("\n");
+    //     }
+    //     return `Q${idx + 1}: ${q.question}\nOptions:\n${opts}\nAnswer: ${
+    //       q.answer
+    //     }\n`;
+    //   })
+    //   .join("\n");
 
     const prompt = `
         You are an expert educator. Create a clear, concise, and accurate study guide for the following collection titled "${
@@ -40,7 +44,7 @@ export async function POST(req: Request) {
         -Format the study guide in easy-to-read Markdown. Do not include the original questions or answers verbatim, but synthesize the information into a helpful guide.
 
         Here is the collection:
-        ${questionsText}
+        ${stringifiedQuestions}
 `;
 
     const stream = await openai.chat.completions.create({

@@ -252,7 +252,7 @@ const AiChat: React.FC<AiChatProps> = ({
             <div className="w-full grid grid-rows-[1fr_auto] gap-4 h-full">
                 {/* Ai Chat Area */}
                 {/* Response Classes are done here so that tailwind actually works */}
-                <div className="chat overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-surface-400 scrollbar-track-surface-200 dark:scrollbar-thumb-surface-700 dark:scrollbar-track-surface-800">
+                <div className="chat overflow-y-auto max-h-max overflow-x-hidden scrollbar-thin scrollbar-thumb-surface-400 scrollbar-track-surface-200 dark:scrollbar-thumb-surface-700 dark:scrollbar-track-surface-800">
                     {/* Loading Icon */}
                     {!currentConversation && <div className="w-full h-full grid place-items-center"><LoadingIcon /></div>}
 

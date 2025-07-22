@@ -228,6 +228,14 @@
 	@apply duration-200;
 	@apply ease-in-out;
 }
+[data-theme='SeniorProject'] .btn.error,
+[data-theme='SeniorProject'] .btn.btn-error {
+	@apply text-surface-950;
+	@apply bg-error-500;
+	@apply hover:bg-error-600;
+	@apply focus-visible:bg-error-600;
+	@apply active:bg-error-700;
+}
 [data-theme='SeniorProject'] .btn.rounded-full {
 	@apply rounded-full;
 }

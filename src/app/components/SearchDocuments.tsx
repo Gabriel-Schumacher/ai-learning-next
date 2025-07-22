@@ -53,8 +53,8 @@ export default function SearchDocuments({ selectedDocId }: SearchDocumentsProps)
 
   return (
     <div>
-      <form onSubmit={handleSearch} className="mb-4">
-        <div className="grid grid-cols-[1fr_auto] gap-2 bg-surface-50 dark:bg-surface-700 rounded-lg p-2 mr-2 mb-4 focus-within:outline-4 focus-within:outline-blue-500">
+      <form onSubmit={handleSearch}>
+        <div className="grid grid-cols-[1fr_auto] gap-2 bg-surface-50 dark:bg-surface-700 rounded-lg p-2 focus-within:outline-4 focus-within:outline-blue-500">
           <input
             type="text"
             value={query}

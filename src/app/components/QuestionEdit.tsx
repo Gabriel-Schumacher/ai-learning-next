@@ -1,67 +1,79 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import * as Types from "@/lib/types/types_new";
 
 type Props = {
-  question: any;
-  onSave: (edit: any) => void;
+  question: Types.QuestionContentItem;
+  onSave: (editedQuestion: Types.QuestionContentItem) => void;
   onRemove: () => void;
 };
 
 export default function QuestionEdit({ question, onSave, onRemove }: Props) {
-  const [localEdit, setLocalEdit] = useState({
-    question: question.question ?? "",
-    answer: question.answer ?? "",
-    options: Array.isArray(question.options) ? [...question.options] : [],
+  const [editedQuestion, setEditedQuestion] = useState<Types.QuestionContentItem>({
+    ...question,
   });
 
   return (
     <>
-      <input
-        className="input bg-white rounded-xl shadow-lg mb-2"
-        type="text"
-        value={localEdit.question}
-        onChange={(e) => setLocalEdit((prev) => ({ ...prev, question: e.target.value }))}
-        placeholder="Edit question"
-        data-drag-disabled
-      />
-      {localEdit.options && localEdit.options.length > 0 && (
-        <ul className="list-none">
-          {localEdit.options.map((option, index) => (
-            <li key={index} className="text-primary-500 list-none mb-2">
-              <input
-                className="input bg-white rounded-xl shadow-lg"
-                type="text"
-                value={localEdit.options[index]}
-                onChange={(e) => {
-                  const newOptions = [...localEdit.options];
-                  newOptions[index] = e.target.value;
-                  setLocalEdit((prev) => ({ ...prev, options: newOptions }));
-                }}
-                placeholder={`Edit option ${index + 1}`}
-                data-drag-disabled
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-      <input
-        className="input bg-white rounded-xl shadow-lg mb-2"
-        type="text"
-        value={localEdit.answer}
-        onChange={(e) => setLocalEdit((prev) => ({ ...prev, answer: e.target.value }))}
-        placeholder="Edit answer"
-        data-drag-disabled
-      />
-      <div className="flex gap-2">
+
+      {/* Question Text */}
+      <label htmlFor="questionText" className="flex flex-col gap-1">
+        <span className="font-bold text-surface-950">Question:</span>
+        <input
+          className="input text-primary-500 bg-white rounded-xl shadow-lg mb-2"
+          type="text"
+          value={editedQuestion.items.question}
+          onChange={(e) => setEditedQuestion((prev) => ({ ...prev, items: { ...prev.items, question: e.target.value } }))}
+          placeholder="Edit question"
+          data-drag-disabled
+        />
+      </label>
+
+      {/* Answers */}
+      <div className="flex flex-col gap-1">
+        <span className="font-bold text-surface-950">Answers:</span>
+        {editedQuestion.items.answers && editedQuestion.items.answers.length > 0 && (
+          <ul className="list-none">
+            {editedQuestion.items.answers.map((option, index) => (
+              <li key={index} className="text-primary-500 list-none mb-2">
+                <input
+                  className="input bg-white rounded-xl shadow-lg"
+                  type="text"
+                  value={editedQuestion.items.answers[index]}
+                  onChange={(e) => {
+                    const newAnswers = [...editedQuestion.items.answers];
+                    newAnswers[index] = e.target.value;
+                    setEditedQuestion((prev: Types.QuestionContentItem) => ({ ...prev, items: { ...prev.items, answers: newAnswers } }));
+                  }}
+                  placeholder={`Edit option ${index + 1}`}
+                  data-drag-disabled
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <label htmlFor="correctAnswer" className="flex flex-col gap-1">
+        <span className="font-bold text-surface-950">Correct Answer:</span>
+        <input
+          className="input text-primary-500 bg-white rounded-xl shadow-lg mb-2"
+          type="text"
+          value={editedQuestion.items.correctAnswer}
+          onChange={(e) => setEditedQuestion((prev) => ({ ...prev, items: { ...prev.items, correctAnswer: e.target.value } }))}
+          placeholder="Edit answer"
+          data-drag-disabled
+        />
+      </label>
+      <div className="flex justify-end gap-2">
         <button
           type="button"
-          className="bg-primary-500 text-white rounded-full px-4 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-          onClick={() => onSave(localEdit)}
+          className="btn"
+          onClick={() => onSave(editedQuestion)}
         >
           Save
         </button>
         <button
           type="button"
-          className="bg-white text-primary-500 rounded-full px-4 py-2 shadow-lg hover:bg-surface-100 hover:shadow-xl"
+          className="btn btn-error"
           onClick={onRemove}
         >
           Remove

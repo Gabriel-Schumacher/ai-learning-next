@@ -75,9 +75,9 @@ function LibraryPage() {
   };
 
   return (
-    <div className="card w-full h-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
-      <h1 className="text-2xl font-bold mb-4">Library</h1>
-      <p className="mb-6">
+    <>
+      <h1 className="text-2xl font-bold">Library</h1>
+      <p>
         Upload PDF documents to extract and vectorize their content.
       </p>
 
@@ -87,7 +87,7 @@ function LibraryPage() {
         </div>
       )}
 
-      <div className="mb-8">
+      <div>
         <ClientOnly>
           <PDFUpload
             onTextExtracted={handleTextExtracted}
@@ -96,7 +96,7 @@ function LibraryPage() {
         </ClientOnly>
 
         {isProcessing && (
-          <div className="mt-4 p-3 bg-blue-100 text-blue-700 rounded-lg flex items-center">
+          <div className="p-3 bg-blue-100 text-blue-700 rounded-lg flex items-center">
             <svg
               className="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-700"
               xmlns="http://www.w3.org/2000/svg"
@@ -122,13 +122,13 @@ function LibraryPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
         <div className="md:col-span-2">
-          <h2 className="text-xl font-semibold mb-4">Search Your Documents</h2>
+          <h2 className="text-xl font-semibold mb-2">Search Your Documents</h2>
           <SearchDocuments selectedDocId={selectedDoc} />
         </div>
         <div className="md:col-span-1">
-          <h2 className="text-xl font-semibold mb-4">Your Documents</h2>
+          <h2 className="text-xl font-semibold mb-2">Your Documents</h2>
           <DocumentList
             documents={documents}
             onSelect={handleDocumentSelect}
@@ -138,7 +138,7 @@ function LibraryPage() {
       </div>
 
       {pdfText && (
-        <div className="mx-auto mt-8 border-t pt-6">
+        <div className="mx-auto border-t pt-6">
           <h2 className="text-xl font-bold mb-4">Extracted Text Preview:</h2>
           <p className="bg-gray-100 p-4 rounded max-h-80 overflow-y-auto">
             {pdfText.length > 1000
@@ -147,7 +147,7 @@ function LibraryPage() {
           </p>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

@@ -24,7 +24,7 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
         { name: "Home", clickable: true, pageOption: "HOME" },
         // { name: "Chat", clickable: false },
         // { name: "Quiz", clickable: false },
-        { name: "Study", clickable: true, pageOption: "DATA_CREATION" },
+        { name: "Study", clickable: true, pageOption: "STUDY" },
         { name: "Essay Assistance", clickable: true, pageOption: "ESSAY" },
     ];
 
@@ -41,6 +41,8 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
                 case 'CHAT':
                     return 1; 
                 case 'QUIZ':
+                    return 2;
+                case 'STUDY': // 2
                     return 2;
                 case 'DATA_CREATION': // 2
                     return 2;

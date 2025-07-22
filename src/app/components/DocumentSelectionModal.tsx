@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LoadingIcon from './LoadingIcon';
 
 type Document = {
   id: string;
@@ -41,38 +42,31 @@ export default function DocumentSelectionModal({ onClose, onSelect }: DocumentSe
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-primary-500">Select a Document</h2>
-          <button 
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ×
-          </button>
-        </div>
+        
+        <h2 className="text-xl font-semibold text-primary-500 mb-2">Select a Document</h2>
         
         {loading ? (
-          <div className="py-4 text-center">Loading documents...</div>
+          <LoadingIcon />
         ) : error ? (
           <div className="py-4 text-center text-red-500">{error}</div>
         ) : documents.length === 0 ? (
-          <div className="py-4 text-center">No documents found. Please upload a document first.</div>
+          <span className="py-4 text-center text-surface-950-50">No documents found. Please upload a document first.</span>
         ) : (
           <div className="space-y-2">
             {documents.map((doc) => (
               <div 
                 key={doc.id}
                 onClick={() => onSelect(doc)}
-                className="p-3 border rounded-lg cursor-pointer hover:bg-primary-50 transition-colors"
+                className="p-3 border rounded-lg cursor-pointer bg-primary-50 hover:bg-primary-100 transition-colors"
               >
-                <div className="font-medium">{doc.title}</div>
+                <h3 className="h5 font-medium text-surface-50-950">{doc.title}</h3>
                 {doc.description && (
-                  <div className="text-sm text-gray-600">{doc.description}</div>
+                  <span className="text-sm text-surface-100-900">{doc.description}</span>
                 )}
                 {doc.createdAt && (
-                  <div className="text-xs text-gray-500 mt-1">
+                  <span className="text-xs text-surface-100-900 mt-1">
                     {new Date(doc.createdAt).toLocaleDateString()}
-                  </div>
+                  </span>
                 )}
               </div>
             ))}
@@ -82,7 +76,7 @@ export default function DocumentSelectionModal({ onClose, onSelect }: DocumentSe
         <div className="mt-4 flex justify-end">
           <button
             onClick={onClose}
-            className="bg-gray-200 text-gray-800 rounded-full px-4 py-2 hover:bg-gray-300"
+            className="w-full rounded hover:bg-primary-800 transition-all disabled:text-surface-50 disabled:bg-surface-950 dark:disabled:bg-surface-300 dark:disabled:text-surface-800 bg-primary-500 text-white px-6 py-2 shadow-lg hover:shadow-xl"
           >
             Cancel
           </button>

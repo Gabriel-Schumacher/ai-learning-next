@@ -19,7 +19,7 @@ const TextArea: React.FC<TextAreaProps> = ({ handleEnterPress, setTextAreaValue,
         <div className="w-full p-2 card border-black border-solid bg-surface-100 dark:bg-surface-900 min-h-24 grid grid-rows-[1fr_min-content] gap-2 relative">
             <textarea 
                 className="w-full text-surface-950 border-none outline-none hover:outline-none focus:outline-none hover:border-none focus:border-none placeholder:text-surface-950 dark:text-surface-200 dark:placeholder:text-surface-200 cursor-text resize-none overflow-auto"
-                placeholder="Type your message here..."
+                placeholder="Type your prompt here..."
                 value={textAreaValue}
                 onChange={(e) => setTextAreaValue(e.target.value)}
                 onKeyDown={handleEnterPress} 

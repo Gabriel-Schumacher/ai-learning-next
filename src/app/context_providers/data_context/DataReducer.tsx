@@ -16,6 +16,8 @@ export type DATA_ACTION_TYPES =
     | { type: 'ADD_CONTENT'; payload: { type: Types.ContentTypes, contentItem: Types.BaseContentItem } } // This is used to add content to a file. The payload contains the type of the file and the content to be added.
     | { type: 'DELETE_ITEM'; payload: { id: number; } } // This is used to delete an item from the state. The payload contains the ID of the item to be deleted.
     | { type: 'DELETE_ITEM_IN_FILE'; payload: { createdAt: string; } } // This is used to delete an item from a file. The payload contains the creation date of the item to be deleted.
+    | { type: 'RENAME_SLOT'; payload: { id: number; newName: string; } } // This is used to rename a slot in the state. The payload contains the ID of the slot and the new name.
+    | { type: 'UPDATE_ITEM'; payload: { id: number, contentItem: Types.BaseContentItem } }
     | { type: 'Unused'; } // Just stops the never typescript error from showing up.
 
 export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateType => {
@@ -315,6 +317,8 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
             case 'DELETE_ITEM':
                 if (!newState.sortedData) throw new Error("[DataReducer | Action: DELETE_ITEM] No sorted data available to delete item.");
                 
+                console.log("[DataReducer | Action: DELETE_ITEM] Deleting item with ID:", action.payload.id);
+
                 const itemToDelete = Utils.getItemById(newState.sortedData.folders, action.payload.id);
                 const parentOfItemToDelete = Utils.getParentByItemId(newState.sortedData.folders, action.payload.id);
 
@@ -397,6 +401,48 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 if (!currentFile_DeleteItemBlock) throw new Error(`[DataReducer | Action: DELETE_ITEM_IN_FILE] Current file not found.`);
 
                 removeItemByCreationDate(currentFile_DeleteItemBlock.content, action.payload.createdAt);
+
+                return newState;
+            case 'RENAME_SLOT':
+                if (!newState.sortedData) throw new Error("[DataReducer | Action: RENAME_SLOT] No sorted data available to rename slot.");
+                if (action.payload.id === -1) {
+                    // If the id is -1, it means we are renaming the current file.
+                    action.payload.id = newState.sortedData.currentFileId || 0;
+                } else if (action.payload.id === -2) {
+                    // If the id is -2, it means we are renaming the current folder.
+                    action.payload.id = newState.sortedData.currentFolderId || 0;
+                }
+                if (action.payload.id === 0) {
+                    throw new Error("[DataReducer | Action: RENAME_SLOT] Attempted to rename a folder or file when there is no current folder or file selected. Please select a folder or file to rename.");
+                }
+                const slotToRename = Utils.getItemById(newState.sortedData.folders, action.payload.id);
+
+                if (!slotToRename) throw new Error(`[DataReducer | Action: RENAME_SLOT] Slot not found.`);
+
+                if (slotToRename.type === 'folder') {
+                    slotToRename.name = action.payload.newName;
+                }
+                else if ('title' in slotToRename && slotToRename.title) {
+                    slotToRename.title = action.payload.newName;
+                } else {
+                    throw new Error(`[DataReducer | Action: RENAME_SLOT] Item with ID ${action.payload.id} does not have a title or name to rename.`);
+                }
+                return newState;
+            case 'UPDATE_ITEM':
+                if (!newState.sortedData) throw new Error("[DataReducer | Action: UPDATE_ITEM] No sorted data available to update item.");
+                const itemToUpdate = Utils.getItemById(newState.sortedData.folders, action.payload.id);
+                if (!itemToUpdate) throw new Error(`[DataReducer | Action: UPDATE_ITEM] Item with ID ${action.payload.id} not found.`);
+                
+                if (itemToUpdate.type !== action.payload.contentItem.type) {
+                    throw new Error(`[DataReducer | Action: UPDATE_ITEM] Mismatched content type. Expected ${itemToUpdate.type}, but received ${action.payload.contentItem.type}.`);
+                }
+
+                Object.assign(itemToUpdate, {
+                    ...action.payload.contentItem,
+                    updatedAt: new Date() // Update the updatedAt field to the current date.
+                });
+
+                console.log(`[DataReducer | Action: UPDATE_ITEM] Updated item with ID ${action.payload.id}.`, itemToUpdate);
 
                 return newState;
             default:

@@ -1,15 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useReadableStream } from "@/app/components/useReadableStream";
-import DataCreationStepper from "@/app/components/DataCreationStepper";
-import DataCreationSetupForm from "@/app/components/DataCreationSetupForm";
-import QuizQuestionsEditor from "@/app/components/QuizQuestionsEditor";
+import DataCreationStepper from "@/app/components/DataCreation/DataCreationStepper";
+import DataCreationSetupForm from "@/app/components/DataCreation/DataCreationSetupForm";
+import QuizQuestionsEditor from "@/app/components/DataCreation/QuizQuestionsEditor";
 
 import { arrayMove } from "@dnd-kit/sortable"; // Import sortable utilities
+import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
+import * as Utils from "@/app/context_providers/data_context/data_utils";
+import * as Types from "@/lib/types/types_new";
+import { options } from "marked";
+import LoadingIcon from "../LoadingIcon";
 
 
-function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () => void; }) {
+function DataCreation() {
+
+  /*OLD STUFF */
   const response = useReadableStream();
   const [numberOfQuestions, setNumberOfQuestions] = useState<number>(1);
   const [subject, setSubject] = useState<string>("");
@@ -19,37 +26,110 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
   const [selectedDocumentTitle, setSelectedDocumentTitle] = useState<string | null>(null);
 
+  /**NEW STUFF */
+  const [currentQuizFile, setCurrentQuizFile] = useState<Types.QuizFile | null>(null);
+
+  const context = useContext(DataContextProvider);
+  if (!context) {
+      throw new Error("DataContextProvider must be used within a AiDataProvider");
+  }
+  const { data, dispatch } = context;
+
+  /* Check if there is a current file, if so, we should be on the customize page instead of the creation page. */
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const quizData = localStorage.getItem("quizData");
-      if (quizData) {
-        try {
-          const parsedData = JSON.parse(quizData);
-          if (parsedData.questions && parsedData.questions.length > 0) {
-            setStep(2);
-          }
-        } catch (e) {
-          console.error("Error parsing quizData during initialization:", e);
-        }
+    if (data && data.sortedData && data.sortedData.currentFileId) {
+      const currentFile = Utils.getItemById(data.sortedData.folders, data.sortedData.currentFileId) as Types.BaseDataFile | undefined;
+      if (currentFile && currentFile.type === 'quiz') {
+        setCurrentQuizFile(currentFile as Types.QuizFile);
+      } else {
+        setCurrentQuizFile(null);
       }
     }
-  }, []);
+  }, [data]);
 
-  function handleKeydown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      const target = event.target as HTMLTextAreaElement;
-      const form = target.closest("form");
-      if (form) {
-        const syntheticEvent = {
-          ...event,
-          currentTarget: form,
-          preventDefault: () => event.preventDefault(),
-        } as React.FormEvent<HTMLFormElement>;
-        handleSubmit(syntheticEvent);
+  function handleCreateNewQuizFile(parsedData: JSON, collectionName: string) {
+    console.debug("Creating new quiz file with parsed data:", parsedData);
+    console.debug("Collection name:", collectionName);
+
+    if (!('questions' in parsedData)) {
+      console.error("Parsed data is missing 'questions' field");
+      return;
+    }
+
+    // Check to see if a folder has been selected. If not, add a folder.
+    if (data.sortedData && !data.sortedData.currentFolderId) {
+      dispatch({
+        type: "ADD_FOLDER",
+        payload: {
+          setActive: true,
+        },
+      });
+    }
+
+    // Dispatch action to create new quiz file
+    dispatch({
+      type: "ADD_FILE",
+      payload: {
+        type: "quiz",
+        setActive: true,
+      },
+    });
+    dispatch({
+      type: "RENAME_SLOT",
+      payload: {
+        id: -1,
+        newName: collectionName,
       }
+    });
+
+    interface questionItem {
+      id: string | number; // Ensure id is string or number
+      question: string;
+      answer: string;
+      options: string[];
+    }
+    const Questions: questionItem[] = parsedData.questions as [];
+
+    try {
+      Questions.forEach(item => {
+        if (typeof item !== 'object') {
+          throw new Error("Invalid question format in parsed data");
+        }
+        if (!('id' in item) || !('question' in item) || !('answer' in item)) {
+          throw new Error("Question object is missing required fields: id, question, or answer");
+        }
+        const answer = item.answer || "";
+        const question = item.question || "";
+        const options = item.options || [];
+
+        // Create the Question Item
+        const questionItem: Types.QuestionItemsType = {
+          question,
+          answers: options,
+          correctAnswer: answer
+        };
+        // Add the Question to a Content Item (what the file will contain)
+        const newContentItem: Types.QuestionContentItem = {
+          id: -1,
+          type: "question",
+          items: questionItem,
+          createdAt: new Date(),
+        };
+        // Add the item to the file
+        dispatch({
+          type: "ADD_CONTENT",
+          payload: {
+            type: "question",
+            contentItem: newContentItem
+          }
+        });
+
+      });
+    } catch (error) {
+      console.error("Error creating quiz file:", error);
     }
   }
+
 
   // Update function signature to accept the extracted form data
   async function handleSubmit(
@@ -129,7 +209,8 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
               documentTitle: selectedDocumentTitle
             };
           }
-          localStorage.setItem("quizData", JSON.stringify(parsedData));
+          //localStorage.setItem("quizData", JSON.stringify(parsedData));
+          handleCreateNewQuizFile(parsedData, collectionName);
         } else {
           throw new Error("Missing 'questions' key in parsed data");
         }
@@ -143,10 +224,11 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
     }
   }
 
+
+  /* Don't Think we need anymore? */
   function clearQuizData() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("quizData");
-      setStep(1);
     }
   }
 
@@ -187,14 +269,6 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
       } else {
         console.error("No quiz data available to save.");
       }
-    }
-  }
-
-  function handleCancel() {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("quizData");
-      setStep(1);
-      if (onCancel) onCancel();
     }
   }
 
@@ -306,61 +380,40 @@ function DataCreation({ onSave, onCancel }: { onSave: () => void; onCancel: () =
 
   // UI
   return (
-    <div>
-      <div className="flex flex-col">
-        {step === 1 && (
-          <DataCreationSetupForm
-            subject={subject}
-            setSubject={setSubject}
-            numberOfQuestions={numberOfQuestions}
-            setNumberOfQuestions={setNumberOfQuestions}
-            handleKeydown={handleKeydown}
-            handleCancel={handleCancel}
-            handleSubmit={handleSubmit}
-            isLoadingQuizData={isLoadingQuizData}
-            step={step} // Pass step to the form
-          />
-        )}
-        {step === 2 && (
-          <div>
-            <h2 className="text-primary-500 mb-4">Topic: {subject}</h2>
-            {selectedDocumentTitle && (
-              <div className="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200">
-                <p className="text-sm text-blue-700">
-                  <span className="font-medium">Document source:</span> {selectedDocumentTitle}
-                </p>
-              </div>
-            )}
-            <div className="flex justify-end mb-2 gap-2">
-              <button
-                type="button"
-                className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                onClick={clearQuizData}
-              >
-                Back
-              </button>
-              <button
-                type="button"
-                className="bg-primary-500 text-white rounded-full px-6 py-2 shadow-lg hover:bg-primary-300 hover:shadow-xl"
-                onClick={saveData}
-              >
-                Save Collection
-              </button>
+    <>
+      {/* If there isn't a currently selected quiz, then we should display the quiz creation form */}
+      {!isLoadingQuizData && !currentQuizFile && (
+        <DataCreationSetupForm
+          handleSubmit={handleSubmit}
+        />
+      )}
+      {/* If there is a currently selected quiz, then the user is trying to edit the content */}
+      {!isLoadingQuizData && currentQuizFile && (
+        <>
+          <h1 className="text-primary-500 dark:text-white h2 mb-2">Editing {currentQuizFile.title}</h1>
+
+          {/* If there is a document attached, show it? */}
+          {selectedDocumentTitle && (
+            <div className="mb-2 p-3 bg-blue-50 rounded-md border border-blue-200">
+              <p className="text-sm text-blue-700">
+                <span className="font-medium">Document source:</span> {selectedDocumentTitle}
+              </p>
             </div>
-            <QuizQuestionsEditor
-              isLoadingQuizData={isLoadingQuizData}
-              questions={getQuizQuestions()}
-              editingQuestionId={editingQuestionId}
-              setEditingQuestionId={setEditingQuestionId}
-              saveQuestion={saveQuestion}
-              removeQuestion={removeQuestion}
-              addQuestion={addQuestion}
-              handleDragEnd={handleDragEnd}
-            />
-          </div>
-        )}
-      </div>
-    </div>
+          )}
+
+          {/* Quiz Questions Editor */}
+          <QuizQuestionsEditor
+            quizFile={currentQuizFile}
+            handleDragEnd={handleDragEnd}
+          />
+        </>
+      )}
+      {isLoadingQuizData && (
+        <div className="w-full h-full grid place-items-center">
+          <LoadingIcon />
+        </div>
+      )}
+    </>
   );
 }
 

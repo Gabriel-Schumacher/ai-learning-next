@@ -67,9 +67,6 @@ main {
 }
 
 @layer utilities {
-    .chat:has(.LoadingIcon) {
-      height: 100%;
-    }
     .chat {
       width: 100%;
       height: max-content;

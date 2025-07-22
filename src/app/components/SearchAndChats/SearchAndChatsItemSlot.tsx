@@ -2,6 +2,7 @@
 import {useState, useContext, useEffect} from 'react';
 import { Bullet, Folder, ChatBox, ThreeDotsEllipsis, QuizIcon } from '../IconsIMGSVG';
 import { DataContextProvider } from '@/app/context_providers/data_context/DataProvider';
+import RenamePopup from './SearchAndChatsRename';
 
 interface SlotProps {
     header: string;
@@ -21,6 +22,7 @@ interface SlotProps {
 const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
     const context = useContext(DataContextProvider);
+    const [showPopup, setShowPopup] = useState<boolean>(false);
     if (!context) {
         throw new Error(
             "DataContextProvider must be used within a DataContextProvider"
@@ -106,9 +108,17 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                         <button
                             type="button"
                             className='w-full p-2 text-white text-left' 
-                            onClick={() => console.log('Rename clicked')}>
+                            onClick={() => setShowPopup(true)}>
                             Rename
                         </button>
+                        {showPopup &&
+                            <RenamePopup
+                                header={`Rename ${header}`}
+                                text={`Enter a new name for the ${type} named ${header}.`}
+                                componentId={dataID ?? -1}
+                                onCancel={() => setShowPopup(false)}
+                            />
+                        }
                     </li>
                 </ul>
                 

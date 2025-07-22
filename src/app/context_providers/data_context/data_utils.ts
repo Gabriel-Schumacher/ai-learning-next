@@ -102,8 +102,8 @@ type GetParentByIdReturnType = Types.FolderStructure | Types.BaseDataFile | Type
 export function getParentByItemId(folders: Types.FolderStructure[], id: number): GetParentByIdReturnType | null {
 
     function _getParentByItemId(parent: any, items: Types.FolderStructure[] | GetParentByIdReturnType, id:number) : any | null {
-
         // Check if items is an array of objects (e.g., [{}, {}, {}])
+        
         if (Array.isArray(items) && items.every(item => typeof item === 'object' && item !== null)) {
             for (const obj of items as Types.FolderStructure[]) {
             const [foundParent, found] = _getParentByItemId(parent, obj as Types.FolderStructure, id);
@@ -118,6 +118,7 @@ export function getParentByItemId(folders: Types.FolderStructure[], id: number):
                 const [foundParent, found] = _getParentByItemId(items, file, id);
                 if (found) return foundParent;
             }
+            return [null, null]; // If no file matches, return null
         }
 
         // If 'items' is a FolderStructure... (state.sortedData.folders[i])
@@ -129,6 +130,7 @@ export function getParentByItemId(folders: Types.FolderStructure[], id: number):
                     const [foundParent, found] = _getParentByItemId(items, file, id);
                     if (found) return [foundParent, found];
                 }
+                return [null, null]; // If no file matches, return null
             }
         }
 
@@ -141,18 +143,19 @@ export function getParentByItemId(folders: Types.FolderStructure[], id: number):
                     const [foundParent, found] = _getParentByItemId(items, contentItem, id);
                     if (found) return [foundParent, found];
                 }
+                return [null, null]; // If no content item matches, return null
             }
         }
 
         // if 'items' is a BaseContentItem... (state.sortedData.folders[i].files[i].content[i])
-        if ('items' in items && Array.isArray((items as any).items)) {
+        if ('items' in items) {
             if ('id' in items && items.id === id) {
-                return items; // Return the file if it matches the id
+                return [parent, items]; // Return the file if it matches the id
             } else {
                 // Unlike the others, we need to check if items is a string or an array. (since this type includes the QuestionContentItem type)
                 if (typeof items.items === 'string') {
                     // If it's a string, we can't dig deeper, so we return null.
-                    return null;
+                    return [null, null];
                 } else if (Array.isArray(items.items)) {
                     // If it's an array, we can dig deeper.
                     /**
@@ -162,18 +165,21 @@ export function getParentByItemId(folders: Types.FolderStructure[], id: number):
                         if (found) return [foundParent, found];
                     }
                     */
-                   return null; // Since we don't have ids for questions, we can't find a parent for them.
+                   return [null, null]; // Since we don't have ids for questions, we can't find a parent for them.
                 }
             }
         }
 
-        return null;
+        return [null, null];
     }
     return _getParentByItemId(null, folders, id);
 }
 
 type GetItemByIdReturnType = Types.FolderStructure | Types.BaseDataFile | Types.BaseContentItem;
 export function getItemById(folders: Types.FolderStructure[], id: number): GetItemByIdReturnType | null {
+
+    console.debug("[DataUtils | getItemById] Searching for item with ID:", id);
+
     function _getItemById(items: Types.FolderStructure[] | GetItemByIdReturnType, id:number) : GetItemByIdReturnType | null {
 
          // Check if items is an array of objects (e.g., [{}, {}, {}])
@@ -218,7 +224,7 @@ export function getItemById(folders: Types.FolderStructure[], id: number): GetIt
         }
 
         // if 'items' is a BaseContentItem... (state.sortedData.folders[i].files[i].content[i])
-        if ('items' in items && Array.isArray((items as any).items)) {
+        if ('items' in items) {
             if ('id' in items && items.id === id) {
                 return items; // Return the file if it matches the id
             } else {

@@ -7,12 +7,11 @@ import { useContext } from "react"
 import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider"
 // import AiQuiz from "./components/AiQuizNOTINUSE/AiQuiz"
 import Quiz from "./routes/quiz/page"
-import DataCreation from "./routes/datacreation/page"
+import StudyPage from "./routes/study/page"
 import WritingAid from "./routes/writingaid/page"
-import LibraryPage from "./routes/library/page"
 // import QuizContextProvider from "./components/AiQuizNOTINUSE/QuizContext"
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+// const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 function Home() {
     const context = useContext(DataContextProvider);
@@ -20,6 +19,8 @@ function Home() {
         throw new Error("DataContextProvider must be used within a DataContextProvider");
     }
     const { data } = context;
+
+    const StudyPageOptions = ['DATA_CREATION', 'LIBRARY', 'STUDY'] as const;
 
     return (
       <main className="flex flex-col h-full lg:flex-row gap-2 w-full p-4 max-w-[1800px] mx-auto min-h-screen">
@@ -37,10 +38,10 @@ function Home() {
                         {data.sortedData?.currentPage === "CHAT" &&
                             <AiChat />
                         }
-                        {/* Data Creation */}
-                        {data.sortedData?.currentPage === "DATA_CREATION" &&
-                            <DataCreation />
-                        }
+                        {/* Data Creation / Library */}
+                        {StudyPageOptions.includes(data.sortedData?.currentPage as typeof StudyPageOptions[number]) && (
+                            <StudyPage />
+                        )}
                         {/* Quiz */}
                         {data.sortedData?.currentPage === "QUIZ" &&
                             <Quiz />
@@ -54,10 +55,6 @@ function Home() {
                         {/*WritingAid/Essay */}
                         {data.sortedData?.currentPage === "ESSAY" &&
                             <WritingAid />
-                        }
-                        {/* Library */}
-                        {data.sortedData?.currentPage === "LIBRARY" &&
-                            <LibraryPage />
                         }
                         {/* Settings */}
                         {/* Error when no page is set. */}

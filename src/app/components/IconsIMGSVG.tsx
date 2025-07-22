@@ -12,7 +12,7 @@ import Quiz from "../media/quiz.svg"
 
 interface IconProps {
     background?: boolean;
-    width?: 'w-2' | 'w-[22px]'| 'w-3' | 'w-4' | 'w-5' | 'w-6' | 'w-8' | 'w-10' | 'w-12' | 'w-16' | 'w-20' | 'w-24';
+    width?: 'w-2' | 'w-[22px]'| 'w-3' | 'w-4' | 'w-5' | 'w-6' | 'w-8' | 'w-10' | 'w-12' | 'w-16' | 'w-20' | 'w-24' | 'auto' | 'full';
     special?: boolean;
 }
 
@@ -27,18 +27,18 @@ const Icon = ({ src, background = true, width="w-6", special=false}: IconProps &
     if (width === 'w-3') {
         width = 'w-[22px]';
     }
-    const height = `h-${width.replace('w-', '')}`;
+    const height = width !== 'auto' ? `h-${width.replace('w-', '')}` : 'h-auto';
 
-    const CLASSES = !special ? `svg-icon ${width} ${height} max-w-${width} ` : `max-${width} svg-icon-special ${width} ${height}`;
+    const CLASSES = !special ? `svg-icon ${width} ${height} max-w-${width} ` : `max-${width} svg-icon-special w-${width} ${height}`;
     return (
         <>
             {background &&
-                <div className={`${special ? "svg-icon-special" : ""} svg-icon grid place-items-center p-[4px] aspect-square rounded bg-white hover:bg-[#f0f0f0] cursor-pointer`}>
-                    <Image src={src} alt="icon" className={CLASSES + " svg-icon-background aspect-square"} width={24} height={24} />
+                <div className={`${special ? "svg-icon-special" : ""} ${width === "full" ? "w-3/4" : width} svg-icon grid place-items-center p-[4px] aspect-square rounded bg-white hover:bg-[#f0f0f0] cursor-pointer`}>
+                    <Image src={src} alt="icon" className={CLASSES + " svg-icon-background aspect-square"} />
                 </div>
             }
             {!background &&
-                <div className={`${special ? "svg-icon-special" : ""} svg-icon grid aspect-square place-items-center cursor-pointer`}>
+                <div className={`${special ? "svg-icon-special" : ""} ${width === "full" ? "w-1/2" : width} svg-icon grid aspect-square place-items-center cursor-pointer`}>
                     <Image src={src} alt="icon" className={CLASSES + " aspect-square"} />
                 </div>
             }
