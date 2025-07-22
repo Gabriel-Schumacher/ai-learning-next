@@ -3,7 +3,7 @@ import SearchAndChats from "./components/SearchAndChats/SearchAndChats";
 import AiChat from "./components/AiChat";
 import AiMenu from "./components/AiMenu";
 import FigmaNavigation from "./components/FigmaNavigation";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
 // import AiQuiz from "./components/AiQuizNOTINUSE/AiQuiz"
 import Quiz from "./routes/quiz/page"

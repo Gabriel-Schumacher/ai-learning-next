@@ -1,9 +1,8 @@
 import React, { useContext, useState } from "react";
 import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
-import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import LoadingIcon from "@/app/components/LoadingIcon";
-import QuestionEdit from "@/app/components/QuestionEdit";
+import QuestionEdit from "@/app/components/DataCreation/QuestionEdit";
 import * as Types from "@/lib/types/types_new";
 import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
 
@@ -112,7 +111,7 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
                 <p className="text-primary-500">
                   Question: {quizFile.content.findIndex(q => q.id === activeQuestion.id) + 1}
                 </p>
-                <p className="text-primary-500 mb-1">{activeQuestion.question}</p>
+                <p className="text-primary-500 mb-1">{activeQuestion.items.question}</p>
                 {activeQuestion.items.answers && activeQuestion.items.answers.length > 0 && (
                   <ul className="list-none">
                     {activeQuestion.items.answers.map((option, index) => (

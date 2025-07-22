@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import LoadingIcon from './LoadingIcon';
+import LoadingIcon from '@/app/components/LoadingIcon';
 
 type Document = {
   id: string;
@@ -59,12 +59,12 @@ export default function DocumentSelectionModal({ onClose, onSelect }: DocumentSe
                 onClick={() => onSelect(doc)}
                 className="p-3 border rounded-lg cursor-pointer bg-primary-50 hover:bg-primary-100 transition-colors"
               >
-                <h3 className="h5 font-medium text-surface-50-950">{doc.title}</h3>
+                <h3 className="h5 font-medium text-surface-950">{doc.title}</h3>
                 {doc.description && (
-                  <span className="text-sm text-surface-100-900">{doc.description}</span>
+                  <span className="text-sm text-surface-900">{doc.description}</span>
                 )}
                 {doc.createdAt && (
-                  <span className="text-xs text-surface-100-900 mt-1">
+                  <span className="text-xs text-surface-900 mt-1">
                     {new Date(doc.createdAt).toLocaleDateString()}
                   </span>
                 )}

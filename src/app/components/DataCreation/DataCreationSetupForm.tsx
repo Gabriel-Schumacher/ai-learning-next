@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import FolderIcon from "@/app/components/customSvg/Folder";
 import PencilIcon from "@/app/components/customSvg/Pencil";
 import DriveIcon from "@/app/components/customSvg/Drive";
-import DataCreationStepper from "@/app/components/DataCreation/DataCreationStepper";
-import DocumentSelectionModal from "@/app/components/DocumentSelectionModal";
-import * as Types from "@/lib/types/types_new";
+import DocumentSelectionModal from "@/app/components/Library/DocumentSelectionModal";
 import ButtonLink from "../ButtonLink";
 
 type Document = {

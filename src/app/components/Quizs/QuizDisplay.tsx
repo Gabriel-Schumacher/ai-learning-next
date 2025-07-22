@@ -1,4 +1,12 @@
-const QuizDisplay = ({ currentQuiz, userAnswers, showCorrectAnswers, handleAnswerChange }) => {
+import * as Types from "@/lib/types/types_new";
+interface QuizDisplayProps {
+    currentQuiz: Types.QuizFile;
+    userAnswers: { [questionId: number]: string };
+    showCorrectAnswers: boolean;
+    handleAnswerChange: (questionId: number, answer: string) => void;
+}
+
+const QuizDisplay = ({ currentQuiz, userAnswers, showCorrectAnswers, handleAnswerChange }: QuizDisplayProps) => {
 
     return (
         <>
@@ -48,3 +56,5 @@ const QuizDisplay = ({ currentQuiz, userAnswers, showCorrectAnswers, handleAnswe
             </>
     )
 }
+
+export default QuizDisplay;
