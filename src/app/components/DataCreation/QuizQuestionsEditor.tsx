@@ -1,6 +1,8 @@
-import React, { useContext } from "react";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { arrayMove, SortableContext } from "@dnd-kit/sortable";
+import React, { useContext, useState } from "react";
+import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
+import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import LoadingIcon from "@/app/components/LoadingIcon";
 import QuestionEdit from "@/app/components/QuestionEdit";
 import * as Types from "@/lib/types/types_new";
 import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
@@ -11,13 +13,26 @@ type Props = {
 };
 
 function SortableItem({ id, children }: { id: number; children: React.ReactNode }) {
-  // ...implement useSortable logic as in your main file...
-  // For brevity, you can keep this logic in the main file and pass it as a prop if needed.
-  return <>{children}</>;
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.7 : 1,
+    zIndex: isDragging ? 100 : "auto",
+    cursor: "grab",
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
 }
 
 export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
   const [editingQuestionId, setEditingQuestionId] = React.useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(null);
+
+  const activeQuestion = quizFile.content.find(q => q.id === activeId);
 
   const context = useContext(DataContextProvider);
   if (!context) {
@@ -37,9 +52,17 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
     setEditingQuestionId(null);
   }
 
-
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+    <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={event => {
+            handleDragEnd(event);
+            setActiveId(null);
+          }}
+          onDragStart={event => {
+            setActiveId(event.active.id as number);
+          }}
+        >
       <SortableContext items={quizFile.content.map((q: Types.QuestionContentItem) => q.id)}>
         {quizFile.content.map((question: Types.QuestionContentItem) => (
           <SortableItem key={question.id} id={question.id}>
@@ -83,6 +106,24 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
           </SortableItem>
         ))}
       </SortableContext>
+      <DragOverlay>
+            {activeQuestion ? (
+              <div className="bg-white rounded-xl shadow-lg p-4 mb-4 border-2 border-blue-400">
+                <p className="text-primary-500">
+                  Question: {quizFile.content.findIndex(q => q.id === activeQuestion.id) + 1}
+                </p>
+                <p className="text-primary-500 mb-1">{activeQuestion.question}</p>
+                {activeQuestion.items.answers && activeQuestion.items.answers.length > 0 && (
+                  <ul className="list-none">
+                    {activeQuestion.items.answers.map((option, index) => (
+                      <li key={index} className="text-primary-500 list-none">{option}</li>
+                    ))}
+                  </ul>
+                )}
+                <p className="text-primary-500 my-1">Answer: {activeQuestion.items.correctAnswer || "No answer available."}</p>
+              </div>
+            ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

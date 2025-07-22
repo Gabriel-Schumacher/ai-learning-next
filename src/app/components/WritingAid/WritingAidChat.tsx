@@ -8,7 +8,7 @@ import typescript from "highlight.js/lib/languages/typescript";
 import css from "highlight.js/lib/languages/css";
 import cpp from "highlight.js/lib/languages/cpp";
 import csharp from "highlight.js/lib/languages/csharp";
-import LoadingIcon from "./LoadingIcon";
+import LoadingIcon from "../LoadingIcon";
 
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("typescript", typescript);

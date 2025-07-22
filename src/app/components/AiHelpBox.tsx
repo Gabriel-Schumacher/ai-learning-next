@@ -16,7 +16,7 @@ function AiEssay() {
                 <a className="flex flex-col items-center gap-2 text-black dark:text-white text-center p-4 rounded-md border border-transparent dark:bg-surface-600 bg-white hover:cursor-pointer">
                     <Document background={false} width="w-8" special={true}/>
                     <h2>I Need To Write An Essay</h2>
-                    <span>Get help with you writing, look like a pro.</span>
+                    <span>Get help with your writing, look like a pro.</span>
                 </a>
                 <a className="flex flex-col items-center gap-2 text-black dark:text-white text-center p-4 rounded-md border border-transparent dark:bg-surface-600 bg-white hover:cursor-pointer">
                     <ChatBoxFilled background={false} width="w-8" special={true}/>

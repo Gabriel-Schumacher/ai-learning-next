@@ -1,10 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
 //import DriveIcon from "@/app/components/customSvg/Drive";
-import PDFUpload from "@/app/components/PDFUpload";
-import SearchDocuments from "@/app/components/SearchDocuments";
-import DocumentList from "@/app/components/DocumentList";
+import PDFUpload from "@/app/components/Library/PDFUpload";
+import SearchDocuments from "@/app/components/Library/SearchDocuments";
+import DocumentList from "@/app/components/Library/DocumentList";
 import ClientOnly from "@/app/components/ClientOnly";
+import ButtonLink from "@/app/components/ButtonLink";
+import LoadingIcon from "@/app/components/LoadingIcon";
 
 function LibraryPage() {
   const [pdfText, setPdfText] = useState<string>("");
@@ -12,6 +14,7 @@ function LibraryPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
+  const [fetching, setFetching] = useState(false);
 
   // Fetch existing documents on component mount
   useEffect(() => {
@@ -21,9 +24,11 @@ function LibraryPage() {
   const fetchDocuments = async () => {
     try {
       const response = await fetch("/api/documents");
+      setFetching(true);
       if (response.ok) {
         const data = await response.json();
         setDocuments(data.documents);
+        setFetching(false);
       } else {
         console.error("Failed to fetch documents");
       }
@@ -71,30 +76,30 @@ function LibraryPage() {
   };
 
   const handleDocumentSelect = (docId: string | null) => {
-      setSelectedDoc(docId);
+    setSelectedDoc(docId);
   };
 
   return (
-    <>
-      <h1 className="text-2xl font-bold">Library</h1>
-      <p>
+    <div className="card w-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
+      <div className="grid grid-cols-[1fr_auto]">
+        <h2 className="text-2xl font-semibold">Library</h2>
+        <ButtonLink local_href="DATA_CREATION">Study</ButtonLink>
+      </div>
+      <p className="mb-6">
         Upload PDF documents to extract and vectorize their content.
       </p>
-
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
           {error}
         </div>
       )}
-
-      <div>
+      <div className="mb-8">
         <ClientOnly>
           <PDFUpload
             onTextExtracted={handleTextExtracted}
             onError={handleError}
           />
         </ClientOnly>
-
         {isProcessing && (
           <div className="p-3 bg-blue-100 text-blue-700 rounded-lg flex items-center">
             <svg
@@ -145,6 +150,11 @@ function LibraryPage() {
               ? `${pdfText.substring(0, 1000)}...`
               : pdfText}
           </p>
+        </div>
+      ) }
+      {!documents.length && !isProcessing && (
+        <div className="text-center mt-8">
+          <p className="text-gray-500">No documents found. Upload a PDF to get started.</p>
         </div>
       )}
     </>

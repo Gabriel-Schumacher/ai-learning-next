@@ -1,10 +1,10 @@
-"use client"
-import SearchAndChats from "./components/SearchAndChats/SearchAndChats"
-import AiChat from "./components/AiChat"
-import AiMenu from "./components/AiMenu"
-import FigmaNavigation from "./components/FigmaNavigation"
-import { useContext } from "react"
-import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider"
+"use client";
+import SearchAndChats from "./components/SearchAndChats/SearchAndChats";
+import AiChat from "./components/AiChat";
+import AiMenu from "./components/AiMenu";
+import FigmaNavigation from "./components/FigmaNavigation";
+import { useContext, useState } from "react";
+import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
 // import AiQuiz from "./components/AiQuizNOTINUSE/AiQuiz"
 import Quiz from "./routes/quiz/page"
 import StudyPage from "./routes/study/page"
@@ -69,19 +69,23 @@ function Home() {
                     </>
                 }
 
-                {/* Error Message */}
-                {data.errorMessage &&
-                    <div className="w-full h-full grid place-items-center">
-                        <div>
-                            <p className="bg-error-500 rounded py-1 px-2 dark:text-black text-surface-950-50 font-bold mb-2">Sorry, there was an error:</p>
-                            <p className="text-surface-900 dark:text-surface-100 text-center">{data.errorMessage}</p>
-                        </div>
-                    </div>
-                }
+          {/* Error Message */}
+          {data.errorMessage && (
+            <div className="w-full h-full grid place-items-center">
+              <div>
+                <p className="bg-error-500 rounded py-1 px-2 dark:text-black text-surface-950-50 font-bold mb-2">
+                  Sorry, there was an error:
+                </p>
+                <p className="text-surface-900 dark:text-surface-100 text-center">
+                  {data.errorMessage}
+                </p>
+              </div>
             </div>
+          )}
         </div>
-      </main>
-    )
-  }
-  
-  export default Home
+      </div>
+    </main>
+  );
+}
+
+export default Home;

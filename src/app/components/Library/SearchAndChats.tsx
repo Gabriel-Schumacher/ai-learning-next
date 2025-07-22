@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Bullet, PlusSign, Chevron, Folder as IconFolder, ChatBox, ThreeDotsEllipsis } from './IconsIMGSVG';
-import { Conversation, Folder } from "../../lib/types/types";
+import { Bullet, PlusSign, Chevron, Folder as IconFolder, ChatBox, ThreeDotsEllipsis } from '../IconsIMGSVG';
+import { Conversation, Folder } from "../../../lib/types/types";
 
 interface SlotProps {
     header: string;
