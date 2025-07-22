@@ -111,17 +111,16 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                             onClick={() => setShowPopup(true)}>
                             Rename
                         </button>
-                        {showPopup &&
-                            <RenamePopup
-                                header={`Rename ${header}`}
-                                text={`Enter a new name for the ${type} named ${header}.`}
-                                componentId={dataID ?? -1}
-                                onCancel={() => setShowPopup(false)}
-                            />
-                        }
                     </li>
                 </ul>
-                
+                {showPopup &&
+                    <RenamePopup
+                        header={`Rename ${header}`}
+                        text={`Enter a new name for the ${type} named ${header}.`}
+                        componentId={dataID ?? -1}
+                        onCancel={() => setShowPopup(false)}
+                    />
+                }
             </div>
         </li>
     );

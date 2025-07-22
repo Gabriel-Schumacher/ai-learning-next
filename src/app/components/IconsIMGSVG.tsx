@@ -8,7 +8,7 @@ import AaSrc from "../media/text.svg";
 import chatboxFilledSrc from "../media/chatbox-icon.svg";
 import arrowSrc from "../media/arrow.svg";
 import Image from "next/image";
-import Quiz from "../media/quiz.svg"
+import QuizSrc from "../media/quiz.svg"
 
 interface IconProps {
     background?: boolean;
@@ -112,4 +112,4 @@ export const Document = (props: IconProps) => <Icon {...props} src={documentSrc}
 export const Aa = (props: IconProps) => <Icon {...props} src={AaSrc} />;
 export const Arrow = (props: IconProps) => <Icon {...props} src={arrowSrc} />;
 export const ChatBoxFilled = (props: IconProps) => <Icon {...props} src={chatboxFilledSrc} />; // This icon is visually similar to chatBox, but is stuled to appear filled instead of just stroked.
-export const QuizIcon = (props: IconProps) => <Icon {...props} src={Quiz} />;
+export const QuizIcon = (props: IconProps) => <Icon {...props} src={QuizSrc} />;

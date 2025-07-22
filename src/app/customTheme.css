@@ -232,6 +232,7 @@
 [data-theme='SeniorProject'] .btn.btn-error {
 	@apply text-surface-950;
 	@apply bg-error-500;
+	@apply hover:text-surface-950;
 	@apply hover:bg-error-600;
 	@apply focus-visible:bg-error-600;
 	@apply active:bg-error-700;
