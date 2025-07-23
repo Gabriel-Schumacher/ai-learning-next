@@ -76,10 +76,10 @@ function LibraryPage() {
   };
 
   return (
-    <div className="card w-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
+    <>
       <div className="grid grid-cols-[1fr_auto]">
         <h2 className="text-2xl font-semibold">Library</h2>
-        <ButtonLink local_href="DATA_CREATION">Study</ButtonLink>
+        <ButtonLink local_href="STUDY">Study</ButtonLink>
       </div>
       <p className="mb-6">
         Upload PDF documents to extract and vectorize their content.
@@ -153,7 +153,7 @@ function LibraryPage() {
           <p className="text-gray-500">No documents found. Upload a PDF to get started.</p>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

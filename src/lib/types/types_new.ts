@@ -108,6 +108,7 @@ export interface BaseContentItem {
 export interface TextContentItem extends BaseContentItem {
     type: "text";
     isAiResponse: boolean;
+    items: string;
 }
 
 export type QuestionItemsType = {

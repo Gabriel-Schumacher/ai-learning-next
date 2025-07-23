@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
-import { SortableContext, useSortable } from "@dnd-kit/sortable";
+import { SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import QuestionEdit from "@/app/components/DataCreation/QuestionEdit";
 import * as Types from "@/lib/types/types_new";
@@ -21,8 +21,9 @@ function SortableItem({ id, children }: { id: number; children: React.ReactNode 
     cursor: "grab",
   };
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} className="relative">
       {children}
+      <button {...attributes} {...listeners} className="cursor-move absolute top-2 right-2">Drag</button>
     </div>
   );
 }
@@ -62,10 +63,10 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
             setActiveId(event.active.id as number);
           }}
         >
-      <SortableContext items={quizFile.content.map((q: Types.QuestionContentItem) => q.id)}>
+      <SortableContext items={quizFile.content.map((q: Types.QuestionContentItem) => q.id)} strategy={rectSortingStrategy}>
         {quizFile.content.map((question: Types.QuestionContentItem) => (
           <SortableItem key={question.id} id={question.id}>
-            <div className="bg-surface-50 p-4 rounded-lg shadow-md w-full hover:bg-surface-300 dark:bg-surface-700 hover:dark:bg-surface-700 transition-all flex flex-col gap-2">
+            <div className="relative bg-surface-50 p-4 rounded-lg shadow-md w-full hover:bg-surface-300 dark:bg-surface-700 hover:dark:bg-surface-700 transition-all flex flex-col gap-2">
               {/* <p className="text-primary-500 dark:text-white">Question: {question.id}</p> */}
               {editingQuestionId === question.id ? (
                 <QuestionEdit
