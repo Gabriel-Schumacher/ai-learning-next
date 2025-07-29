@@ -245,11 +245,20 @@ function DataCreation() {
     if (!over || active.id === over.id) return;
     if (currentQuizFile) {
       try {
-        const oldIndex = currentQuizFile.content.flatMap(q => q).findIndex((q: { id: string | number }) => q.id === active.id);
-        const newIndex = currentQuizFile.content.flatMap(q => q).findIndex((q: { id: string | number }) => q.id === over.id);
-        const reorderedQuestions = arrayMove(currentQuizFile.content.flatMap(q => q.questions), oldIndex, newIndex);
-        const updatedQuestions = reorderQuestionIds(reorderedQuestions as { id: number; question: string; answer: string; options?: string[] }[]);
-        localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
+        // Old stuff
+        // const oldIndex = currentQuizFile.content.flatMap(q => q).findIndex((q: { id: string | number }) => q.id === active.id);
+        // const newIndex = currentQuizFile.content.flatMap(q => q).findIndex((q: { id: string | number }) => q.id === over.id);
+        // const reorderedQuestions = arrayMove(currentQuizFile.content.flatMap(q => q.questions), oldIndex, newIndex);
+        // const updatedQuestions = reorderQuestionIds(reorderedQuestions as { id: number; question: string; answer: string; options?: string[] }[]);
+        // localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
+        const oldIndex = currentQuizFile.content.findIndex((q: { id: string | number }) => q.id === active.id);
+        const newIndex = currentQuizFile.content.findIndex((q: { id: string | number }) => q.id === over.id);
+        const reorderedQuestions = arrayMove(currentQuizFile.content, oldIndex, newIndex);
+        const updatedQuestions = reorderedQuestions.map((question, index) => ({
+          ...question
+        }));
+        // Update the quiz file content with the reordered questions
+        currentQuizFile.content = updatedQuestions;
       } catch (e) {
         console.error("Error reordering questions:", e);
       }
