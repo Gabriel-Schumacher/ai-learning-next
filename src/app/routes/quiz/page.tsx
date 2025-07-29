@@ -124,52 +124,50 @@ function Quiz() {
 
                     {module === 'HOME' && <>
                         {/* Home Header */}
-                        <div className="text-center my-4">
-                            <p className="text-xl">How would you like to study?</p>
-                        </div>
+                        <h2 className="text-2xl font-bold w-full text-center block">How would you like to study?</h2>
                         {/* Study Activity Options */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                             {/* Flash Card Button */}
-                            <button title="Flashcards" className="card bg-surface-50-950 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
+                            <button title="Flashcards" className="card bg-surface-50-950 dark:bg-surface-700 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
                                 onClick={() => setModule('FLASHCARD')}
                             >
-                                <div className="text-center flex flex-col items-center gap-2">
+                                <div className="text-center flex flex-col items-center gap-2 w-full">
                                     <div className="w-[48px] h-[48px] text-primary-500 mx-auto">
                                         <CardIcon />
                                     </div>
                                     <p className="text-xl">Flashcards</p>
                                 </div>
-                                <p className="mt-8"> Make studying fun! Test yourseslf, build speed, and lock in your knowledge.</p>
+                                <p className="mt-4 md:mt-8"> Make studying fun! Test yourseslf, build speed, and lock in your knowledge.</p>
                             </button>
 
                             {/* Quiz Button */}
-                            <button title="Practice Tests" className="card bg-surface-50-950 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
+                            <button title="Practice Tests" className="card bg-surface-50-950 dark:bg-surface-700 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
                                 onClick={() => setModule('QUIZ')}
                             >
-                                <div className="text-center flex flex-col items-center gap-2">
+                                <div className="text-center flex flex-col items-center gap-2 w-full">
                                     <div className="w-[48px] h-[48px] text-primary-500 mx-auto">
                                         <ListIcon />
                                     </div>
                                     <p className="text-xl">Practice Tests</p>
                                 </div>
-                                <p className="mt-8">Simulate the real thing. Build confidence, find weak spots in your knowledge, and track your progress.</p>
+                                <p className="mt-4 md:mt-8">Simulate the real thing. Build confidence, find weak spots in your knowledge, and track your progress.</p>
                             </button>
 
                             {/* Study Guide Button */}
                             <button
-                                className="card bg-surface-50-950 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
+                                className="card bg-surface-50-950 dark:bg-surface-700 p-4 rounded-lg shadow-lg flex flex-col gap-2 py-6 hover:cursor-pointer hover:shadow-xl"
                                 onClick={() => {
                                 setModule('STUDY');
                                 localHandleStudyGuide();
                                 }}
                             >
-                                <div className="text-center flex flex-col items-center gap-2">
+                                <div className="text-center flex flex-col items-center gap-2 w-full">
                                     <div className="w-[48px] h-[48px] text-primary-500 mx-auto">
                                         <BookIcon />
                                     </div>
                                     <p className="text-xl">Study Guide</p>
                                 </div>
-                                <p className="mt-8">Break it down, keep it clear. A quick-glance tool to review the most important stuff fast.</p>
+                                <p className="mt-4 md:mt-8">Break it down, keep it clear. A quick-glance tool to review the most important stuff fast.</p>
                             </button>
                         </div>
                     </>
