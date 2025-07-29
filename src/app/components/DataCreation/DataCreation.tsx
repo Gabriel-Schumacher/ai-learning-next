@@ -222,16 +222,32 @@ function DataCreation() {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function handleDragEnd(event: any) {
+  /** OLD CODE FOR OLD JSON DATA */
+  // function handleDragEnd(event: any) {
+  //   const { active, over } = event;
+  //   if (!over || active.id === over.id) return;
+  //   const quizData = localStorage.getItem("quizData");
+  //   if (quizData) {
+  //     try {
+  //       const parsedData = JSON.parse(quizData);
+  //       const oldIndex = parsedData.questions.findIndex((q: { id: string | number }) => q.id === active.id);
+  //       const newIndex = parsedData.questions.findIndex((q: { id: string | number }) => q.id === over.id);
+  //       const reorderedQuestions = arrayMove(parsedData.questions, oldIndex, newIndex);
+  //       const updatedQuestions = reorderQuestionIds(reorderedQuestions as { id: number; question: string; answer: string; options?: string[] }[]);
+  //       localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
+  //     } catch (e) {
+  //       console.error("Error reordering questions:", e);
+  //     }
+  //   }
+  // }
+    function handleDragEnd(event: any) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const quizData = localStorage.getItem("quizData");
-    if (quizData) {
+    if (currentQuizFile) {
       try {
-        const parsedData = JSON.parse(quizData);
-        const oldIndex = parsedData.questions.findIndex((q: { id: string | number }) => q.id === active.id);
-        const newIndex = parsedData.questions.findIndex((q: { id: string | number }) => q.id === over.id);
-        const reorderedQuestions = arrayMove(parsedData.questions, oldIndex, newIndex);
+        const oldIndex = currentQuizFile.content.flatMap(q => q).findIndex((q: { id: string | number }) => q.id === active.id);
+        const newIndex = currentQuizFile.content.flatMap(q => q).findIndex((q: { id: string | number }) => q.id === over.id);
+        const reorderedQuestions = arrayMove(currentQuizFile.content.flatMap(q => q.questions), oldIndex, newIndex);
         const updatedQuestions = reorderQuestionIds(reorderedQuestions as { id: number; question: string; answer: string; options?: string[] }[]);
         localStorage.setItem("quizData", JSON.stringify({ ...parsedData, questions: updatedQuestions }));
       } catch (e) {

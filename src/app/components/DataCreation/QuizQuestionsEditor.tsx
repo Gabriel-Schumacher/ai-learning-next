@@ -81,7 +81,7 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
                     <span className="text-surface-900-100 font-bold">Options:</span>
                     {question.items.answers && question.items.answers.length > 0 && (
                       <ul className="list-disc pl-4 text-primary-500 dark:text-white">
-                        {question.items.answers.map((option:string, index:number) => (
+                        {question.items.answers.map((option:string, index:number) => ( 
                           <li key={index} className="text-primary-500 dark:text-white">{option}</li>
                         ))}
                       </ul>

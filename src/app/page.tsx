@@ -25,7 +25,7 @@ function Home() {
     return (
       <main className="flex flex-col h-full lg:flex-row gap-2 w-full p-4 max-w-[1800px] mx-auto min-h-screen">
         <SearchAndChats />
-        <div className="w-full mr-2 grid grid-rows-[auto_1fr]">
+        <div className="w-full mr-2 grid grid-rows-[auto_1fr] max-w-[1400px]">
             <FigmaNavigation actions={() => {}}/>
             <div className="w-full h-full">
                 { !data.errorMessage &&
