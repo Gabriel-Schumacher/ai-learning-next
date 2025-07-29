@@ -61,9 +61,9 @@ const RenamePopup: React.FC<RenamePopupProps> = ({header, text, componentId, onC
 
     return (
         <div className="fixed inset-0 flex items-center bg-[rgba(0,0,0,0.25)] justify-center z-50 w-full h-screen cursor-default" id="rename-slot-popup" onClick={handleClickOutsidePopup}>
-            <div className="flex flex-col p-4 gap-2 bg-surface-50 dark:bg-surface-700 rounded-lg shadow-lg place-items-center">
+            <div className="flex flex-col p-4 gap-2 bg-surface-50 dark:bg-surface-700 rounded-lg shadow-lg place-items-center max-w-5/6">
                 <h3 className="text-lg font-semibold">{header}</h3>
-                <p className="text-sm text-surface-950-50">{text}</p>
+                <p className="text-sm text-surface-950-50 w-full max-w-[35ch] place-self-start">{text}</p>
                 {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
                 <span className='grid w-full grid-cols-[1fr] gap-2 bg-surface-200 dark:bg-surface-400 rounded-lg p-2 cursor-pointer'>
                     <input type="text" name={`slot-rename-${componentId}`} id={`slot-rename-${componentId}`} onKeyDown={checkIfKeyIsEnter} autoFocus className='w-full text-black placeholder:text-surface-900 bg-transparent focus:outline-none cursor-pointer'/></span>

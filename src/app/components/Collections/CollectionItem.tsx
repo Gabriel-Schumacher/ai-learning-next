@@ -39,8 +39,8 @@ const CollectionItem: React.FC<CollectionItemProps> = ({index, collectionFile}) 
     return (
         <li key={index}>
             <button className="bg-surface-50 p-4 rounded-lg shadow-md w-full hover:bg-surface-300 dark:bg-surface-700 hover:dark:bg-surface-700 hover:cursor-pointer hover:shadow-xl focus:outline-2 focus:outline-surface-500 dark:focus:outline-surface-400 transition-colors duration-200 grid grid-cols-[1fr_auto]" onClick={handleClick}>
-                <p className="text-lg font-medium text-start">Collection {index + 1}: {collectionFile.title}</p>
-                <p>{collectionFile.content.length} Terms</p>
+                <p className="text-sm sm:text-base md:text-lg font-medium text-start">Collection {index + 1}: {collectionFile.title}</p>
+                <p className='text-xs sm:text-base'>{collectionFile.content.length} Terms</p>
             </button>
         </li>
     );

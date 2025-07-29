@@ -16,6 +16,7 @@ import ButtonLink from "../ButtonLink";
 import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
 import * as Types from "@/lib/types/types_new";
 import CollectionItem from "./CollectionItem";
+import { PlusSign } from "../IconsIMGSVG";
 
 
 
@@ -65,10 +66,11 @@ function CollectionsDisplay() {
 
           {/* Button to Create a Collection */}
           <button className="btn" onClick={() => dispatch({ type: "SET_PAGE", payload: "DATA_CREATION" })}>
-              <div className="w-[24px] h-[24px]">
-                  <PlusIcon color={"text-surface-50"}/>                        
-              </div>
-
+              <PlusSign
+                  background={true}
+                  special={true}
+                  width="w-3"
+              />
               New Collection
           </button>
         </>

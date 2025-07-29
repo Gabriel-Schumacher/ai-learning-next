@@ -34,12 +34,12 @@ export default function CollectionsList({
       <ul className="flex flex-col gap-4">
         {questionLog.map((quizSet, index) => (
           <li
-            className="bg-surface-50 dark:bg-surface-900 p-4 rounded-lg shadow-md w-full hover:shadow-xl hover:bg-surface-300 dark:bg-surface-700 hover:dark:bg-surface-700 hover:cursor-pointer hover:shadow-xl"
+            className="bg-surface-50 p-4 text-sm md:text-base rounded-lg shadow-md w-full hover:bg-surface-300 dark:bg-surface-700 hover:dark:bg-surface-700 hover:cursor-pointer hover:shadow-xl"
             key={index}
             onClick={() => onQuizSelect(index)}
           >
             <div className="flex justify-between">
-              <p className="text-lg font-medium">
+              <p className="text-base md:text-lg font-medium">
                 {quizSet.title
                   ? `Collection ${index + 1}: ${quizSet.title}`
                   : `Quiz ${index + 1}`}

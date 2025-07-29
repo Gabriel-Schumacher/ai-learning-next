@@ -153,14 +153,7 @@ const WritingAidChat: React.FC<WritingAidChatProps> = ({ writingText }) => {
           className="chat overflow-y-auto max-h-max overflow-x-hidden scrollbar-thin scrollbar-thumb-surface-400 scrollbar-track-surface-200 dark:scrollbar-thumb-surface-700 dark:scrollbar-track-surface-800"
         >
           {safeChatHistory.length === 0 && !loading && (
-            <div className="flex items-center justify-center h-32">
-              <div className="p-6 bg-gray-50 rounded-lg shadow-sm max-w-md dark:bg-gray-800">
-                <h2 className="text-xl font-medium text-gray-700 mb-2 dark:text-gray-50">Welcome!</h2>
-                <p className="text-gray-600 dark:text-gray-50">
-                  Paste your writing and chat with the AI for feedback or suggestions!
-                </p>
-              </div>
-            </div>
+            <div className="AIRESPONSE"><b>Welcome!</b> The content of your essay on the right will automatically be combined with what ever message you ask me. So go ahead and chat with me to get feedback or suggestions!</div>
           )}
           {safeChatHistory.map((chat, idx) =>
             chat.role === "user" ? (

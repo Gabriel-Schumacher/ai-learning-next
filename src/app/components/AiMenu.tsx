@@ -80,17 +80,17 @@ const AiMenu: React.FC = () => {
 
 
     return (
-        <div className="card w-full h-full grid grid-rows-[1fr_max-content] gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
+        <div className="card w-full h-full flex flex-col gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
                 {/* First Row */}
-                <div className="grid grid-rows-2 gap-2">
+                <div className="flex flex-col md:grid md:grid-rows-2 gap-2">
                     {/* Entry Text */}
-                    <div className="grid grid-rows-2 place-items-center gap-2">
-                        <h1 className="h2 text-center text-primary-500 dark:text-surface-50 text-7xl">How Can I Help You Today?</h1>
+                    <div className="grid grid-rows-2 place-items-center gap-2 mb-4 md:mb-0">
+                        <h1 className="h2 text-center text-primary-500 dark:text-surface-50 text-4xl md:text-7xl">How Can I Help You Today?</h1>
                         <p className="text-center dark:text-surface-50">Our AI learning assistant is designed to provide personalized, real-time support to help you learn more effectively. Whether yout&#39;re studying for an exam, picking up a new skill, or tackling a tough topic, our AI assistant makes learning engaging and efficient.</p>
                     </div>
 
                     {/* Three Buttons To Start a Conversation */}
-                    <div className="grid grid-cols-3 gap-2 [&>button]:hover:cursor-pointer [&>button]:p-2 [&>button]:rounded-md [&>button]:border [&>button]:border-transparent dark:[&>button]:hover:bg-surface-500 [&>button]:dark:bg-surface-600 [&>button]:bg-surface-50 [&>button]:hover:bg-surface-200 [&>button]:grid [&>button]:grid-rows-[1fr_auto] [&>button]:place-items-center [&>button]:gap-2 [&>button]:text-black [&>button]:dark:text-white [&>button]:text-center [&>button>span]:text-xs">
+                    <div className="grid grid-rows-3 md:grid-rows-1 md:grid-cols-3 gap-2 [&>button]:hover:cursor-pointer [&>button]:p-2 [&>button]:rounded-md [&>button]:border [&>button]:border-transparent dark:[&>button]:hover:bg-surface-500 [&>button]:dark:bg-surface-600 [&>button]:bg-surface-50 [&>button]:hover:bg-surface-200 [&>button]:grid [&>button]:grid-rows-[1fr_auto] [&>button]:place-items-center [&>button]:gap-2 [&>button]:text-black [&>button]:dark:text-white [&>button]:text-center [&>button>span]:text-xs">
                         {/* Essay Help Button */}
                         <button aria-label="Get help writing an essay" onClick={handleWritingEssayClick}>
                             <Document background={false} width="full" special={true}/>
@@ -119,7 +119,7 @@ const AiMenu: React.FC = () => {
                 </div>
 
                 {/* Text Area */}
-                <TextArea handleEnterPress={handleEnterPress} setTextAreaValue={setTextAreaValue} textAreaValue={textAreaValue} />
+                <TextArea handleEnterPress={handleEnterPress} setTextAreaValue={setTextAreaValue} textAreaValue={textAreaValue} attach={false} />
 
         </div>
     );
