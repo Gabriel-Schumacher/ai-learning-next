@@ -62,21 +62,31 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
 
   const handleSaveQuestion = (questionId: number, localEdit: Types.QuestionContentItem, setNull=true) => {
     console.debug("Saving question:", questionId, localEdit);
+
+    // Check if there are empty options, and remove them if necessary.
     if (checkForEmptyOptions(localEdit)) {
       localEdit = removeEmptyOptions(localEdit);
     }
-    dispatch({
-      type: 'UPDATE_ITEM',
-      payload: {
-        id: questionId,
-        contentItem: localEdit
-      }
-    });
+
+    // If there are no answers left after removing empty options, delete the question.
+    // Else, update the question in the context.
+    if (localEdit.items.answers.length === 0) {
+      dispatch({ type: 'DELETE_ITEM', payload: { id: questionId } });
+    } else {
+      dispatch({
+        type: 'UPDATE_ITEM',
+        payload: {
+          id: questionId,
+          contentItem: localEdit
+        }
+      });
+    }
+
+    // How should the UI react? If setNull is true, we reset the editing state (make it back to normal),
+    // else, we force a re-render to update the UI so that the editable question shows the latest changes.
     if (setNull) {
-      console.log("setNull is true");
       setEditingQuestionId(null);
     } else {
-      console.log("setNull is false")
       forceUpdate(prev => prev + 1); //  Force a re-render to update the UI to reflect the new context.
     }
   }

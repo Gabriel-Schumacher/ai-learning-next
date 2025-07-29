@@ -9,6 +9,9 @@ import css from "highlight.js/lib/languages/css";
 import cpp from "highlight.js/lib/languages/cpp";
 import csharp from "highlight.js/lib/languages/csharp";
 import LoadingIcon from "../LoadingIcon";
+import { Response } from "../Response";
+import * as Types from "@/lib/types/types_new";
+import TextArea from "../TextArea";
 
 hljs.registerLanguage("javascript", javascript);
 hljs.registerLanguage("typescript", typescript);
@@ -147,21 +150,7 @@ const WritingAidChat: React.FC<WritingAidChatProps> = ({ writingText }) => {
         {/* Chat Area */}
         <div
           ref={chatContainerRef}
-          className="w-full"
-          style={{
-            height: "400px",
-            maxHeight: "400px",
-            minHeight: "200px",
-            background: "white",
-            borderRadius: "0.5rem",
-            border: "1px solid #e5e7eb",
-            padding: "0.5rem",
-            marginBottom: "0.5rem",
-            overflowY: "auto",
-            overflowX: "hidden",
-            display: "flex",
-            flexDirection: "column",
-          }}
+          className="chat overflow-y-auto max-h-max overflow-x-hidden scrollbar-thin scrollbar-thumb-surface-400 scrollbar-track-surface-200 dark:scrollbar-thumb-surface-700 dark:scrollbar-track-surface-800"
         >
           {safeChatHistory.length === 0 && !loading && (
             <div className="flex items-center justify-center h-32">
@@ -175,34 +164,19 @@ const WritingAidChat: React.FC<WritingAidChatProps> = ({ writingText }) => {
           )}
           {safeChatHistory.map((chat, idx) =>
             chat.role === "user" ? (
-              <div key={idx} className="flex justify-end my-2">
-                <div className="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%] shadow-sm">
-                  {chat.content}
-                </div>
-              </div>
+              <Response key={idx} chatResponse={{type: 'text', isAiResponse: false, items: chat.content, id: idx, createdAt: new Date()} as Types.TextContentItem} />
             ) : (
-              <div key={idx} className="flex justify-start my-2">
-                <div
-                  className="bg-gray-50 border-l-4 border-blue-500 pl-4 py-3 pr-5 text-gray-800 dark:bg-gray-800 max-w-[90%]"
-                  dangerouslySetInnerHTML={{ __html: chat.content }}
-                />
-              </div>
+              <Response key={idx} chatResponse={{type: 'text', isAiResponse: true, items: chat.content, id: idx, createdAt: new Date()} as Types.TextContentItem} />
             )
           )}
           {loading && (
-            <div className="flex justify-start my-2 max-w-[90%]">
-              <div className="bg-gray-50 border-l-4 border-blue-500 pl-4 py-3 pr-5 text-gray-800 dark:bg-gray-800">
-                <div className="flex items-center">
-                  <LoadingIcon />
-                  <span className="ml-2">Thinking...</span>
-                </div>
-              </div>
-            </div>
+            <div className="AIRESPONSE"><LoadingIcon /></div>
           )}
         </div>
         {/* Input Area */}
-        <form className="w-full flex flex-row gap-2" onSubmit={handleSubmit}>
-          <textarea
+        <form className="w-full flex flex-col gap-2" onSubmit={handleSubmit}>
+          <TextArea handleEnterPress={(e) => handleKeyDown(e as React.KeyboardEvent<HTMLTextAreaElement>)} setTextAreaValue={(v) => setInput(v)} textAreaValue={input} attach={false}/>
+          {/* <textarea
             className="border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 p-3 rounded-lg w-full resize-none transition-colors"
             required
             placeholder="Type your message..."
@@ -211,15 +185,15 @@ const WritingAidChat: React.FC<WritingAidChatProps> = ({ writingText }) => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-          />
+          /> */}
           <div className="flex flex-col justify-between gap-2">
-            <button
+            {/* <button
               type="submit"
               className="btn bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg transition-colors flex-grow"
               disabled={loading}
             >
               Send
-            </button>
+            </button> */}
             <button
               type="button"
               className="btn bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg transition-colors flex-grow"

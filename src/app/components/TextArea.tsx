@@ -4,6 +4,7 @@ interface TextAreaProps {
     handleEnterPress: (e: React.KeyboardEvent<HTMLTextAreaElement> | React.MouseEvent<HTMLButtonElement>) => void;
     setTextAreaValue: React.Dispatch<React.SetStateAction<string>>;
     textAreaValue: string;
+    attach?: boolean; // Optional prop to handle attachment functionality
 }
 /**
  * 
@@ -14,7 +15,7 @@ interface TextAreaProps {
  * @param textAreaValue - Current value of the text area
  * @returns 
  */
-const TextArea: React.FC<TextAreaProps> = ({ handleEnterPress, setTextAreaValue, textAreaValue }) => {
+const TextArea: React.FC<TextAreaProps> = ({ handleEnterPress, setTextAreaValue, textAreaValue, attach=true }) => {
     return (
         <div className="w-full p-2 card border-black border-solid bg-surface-100 dark:bg-surface-900 min-h-24 grid grid-rows-[1fr_min-content] gap-2 relative">
             <textarea 
@@ -26,8 +27,8 @@ const TextArea: React.FC<TextAreaProps> = ({ handleEnterPress, setTextAreaValue,
             />
 
             <div className="flex w-full justify-between items-center gap-2">
-                <button className="btn lg">+ Attach</button>
-                <div className="flex flex-row items-center gap-2">
+                {attach && <button className="btn lg">+ Attach</button>}
+                <div className="flex flex-row items-center justify-between gap-2 w-full">
                     <span className="text-sm text-surface-900 dark:text-surface-100">shift+enter for a new line</span>
                     <button className="btn rounded-full" onClick={handleEnterPress}>
                         <Arrow width="w-3" background={false} special={true} />
