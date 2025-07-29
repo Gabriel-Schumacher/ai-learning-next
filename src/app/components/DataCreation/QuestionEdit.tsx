@@ -5,9 +5,10 @@ type Props = {
   question: Types.QuestionContentItem;
   onSave: (editedQuestion: Types.QuestionContentItem) => void;
   onRemove: () => void;
+  onDeleteAnswer: (index: number) => void;
 };
 
-export default function QuestionEdit({ question, onSave, onRemove }: Props) {
+export default function QuestionEdit({ question, onSave, onRemove, onDeleteAnswer }: Props) {
   const [editedQuestion, setEditedQuestion] = useState<Types.QuestionContentItem>({
     ...question,
   });
@@ -34,7 +35,7 @@ export default function QuestionEdit({ question, onSave, onRemove }: Props) {
         {editedQuestion.items.answers && editedQuestion.items.answers.length > 0 && (
           <ul className="list-none">
             {editedQuestion.items.answers.map((option, index) => (
-              <li key={index} className="text-primary-500 list-none mb-2">
+              <li key={index} className="text-primary-500 list-none mb-2 grid grid-cols-[1fr_auto] items-center gap-2">
                 <input
                   className="input bg-white rounded-xl shadow-lg"
                   type="text"
@@ -47,10 +48,24 @@ export default function QuestionEdit({ question, onSave, onRemove }: Props) {
                   placeholder={`Edit option ${index + 1}`}
                   data-drag-disabled
                 />
+                <button
+                  type="button"
+                  className="btn btn-error h-full aspect-square flex items-center justify-center"
+                  onClick={() => {
+                    onDeleteAnswer(index);
+                  }}>✖</button>
               </li>
             ))}
           </ul>
         )}
+        <button
+          type="button"
+          className="btn btn-secondary w-full rounded-lg shadow-lg"
+          data-drag-disabled
+          onClick={() => {
+            const newAnswers = [...editedQuestion.items.answers, ""];
+            setEditedQuestion((prev: Types.QuestionContentItem) => ({ ...prev, items: { ...prev.items, answers: newAnswers } }));
+          }}>Add Option</button>
       </div>
       <label htmlFor="correctAnswer" className="flex flex-col gap-1">
         <span className="font-bold text-surface-950">Correct Answer:</span>

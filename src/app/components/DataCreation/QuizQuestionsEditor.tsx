@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useReducer, useState } from "react";
 import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
 import { SortableContext, useSortable, rectSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -18,12 +18,11 @@ function SortableItem({ id, children }: { id: number; children: React.ReactNode 
     transition,
     opacity: isDragging ? 0.7 : 1,
     zIndex: isDragging ? 100 : "auto",
-    cursor: "grab",
   };
   return (
     <div ref={setNodeRef} style={style} className="relative">
       {children}
-      <button {...attributes} {...listeners} className="cursor-move absolute top-2 right-2">Drag</button>
+      <button {...attributes} {...listeners} className="cursor-grab absolute top-2 right-2">Drag</button>
     </div>
   );
 }
@@ -31,6 +30,7 @@ function SortableItem({ id, children }: { id: number; children: React.ReactNode 
 export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
   const [editingQuestionId, setEditingQuestionId] = React.useState<number | null>(null);
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [forceUpdateValue, forceUpdate] = useState(0);
 
   const activeQuestion = quizFile.content.find(q => q.id === activeId);
 
@@ -40,8 +40,31 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
   }
   const { dispatch } = context;
 
-  const handleSaveQuestion = (questionId: number, localEdit: Types.QuestionContentItem) => {
+  const checkForEmptyOptions = (question: Types.QuestionContentItem) => {
+    if (!question.items.answers || question.items.answers.length === 0) {
+      return true; // No answers available
+    }
+    return question.items.answers.some(answer => answer.trim() === ""); // Check if any answer is empty
+  }
+  const removeEmptyOptions = (question: Types.QuestionContentItem) => {
+    if (!question.items.answers || question.items.answers.length === 0) {
+      return question; // No answers available
+    }
+    const filteredAnswers = question.items.answers.filter(answer => answer.trim() !== "");
+    return {
+      ...question,
+      items: {
+        ...question.items,
+        answers: filteredAnswers,
+      },
+    };
+  }
+
+  const handleSaveQuestion = (questionId: number, localEdit: Types.QuestionContentItem, setNull=true) => {
     console.debug("Saving question:", questionId, localEdit);
+    if (checkForEmptyOptions(localEdit)) {
+      localEdit = removeEmptyOptions(localEdit);
+    }
     dispatch({
       type: 'UPDATE_ITEM',
       payload: {
@@ -49,7 +72,13 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
         contentItem: localEdit
       }
     });
-    setEditingQuestionId(null);
+    if (setNull) {
+      console.log("setNull is true");
+      setEditingQuestionId(null);
+    } else {
+      console.log("setNull is false")
+      forceUpdate(prev => prev + 1); //  Force a re-render to update the UI to reflect the new context.
+    }
   }
 
   return (
@@ -73,6 +102,12 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
                   question={question}
                   onSave={(localEdit) => handleSaveQuestion(question.id, localEdit)}
                   onRemove={() => dispatch({ type: 'DELETE_ITEM', payload: { id: question.id }})}
+                  onDeleteAnswer={(index) => {
+                    const newAnswers = [...question.items.answers];
+                    newAnswers.splice(index, 1);
+                    handleSaveQuestion(question.id, { ...question, items: { ...question.items, answers: newAnswers } }, false);
+                  }}
+                  key={forceUpdateValue}
                 />
               ) : (
                 <>
