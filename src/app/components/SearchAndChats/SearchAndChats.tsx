@@ -119,9 +119,9 @@ const SearchAndChats: React.FC = () => {
     }, [searchQuery, data.sortedData?.currentFolderId, baseFoldersAndFiles.folders, baseFoldersAndFiles.files]);
 
     return (
-        <aside className="card lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg grid grid-rows-[1fr_auto] gap-0">
+        <aside className="rounded-lg lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg flex flex-col md:grid md:grid-rows-[1fr_auto] gap-0">
             {/* Top Content */}
-            <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] [&>div>.subheader]:grid [&>div>.subheader]:place-items-center [&>div>.subheader]:w-full [&>div>.subheader]:py-2 flex flex-col gap-0 overflow-y-scroll [&>*]:pr-2">
+            <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] flex flex-col gap-0 overflow-y-scroll [&>*]:pr-2 bg-pink-500">
                 {/* Search Bar */}
                 <label
                     htmlFor="search-input"
@@ -143,7 +143,7 @@ const SearchAndChats: React.FC = () => {
                 {/* Folders Section */}
                 <div>
                     {/* Header (Section title, collapse button, and add file button) */}
-                    <div className="subheader grid-cols-[1fr_auto_auto] gap-2">
+                    <div className="grid place-items-center w-full py-2 grid-cols-[1fr_auto_auto] gap-2">
                         {/* Section Title */}
                         <span className="block w-full font-semibold text-surface-950 dark:text-surface-50">
                             Folders
@@ -195,7 +195,7 @@ const SearchAndChats: React.FC = () => {
                 {/* Folder Items Section */}
                 <div className="max-h-full">
                     {/* Header (Section title, Collapse Button */}
-                    <div className="subheader grid-cols-[1fr_auto] gap-2">
+                    <div className="grid place-items-center w-full py-2 grid-cols-[1fr_auto] gap-2">
                         <span className="block w-full font-semibold text-surface-950 dark:text-surface-50">
                             Files
                         </span>
@@ -213,7 +213,7 @@ const SearchAndChats: React.FC = () => {
 
                     {/* Files */}
                     <ul
-                        className={`max-h-full flex flex-col gap-2 mb-4 ${filesHidden ? "hidden" : "" }`}
+                        className={`max-h-full flex flex-col gap-2 mb-4 ${filesHidden ? "hidden" : ""}`}
                     >
                         {files &&
                             files.map((file, index) => (

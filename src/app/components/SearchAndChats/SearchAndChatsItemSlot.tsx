@@ -60,7 +60,7 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     }, [menuIsOpen, dataID])
 
     return (
-        <li className='grid grid-cols-[1fr_auto] relative bg-surface-50 dark:bg-surface-900 rounded-lg place-items-center hover:cursor-pointer transition-all '>
+        <li className='flex flex-row justify-between relative bg-surface-50 dark:bg-surface-900 rounded-lg place-items-center hover:cursor-pointer transition-all '>
             {/* Icon and File Name */}
     
                 <button type='button' className="grid grid-cols-[auto_1fr] gap-2 h-full place-items-center justify-items-start relative w-full hover:bg-surface-100 dark:hover:bg-surface-950 p-2 rounded-lg rounded-r-none"
