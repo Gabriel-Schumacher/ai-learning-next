@@ -80,7 +80,7 @@ const AiMenu: React.FC = () => {
 
 
     return (
-        <div className="card w-full h-full flex flex-col gap-4 p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
+        <div className="card w-full h-full flex flex-col gap-4 p-2 md:p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
                 {/* First Row */}
                 <div className="flex flex-col md:grid md:grid-rows-2 gap-2">
                     {/* Entry Text */}

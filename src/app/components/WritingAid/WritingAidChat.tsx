@@ -153,7 +153,7 @@ const WritingAidChat: React.FC<WritingAidChatProps> = ({ writingText }) => {
           className="chat overflow-y-auto max-h-max overflow-x-hidden scrollbar-thin scrollbar-thumb-surface-400 scrollbar-track-surface-200 dark:scrollbar-thumb-surface-700 dark:scrollbar-track-surface-800"
         >
           {safeChatHistory.length === 0 && !loading && (
-            <div className="AIRESPONSE"><b>Welcome!</b> The content of your essay on the right will automatically be combined with what ever message you ask me. So go ahead and chat with me to get feedback or suggestions!</div>
+            <div className="AIRESPONSE"><b>Welcome!</b> The content of your essay will automatically be combined with what ever message you ask me. So go ahead and chat with me to get feedback or suggestions!</div>
           )}
           {safeChatHistory.map((chat, idx) =>
             chat.role === "user" ? (
