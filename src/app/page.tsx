@@ -3,7 +3,7 @@ import SearchAndChats from "./components/SearchAndChats/SearchAndChats";
 import AiChat from "./components/AiChat";
 import AiMenu from "./components/AiMenu";
 import FigmaNavigation from "./components/FigmaNavigation";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DataContextProvider } from "@/app/context_providers/data_context/DataProvider";
 // import AiQuiz from "./components/AiQuizNOTINUSE/AiQuiz"
 import Quiz from "./routes/quiz/page"
@@ -20,12 +20,21 @@ function Home() {
     }
     const { data } = context;
 
+    // Hydration Issue? No idea why this fixes a next.js error. Not a big deal if this is removed.
+    const [isMounted, setIsMounted] = useState<boolean>(false);
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+    if (!isMounted) {
+        return null;
+    }
+
     const StudyPageOptions = ['DATA_CREATION', 'LIBRARY', 'STUDY'] as const;
 
     return (
       <main className="flex flex-col h-full lg:flex-row gap-2 w-full md:p-4 p-2 max-w-[1800px] mx-auto min-h-screen" style={{ padding: "8px" }}>
-        <SearchAndChats />
-        <div className="w-full mr-2 grid grid-rows-[auto_1fr] max-w-[1400px]">
+        {data.sortedData?.currentPage === "ESSAY" ? null : <SearchAndChats />}
+        <div className={data.sortedData?.currentPage === "ESSAY" ? 'w-full max-w-[1400px] mx-auto' :"w-full grid grid-rows-[auto_1fr] max-w-[1400px]"}>
             <FigmaNavigation actions={() => {}}/>
             <div className="w-full h-full">
                 { !data.errorMessage &&

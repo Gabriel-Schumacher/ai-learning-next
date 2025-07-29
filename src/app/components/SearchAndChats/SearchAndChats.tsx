@@ -121,7 +121,7 @@ const SearchAndChats: React.FC = () => {
     return (
         <aside className="rounded-lg lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg flex flex-col md:grid md:grid-rows-[1fr_auto] gap-0">
             {/* Top Content */}
-            <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] flex flex-col gap-0 overflow-y-scroll [&>*]:pr-2 bg-pink-500">
+            <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] flex flex-col gap-0 overflow-y-scroll [&>*]:pr-2">
                 {/* Search Bar */}
                 <label
                     htmlFor="search-input"
@@ -179,7 +179,7 @@ const SearchAndChats: React.FC = () => {
                         {folders &&
                             folders.map((folder, index) => (
                                 <Slot
-                                    key={index}
+                                    key={`folderkey-${index}`}
                                     header={folder.name}
                                     type={"folder"}
                                     isActive={
@@ -218,7 +218,7 @@ const SearchAndChats: React.FC = () => {
                         {files &&
                             files.map((file, index) => (
                                 <Slot
-                                    key={index}
+                                    key={`filekey-${index}`}
                                     data-chat-active={
                                         file.id === data.sortedData?.currentFileId
                                     }

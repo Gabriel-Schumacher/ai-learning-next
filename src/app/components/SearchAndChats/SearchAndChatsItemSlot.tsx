@@ -3,6 +3,7 @@ import {useState, useContext, useEffect} from 'react';
 import { Bullet, Folder, ChatBox, ThreeDotsEllipsis, QuizIcon } from '../IconsIMGSVG';
 import { DataContextProvider } from '@/app/context_providers/data_context/DataProvider';
 import RenamePopup from './SearchAndChatsRename';
+import SubMenuPopup from './SearchAndChatsSubmenu';
 
 interface SlotProps {
     header: string;
@@ -21,6 +22,7 @@ interface SlotProps {
  */
 const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     const [menuIsOpen, setMenuIsOpen] = useState<boolean>(false);
+    const [subMenuOpen, setSubMenuOpen] = useState<boolean>(false);
     const context = useContext(DataContextProvider);
     const [showPopup, setShowPopup] = useState<boolean>(false);
     if (!context) {
@@ -59,6 +61,23 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
         checkIfMenuWasForceClosed()
     }, [menuIsOpen, dataID])
 
+    // WINDOW SIZE STATE
+    /* Handles menu when on a mobile device */
+    // 
+    const [width, setWidth] = useState<number>(window.innerWidth);
+
+    function handleWindowSizeChange() {
+        setWidth(window.innerWidth);
+    }
+    useEffect(() => {
+        window.addEventListener('resize', handleWindowSizeChange);
+        return () => {
+            window.removeEventListener('resize', handleWindowSizeChange);
+        }
+    }, []);
+
+    const isMobile = width <= 768;
+
     return (
         <li className='flex flex-row justify-between relative bg-surface-50 dark:bg-surface-900 rounded-lg place-items-center hover:cursor-pointer transition-all '>
             {/* Icon and File Name */}
@@ -90,15 +109,27 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                 </button>
 
             {/* Options Button */}
-            <div className='rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center focus-within:[&>ul]:flex focus:[&>ul]:opacity-100 transition-all'>
-                <button className="p-2 bg-transparent border-none m-0 cursor-pointer focus:[&_+_ul]:flex focus:[&_+_ul]:opacity-100" onClick={()=>{handleButtonClick()}}><ThreeDotsEllipsis width='w-3' background={false} /></button>
+            <div className='rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center focus-within:[&>ul]:flex focus-within:[&>ul]:opacity-100 hover:[&>ul]:opacity-100 hover:[&>ul]:flex focus:[&>ul]:flex  focus:[&>ul]:opacity-100 transition-all'>
+                <button
+                    className="p-2 bg-transparent border-none m-0 cursor-pointer hover:[&_+_ul]:opacity-100 hover:[&_+_ul]:flex focus:[&_+_ul]:flex focus:[&_+_ul]:opacity-100 focus-within:[&_+_ul]:flex focus-within:[&_+_ul]:opacity-100"
+                    onClick={(e) => {
+                        handleButtonClick();
+                        if (isMobile) {
+                            setSubMenuOpen(true);
+                        } else {
+                            setSubMenuOpen(false);
+                        }
+                    }}>
+                    <ThreeDotsEllipsis width='w-3' background={false} />
+                </button>
                 
-                <ul data-key={dataID} className={`hidden focus:flex focus-within:flex focus:opacity-100 focus-within:opacity-100 opacity-0 transition-all absolute right-3 top-5 rounded-lg shadow-lg flex-col gap-0 cursor-pointer z-10`}>
+                <ul data-key={dataID} className={`hidden hover:opacity-100 hover:flex focus:flex focus-within:flex focus:opacity-100 focus-within:opacity-100 opacity-0 transition-all absolute right-3 top-5 rounded-lg shadow-lg flex-col gap-0 cursor-pointer z-10`}>
                     <li className='border-transparent rounded-tl-lg hover:bg-error-800 bg-error-500 transition-all'>
                         <button
                             type="button"
                             className='w-full p-2 text-black hover:text-white text-left' 
                             onClick={() => {
+                                dispatch({type: "SET_ERROR", payload: "Maybe?"});
                                 dispatch({type: "DELETE_ITEM", payload: {id: dataID ?? 0}});
                             }}>
                             Delete
@@ -108,7 +139,10 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                         <button
                             type="button"
                             className='w-full p-2 text-white text-left' 
-                            onClick={() => setShowPopup(true)}>
+                            onClick={() => {
+                                setShowPopup(true);
+                                dispatch({type: "SET_ERROR", payload: "Maybe?"});
+                            }}>
                             Rename
                         </button>
                     </li>
@@ -119,6 +153,21 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                         text={`Enter a new name for the ${type} named ${header}.`}
                         componentId={dataID ?? -1}
                         onCancel={() => setShowPopup(false)}
+                    />
+                }
+                {subMenuOpen && isMobile && 
+                    <SubMenuPopup
+                        header={header}
+                        componentId={dataID ?? -1}
+                        onCancel={() => setSubMenuOpen(false)}
+                        onDelete={() => {
+                            setSubMenuOpen(false)
+                            dispatch({type: "DELETE_ITEM", payload: {id: dataID ?? 0}});
+                        }}
+                        onRename={() => {
+                            setSubMenuOpen(false)
+                            setShowPopup(true);
+                        }}
                     />
                 }
             </div>
