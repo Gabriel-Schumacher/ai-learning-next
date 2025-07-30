@@ -12,6 +12,7 @@ import { handleStudyGuide } from "./quizUtils";
 import LoadingIcon from "@/app/components/LoadingIcon";
 import { Marked } from "marked";
 import DOMPurify from "dompurify";
+import QuizComponent from "./QuizComponent";
 
 const marked = new Marked();
 
@@ -177,7 +178,7 @@ function Quiz() {
                         {/* Display Questions */}
                         {currentQuizFile?.content && currentQuizFile?.content.length > 0 && (
                             <div className="w-full flex flex-col gap-4">
-                                {currentQuizFile?.content.map((question) => (
+                                {/* {currentQuizFile?.content.map((question) => (
                                     <div key={question.id} className="bg-surface-50 p-4 rounded-lg shadow-md w-full hover:bg-surface-300 dark:bg-surface-700 hover:dark:bg-surface-700 hover:shadow-xl transition-all">
                                         <h2 className="text-xl font-semibold">{question.items.question}</h2>
                                         <ul className="list-none pl-2">
@@ -213,15 +214,8 @@ function Quiz() {
                                             </p>
                                         )}
                                     </div>
-                                ))}
-                                <div className="flex flex-row gap-2 w-full">
-                                    <button className="btn w-full" title="Back to Collection Options" onClick={() => setModule('HOME')}>
-                                        Back to Collection Options
-                                    </button>
-                                    <button className="btn w-full" title="Submit Answers" onClick={() => setQuizData((prev) => prev ? { showCorrectAnswers: true, userAnswers: prev.userAnswers } : { showCorrectAnswers: true, userAnswers: {} })}>
-                                        Show Correct Answers
-                                    </button>
-                                </div>
+                                ))} */}
+                                <QuizComponent backBtnClicked={() => setModule('HOME')} ></QuizComponent>
                             </div>
 
                         )}
