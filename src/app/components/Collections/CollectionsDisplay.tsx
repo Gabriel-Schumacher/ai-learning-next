@@ -64,17 +64,20 @@ function CollectionsDisplay() {
             ))}
           </ul>
 
-          {/* Button to Create a Collection */}
-          <button className="btn" onClick={() => dispatch({ type: "SET_PAGE", payload: "DATA_CREATION" })}>
-              <PlusSign
-                  background={true}
-                  special={true}
-                  width="w-3"
-              />
-              New Collection
-          </button>
         </>
       )}
+      {(allQuizFiles.length < 0 || !allQuizFiles.length) && (
+        <p className="text-surface-950-50 w-full block text-center ">No collections found. Please create a new collection.</p>
+      )}
+      {/* Button to Create a Collection */}
+      <button className="btn" onClick={() => dispatch({ type: "SET_PAGE", payload: "DATA_CREATION" })}>
+          <PlusSign
+              background={true}
+              special={true}
+              width="w-3"
+          />
+          New Collection
+      </button>
     </>
   );
 }

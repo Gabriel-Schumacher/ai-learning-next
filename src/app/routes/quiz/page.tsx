@@ -331,7 +331,7 @@ function Quiz() {
 
             {!currentQuizFile && (
                 <div className="text-center">
-                    <p>No collection selected. Please click on &quot;Study&quot; above and select a collection</p>
+                    <p className="text-surface-950-50">No collection selected. Please click on &quot;Study&quot; above and select a collection</p>
                 </div>
             )}
         </div>
