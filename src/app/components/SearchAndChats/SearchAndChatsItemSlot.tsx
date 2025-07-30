@@ -109,9 +109,9 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                 </button>
 
             {/* Options Button */}
-            <div className='rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center focus-within:[&>ul]:flex focus-within:[&>ul]:opacity-100 hover:[&>ul]:opacity-100 hover:[&>ul]:flex focus:[&>ul]:flex  focus:[&>ul]:opacity-100 transition-all'>
+            <div className='rounded-r-lg hover:bg-surface-100 dark:hover:bg-surface-950 grid place-items-center focus-within:[&>ul]:flex focus-within:[&>ul]:opacity-100 focus:[&>ul]:flex  focus:[&>ul]:opacity-100 transition-all'>
                 <button
-                    className="p-2 bg-transparent border-none m-0 cursor-pointer hover:[&_+_ul]:opacity-100 hover:[&_+_ul]:flex focus:[&_+_ul]:flex focus:[&_+_ul]:opacity-100 focus-within:[&_+_ul]:flex focus-within:[&_+_ul]:opacity-100"
+                    className="p-2 bg-transparent border-none m-0 cursor-pointer focus:[&_+_ul]:flex focus:[&_+_ul]:opacity-100 focus-within:[&_+_ul]:flex focus-within:[&_+_ul]:opacity-100"
                     onClick={(e) => {
                         handleButtonClick();
                         if (isMobile) {
@@ -123,7 +123,7 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                     <ThreeDotsEllipsis width='w-3' background={false} />
                 </button>
                 
-                <ul data-key={dataID} className={`hidden hover:opacity-100 hover:flex focus:flex focus-within:flex focus:opacity-100 focus-within:opacity-100 opacity-0 transition-all absolute right-3 top-5 rounded-lg shadow-lg flex-col gap-0 cursor-pointer z-10`}>
+                <ul data-key={dataID} className={`hidden focus:flex focus-within:flex focus:opacity-100 focus-within:opacity-100 opacity-0 transition-all absolute right-3 top-5 rounded-lg shadow-lg flex-col gap-0 cursor-pointer z-10`}>
                     <li className='border-transparent rounded-tl-lg hover:bg-error-800 bg-error-500 transition-all'>
                         <button
                             type="button"
