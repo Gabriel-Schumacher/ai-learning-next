@@ -52,7 +52,7 @@ export default function QuizComponent({
     };
     const handleQuizSubmit = () => {
         if (quizSelectedOption !== null && !quizShowFeedback) {
-            const correctAnswer = questions?.content[quizCurrentIndex].items.question;
+            const correctAnswer = questions?.content[quizCurrentIndex].items.correctAnswer;
             const isCorrect = quizSelectedOption === correctAnswer;
             setQuizCorrect(isCorrect);
             setQuizShowFeedback(true);

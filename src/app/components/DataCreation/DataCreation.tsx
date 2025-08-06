@@ -122,6 +122,35 @@ function DataCreation() {
     }
   }
 
+  function handleAddQuestion() {
+    if (!currentQuizFile) {
+      console.error("No current quiz file to add a question to.");
+      return;
+    }
+    // Create a new question item with default values
+    const newQuestionItem: Types.QuestionItemsType = {
+      question: "",
+      answers: [],
+      correctAnswer: ""
+    };
+    // Create a new content item for the question
+    const newContentItem: Types.QuestionContentItem = {
+      id: -1, // This will be set by the reducer
+      type: "question",
+      items: newQuestionItem,
+      createdAt: new Date(),
+    };
+    // Dispatch action to add the new question to the current quiz file
+    dispatch({
+      type: "ADD_CONTENT",
+      payload: {
+        type: "question",
+        contentItem: newContentItem
+      }
+    });
+  }
+
+
 
   // Update function signature to accept the extracted form data
   async function handleSubmit(
@@ -293,6 +322,15 @@ function DataCreation() {
             quizFile={currentQuizFile}
             handleDragEnd={handleDragEnd}
           />
+
+          {/* Button to create a new question */}
+          <button
+            type="button"
+            className="btn"
+            onClick={handleAddQuestion}
+          >
+            Add Question
+          </button>
         </>
       )}
       {isLoadingQuizData && (

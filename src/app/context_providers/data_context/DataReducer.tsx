@@ -36,9 +36,10 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
 
                 const localRawData = Utils.getLocalStorageData();
                 if (localRawData === null) {
-                    console.warn("[DataReducer] No data found in localStorage. Initializing with fake data.");
-                    const fakeData: Types.FolderStructureRoot = Utils.generateFakeFolderStructureRoot();
-                    newState.rawData = JSON.stringify(fakeData);
+                    /* If we want fake data, remove the comments below */
+                    // console.warn("[DataReducer] No data found in localStorage. Initializing with fake data.");
+                    // const fakeData: Types.FolderStructureRoot = Utils.generateFakeFolderStructureRoot();
+                    // newState.rawData = JSON.stringify(fakeData);
                 } else {
                     newState.rawData = localRawData;
                 }
@@ -46,10 +47,12 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 const sortedData = Utils.convertToSortedJson(newState.rawData);
 
                 if (sortedData === undefined) {
-                    throw new Error("[DataReducer | Action: LOAD] Error converting data to sorted JSON format");
+                    if (newState.rawData !== null) {
+                        throw new Error("[DataReducer | Action: LOAD] Error converting data to sorted JSON format");
+                    }
                 }
                 
-                newState.sortedData = sortedData;
+                newState.sortedData = sortedData ?? Utils.createEmptyFolderStructureRoot();
 
                 /** Load should only be called when a user loads the site after a while away, or for the first time. Thus, we should set these initial values to undefined and HOME. */
                 newState.sortedData.currentPage = 'HOME';

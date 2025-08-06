@@ -302,6 +302,14 @@ export function generateFakeFolderStructureRoot(): Types.FolderStructureRoot {
     return ROOT;
         
 }
+export function createEmptyFolderStructureRoot(): Types.FolderStructureRoot {
+    const ROOT : Types.FolderStructureRoot = {
+        ids: [],
+        folders: [],
+    };
+    // We return an empty root structure.
+    return ROOT;
+}
 
 export function getLocalStorageData(): string | null {
     const data = localStorage.getItem("user_saved_data_01");
