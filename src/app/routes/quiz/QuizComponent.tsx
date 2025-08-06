@@ -146,7 +146,7 @@ export default function QuizComponent({
                   <p className="text-red-600 font-semibold">
                     Incorrect. Correct answer:{" "}
                     <span className="font-bold">
-                      {questions?.content[quizCurrentIndex].items.question}
+                      {questions?.content[quizCurrentIndex].items.correctAnswer}
                     </span>
                   </p>
                 )}
