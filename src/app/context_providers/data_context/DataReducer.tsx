@@ -26,6 +26,15 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
     // Reset the error message every time the reducer is called. This helps to ensure that if an error occurs, it will be set to the new error message instead of retaining the previous one. And if no error occurs, the error message will automatically be cleared.
     newState.errorMessage = undefined;
 
+    function saveDataFunc() {
+        console.log("Saving...")
+        if (!newState.sortedData) {
+            console.log("Saving Failed")
+            return;
+        } else Utils.saveData(newState.sortedData);
+        console.log("Saving Succeeded")
+    }
+
     try {
         switch (action.type) {
             case 'LOAD': 
@@ -197,6 +206,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                         (newState.sortedData.ids as Set<number>).add(newFolder.id);
                     }
                 }
+                saveDataFunc();
                 return newState;
             case 'ADD_FILE':
                 // Check if the sortedData is available and has the necessary properties.
@@ -239,7 +249,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                         (newState.sortedData.ids as Set<number>).add(newFile.id);
                     }
                 }
-
+                saveDataFunc();
                 return newState;
             case 'ADD_CONTENT':
                 // Check if the sortedData is available and has the necessary properties.
@@ -316,6 +326,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                     }
                 }
                 currentFile.content.push(itemToBeAdded);
+                saveDataFunc();
                 return newState;
             case 'DELETE_ITEM':
                 if (!newState.sortedData) throw new Error("[DataReducer | Action: DELETE_ITEM] No sorted data available to delete item.");
@@ -382,6 +393,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                     newState.sortedData.folders = newState.sortedData.folders.filter(folder => folder.id !== action.payload.id);
                 }
 
+                saveDataFunc();
                 return newState;
             case 'DELETE_ITEM_IN_FILE':
                 if (!newState.sortedData) throw new Error("[DataReducer | Action: DELETE_ITEM_IN_FILE] No sorted data available to delete item in file.");
@@ -430,6 +442,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 } else {
                     throw new Error(`[DataReducer | Action: RENAME_SLOT] Item with ID ${action.payload.id} does not have a title or name to rename.`);
                 }
+                saveDataFunc();
                 return newState;
             case 'UPDATE_ITEM':
                 if (!newState.sortedData) throw new Error("[DataReducer | Action: UPDATE_ITEM] No sorted data available to update item.");
@@ -447,6 +460,7 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
 
                 console.log(`[DataReducer | Action: UPDATE_ITEM] Updated item with ID ${action.payload.id}.`, itemToUpdate);
 
+                saveDataFunc();
                 return newState;
             default:
                 throw new Error(`Unknown action type: ${action.type}`);

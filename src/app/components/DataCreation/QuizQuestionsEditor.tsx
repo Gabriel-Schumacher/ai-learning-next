@@ -59,6 +59,17 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
       },
     };
   }
+  const changedAnswer = (localEdit: Types.QuestionContentItem, questionId: number) => {
+    const originalQuestion = quizFile.content.find(q => q.id === questionId);
+    if (!originalQuestion) return false; // Question not found
+    return originalQuestion.items.correctAnswer !== localEdit.items.correctAnswer;
+  }
+  const answerNotInOptions = (localEdit: Types.QuestionContentItem, questionId: number) => {
+    const originalQuestion = quizFile.content.find(q => q.id === questionId);
+    if (!originalQuestion) return false; // Question not found
+    return !originalQuestion.items.answers.includes(localEdit.items.correctAnswer);
+  }
+  
 
   const handleSaveQuestion = (questionId: number, localEdit: Types.QuestionContentItem, setNull=true) => {
     console.debug("Saving question:", questionId, localEdit);
@@ -68,10 +79,30 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
       localEdit = removeEmptyOptions(localEdit);
     }
 
+    if (changedAnswer(localEdit, questionId)) {
+      // If the answer has changed, we need to update the question.
+      // We need to remove the old option from the answers array.
+      const oldQuestion = quizFile.content.find(q => q.id === questionId);
+      if (oldQuestion) {
+        const oldCorrectAnswer = oldQuestion.items.correctAnswer;
+        if (oldCorrectAnswer && localEdit.items.answers.includes(oldCorrectAnswer)) {
+          const oldCorrectIndex = localEdit.items.answers.indexOf(oldCorrectAnswer);
+          localEdit.items.answers.splice(oldCorrectIndex, 1);
+        }
+      }
+    }
+
+    if (answerNotInOptions(localEdit, questionId)) {
+      // If the answer is not in the options, we need to add it to the options.
+      const correctAnswer = localEdit.items.correctAnswer;
+      localEdit.items.answers.push(correctAnswer);
+    }
+
     // If there are no answers left after removing empty options, delete the question.
     // Else, update the question in the context.
     if (localEdit.items.answers.length === 0) {
       dispatch({ type: 'DELETE_ITEM', payload: { id: questionId } });
+      dispatch({ type: "SAVE" });
     } else {
       dispatch({
         type: 'UPDATE_ITEM',
@@ -80,6 +111,7 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
           contentItem: localEdit
         }
       });
+      dispatch({ type: "SAVE" });
     }
 
     // How should the UI react? If setNull is true, we reset the editing state (make it back to normal),
@@ -126,9 +158,11 @@ export default function QuizQuestionsEditor({quizFile, handleDragEnd}: Props) {
                     <span className="text-surface-900-100 font-bold">Options:</span>
                     {question.items.answers && question.items.answers.length > 0 && (
                       <ul className="list-disc pl-4 text-primary-500 dark:text-white">
-                        {question.items.answers.map((option:string, index:number) => ( 
-                          <li key={index} className="text-primary-500 dark:text-white">{option}</li>
-                        ))}
+                        {question.items.answers.map((option:string, index:number) => {
+                          return (
+                            <li key={index} className="text-primary-500 dark:text-white">{option}</li>
+                          )
+                        })}
                       </ul>
                     )}
                   </div>

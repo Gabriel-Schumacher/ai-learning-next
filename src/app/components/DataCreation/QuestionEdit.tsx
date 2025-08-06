@@ -34,12 +34,16 @@ export default function QuestionEdit({ question, onSave, onRemove, onDeleteAnswe
         <span className="font-bold text-surface-950">Answers:</span>
         {editedQuestion.items.answers && editedQuestion.items.answers.length > 0 && (
           <ul className="list-none">
-            {editedQuestion.items.answers.map((option, index) => (
-              <li key={index} className="text-primary-500 list-none mb-2 grid grid-cols-[1fr_auto] items-center gap-2">
-                <input
-                  className="input bg-white rounded-xl shadow-lg"
-                  type="text"
-                  value={editedQuestion.items.answers[index]}
+            {editedQuestion.items.answers.map((option, index) => {
+              if (option.trim() === question.items.correctAnswer) {
+                            return null;
+                          }
+              else return (
+                <li key={index} className="text-primary-500 list-none mb-2 grid grid-cols-[1fr_auto] items-center gap-2">
+                  <input
+                    className="input bg-white rounded-xl shadow-lg"
+                    type="text"
+                    value={editedQuestion.items.answers[index]}
                   onChange={(e) => {
                     const newAnswers = [...editedQuestion.items.answers];
                     newAnswers[index] = e.target.value;
@@ -55,7 +59,7 @@ export default function QuestionEdit({ question, onSave, onRemove, onDeleteAnswe
                     onDeleteAnswer(index);
                   }}>✖</button>
               </li>
-            ))}
+            )})}
           </ul>
         )}
         <button
