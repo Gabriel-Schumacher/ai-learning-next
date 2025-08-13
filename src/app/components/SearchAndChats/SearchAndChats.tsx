@@ -119,7 +119,7 @@ const SearchAndChats: React.FC = () => {
     }, [searchQuery, data.sortedData?.currentFolderId, baseFoldersAndFiles.folders, baseFoldersAndFiles.files]);
 
     return (
-        <aside className="rounded-lg lg:h-full max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg flex flex-col md:grid md:grid-rows-[1fr_auto] gap-0">
+        <aside className="rounded-lg lg:h-max max-h-[600px] lg:max-h-[80vh] w-full lg:max-w-[300px] p-2 bg-surface-200 dark:bg-surface-800 shadow-lg flex flex-col md:grid md:grid-rows-[1fr_auto] gap-0">
             {/* Top Content */}
             <div className="max-h-[clamp(0,100%,800px)] lg:max-h-[clamp(0,100%,800px)] flex flex-col gap-0 overflow-y-scroll [&>*]:pr-2">
                 {/* Search Bar */}

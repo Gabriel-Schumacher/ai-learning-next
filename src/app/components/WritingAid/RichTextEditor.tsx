@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css'; // Import Quill styles
+import './quill.darkmode.css'; // Import custom dark mode styles
 
 export type RichTextEditorHandle = {
   getContent: () => string;

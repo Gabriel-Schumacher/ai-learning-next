@@ -107,7 +107,7 @@ function Quiz() {
     // This page should only show up when the user has SELECTED a collection to study from.
     // If they have not selected a collection, we should show a message that they need to select one.
     return (
-        <div className="rounded-lg card w-full h-full flex flex-col gap-4 p-2 md:p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
+        <div className="rounded-lg card w-full h-max flex flex-col gap-4 p-2 md:p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
             {currentQuizFile && (
                 <>
                     {/* Header */}

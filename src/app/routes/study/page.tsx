@@ -15,7 +15,7 @@ function StudyPage() {
     return (
         <>
         {data && data.sortedData &&
-            <div className="card w-full h-full flex flex-col gap-2 p-2 md:p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
+            <div className="card w-full h-max flex flex-col gap-2 p-2 md:p-4 bg-surface-200 dark:bg-surface-800 shadow-lg">
                 {data.sortedData.currentPage === 'DATA_CREATION' &&
                     <DataCreation />
                 }

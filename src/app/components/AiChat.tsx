@@ -248,7 +248,7 @@ const AiChat: React.FC<AiChatProps> = ({
     // Need an attachment function that will pass up to the parent.
 
     return (
-        <div className="w-full h-full grid place-items-center grid-cols-1 place-self-center">
+        <div className="w-full h-max min-h-3/4 grid place-items-center grid-cols-1 place-self-center">
             <div className="w-full grid grid-rows-[1fr_auto] gap-4 h-full">
                 {/* Ai Chat Area */}
                 {/* Response Classes are done here so that tailwind actually works */}

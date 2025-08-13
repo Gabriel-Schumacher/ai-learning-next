@@ -1,0 +1,54 @@
+/* quill.darkmode.css - Dark mode overrides for Quill text editor */
+
+.ql-container {
+    background: #18181b !important;
+    color: #e5e7eb !important;
+    border: 0px solid transparent !important;
+}
+
+.ql-editor {
+    background: #18181b !important;
+    color: #e5e7eb !important;
+}
+
+.ql-toolbar {
+    background: #23272f !important;
+    border-color: #2d2d34 !important;
+}
+
+.ql-toolbar button,
+.ql-toolbar .ql-picker-label,
+.ql-toolbar .ql-picker-item {
+    color: #e5e7eb !important;
+    background: transparent !important;
+}
+
+.ql-toolbar button:hover,
+.ql-toolbar .ql-picker-label:hover,
+.ql-toolbar .ql-picker-item:hover {
+    background: #2d2d34 !important;
+}
+
+.ql-toolbar .ql-active {
+    background: #3b3b44 !important;
+    color: #facc15 !important;
+}
+
+.ql-editor a {
+    color: #60a5fa !important;
+}
+
+.ql-editor pre {
+    background: #23272f !important;
+    color: #e5e7eb !important;
+}
+
+.ql-editor blockquote {
+    border-left: 4px solid #3b3b44 !important;
+    background: #23272f !important;
+    color: #e5e7eb !important;
+}
+
+.ql-editor img {
+    filter: brightness(0.9) contrast(1.1);
+}
