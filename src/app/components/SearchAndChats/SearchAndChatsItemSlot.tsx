@@ -25,6 +25,7 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
     const [subMenuOpen, setSubMenuOpen] = useState<boolean>(false);
     const context = useContext(DataContextProvider);
     const [showPopup, setShowPopup] = useState<boolean>(false);
+    const [rerenderFlag, setRerenderFlag] = useState<boolean>(false);
     if (!context) {
         throw new Error(
             "DataContextProvider must be used within a DataContextProvider"
@@ -78,8 +79,12 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
 
     const isMobile = width <= 768;
 
+    const forcePageRerender = () => {
+        setRerenderFlag(prev => !prev);
+    }
+
     return (
-        <li className='flex flex-row justify-between relative bg-surface-50 dark:bg-surface-900 rounded-lg place-items-center hover:cursor-pointer transition-all '>
+        <li className='flex flex-row justify-between relative bg-surface-50 dark:bg-surface-900 rounded-lg place-items-center hover:cursor-pointer transition-all ' data-reloadflag={rerenderFlag}>
             {/* Icon and File Name */}
     
                 <button type='button' className="grid grid-cols-[auto_1fr] gap-2 h-full place-items-center justify-items-start relative w-full hover:bg-surface-100 dark:hover:bg-surface-950 p-2 rounded-lg rounded-r-none"
@@ -129,7 +134,6 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                             type="button"
                             className='w-full p-2 text-black hover:text-white text-left' 
                             onClick={() => {
-                                dispatch({type: "SET_ERROR", payload: "Maybe?"});
                                 dispatch({type: "DELETE_ITEM", payload: {id: dataID ?? 0}});
                             }}>
                             Delete
@@ -141,7 +145,8 @@ const Slot: React.FC<SlotProps> = ({header, type, isActive=false, dataID}) => {
                             className='w-full p-2 text-white text-left' 
                             onClick={() => {
                                 setShowPopup(true);
-                                dispatch({type: "SET_ERROR", payload: "Maybe?"});
+                                forcePageRerender();
+                                //dispatch({type: "SET_ERROR", payload: "Maybe?"});
                             }}>
                             Rename
                         </button>
