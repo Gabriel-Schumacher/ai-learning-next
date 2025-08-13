@@ -31,6 +31,9 @@ const FigmaNavigation: React.FC<FigmaNavigationProps> = () => {
     const changePage = (index: number) => {
         dispatch({ type: "SET_PAGE", payload: navigationItems[index].pageOption as Types.PageOptions });
         dispatch({ type: "TOGGLE_CURRENT_FILE", payload: -1 })
+        if (navigationItems[index].pageOption === "STUDY") {
+            dispatch({ type: "TOGGLE_CURRENT_FOLDER", payload: -1 });
+        }
     }
 
     useEffect(() => {

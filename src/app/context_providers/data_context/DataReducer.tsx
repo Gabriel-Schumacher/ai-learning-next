@@ -106,8 +106,13 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
                 const hasId = Array.isArray(ids)
                     ? ids.includes(action.payload)
                     : ids.has(action.payload);
-                if (!hasId) {
+                if (!hasId && action.payload !== -1) {
                     throw new Error(`[DataReducer | Action: TOGGLE_FOLDER] No data has the id ${action.payload}.`);
+                }
+                if (action.payload === -1) {
+                    newState.sortedData.currentFolderId = undefined;
+                    newState.sortedData.currentFileId = undefined;
+                    return newState;
                 }
 
                 newState.sortedData.currentFolderId = (newState.sortedData.currentFolderId === action.payload) ? undefined : action.payload;
