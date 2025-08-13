@@ -110,7 +110,7 @@ export default function QuizComponent({
                   let btnClass =
                     "btn bg-primary-500 w-full text-left border-3 border-primary-500";
                   if (quizShowFeedback) {
-                    if (option === questions?.content[quizCurrentIndex].items.question) {
+                    if (option === questions?.content[quizCurrentIndex].items.correctAnswer) {
                       btnClass += "bg-green-200 border-green-600 border-3 ";
                     } else if (option === quizSelectedOption) {
                       btnClass += "bg-red-200 border-red-600 border-3 ";
