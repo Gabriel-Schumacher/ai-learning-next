@@ -31,11 +31,19 @@ function CollectionsDisplay() {
   const { data, dispatch } = context;
 
   useEffect(() => {
-    if (data && data.sortedData && data.sortedData.folders) {
-      const quizFiles = data.sortedData.folders.flatMap(folder => 
-        folder.files.filter(file => file.type === 'quiz')
-      ) as Types.QuizFile[];
-      setAllQuizFiles(quizFiles);
+      if (data && data.sortedData && data.sortedData.folders) {
+          if (!data.sortedData.currentFolderId) {
+            const quizFiles = data.sortedData.folders.flatMap(folder => 
+              folder.files.filter(file => file.type === 'quiz')
+            ) as Types.QuizFile[];
+            setAllQuizFiles(quizFiles);
+        } else {
+          const currentFolder = data.sortedData.folders.find(folder => folder.id === data.sortedData?.currentFolderId);
+          if (currentFolder) {
+            const quizFiles = currentFolder.files.filter(file => file.type === 'quiz') as Types.QuizFile[];
+            setAllQuizFiles(quizFiles);
+          }
+        }
     }
   }, [data])
 
@@ -46,7 +54,7 @@ function CollectionsDisplay() {
           {/* Header */}
           <div className="grid grid-cols-[1fr_auto]">
             <h2 className="text-2xl font-semibold">
-              Your study collections
+              Your study collections {data && data.sortedData && data.sortedData.currentFolderId && data.sortedData.folders.find(folder => folder.id === data.sortedData?.currentFolderId)?.name && `in ${data.sortedData.folders.find(folder => folder.id === data.sortedData?.currentFolderId)?.name}`}
             </h2>
             <ButtonLink local_href="LIBRARY">
               Library
