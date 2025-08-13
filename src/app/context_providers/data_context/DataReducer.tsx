@@ -243,6 +243,12 @@ export const DataReducer = (state: StateType, action: DATA_ACTION_TYPES): StateT
 
                 if (action.payload.setActive) {
                     newState.sortedData.currentFileId = newFile.id;
+                    console.log("[DataReducer | Action: ADD_FILE] Set current file to:", newFile.id);
+                }
+                console.log('Type is:', action.payload.type);
+                if (action.payload.type === 'conversation') {
+                    console.log("[DataReducer | Action: ADD_FILE] Set current page to: CHAT");
+                    newState.sortedData.currentPage = 'CHAT';
                 }
                 if (
                     (Array.isArray(newState.sortedData.ids) && !newState.sortedData.ids.includes(newFile.id)) ||
